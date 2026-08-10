@@ -54,14 +54,13 @@
     </noscript>
 </head>
 <body>
-    <!-- Fluid Gooey Filter Engine -->
+    <!-- Dynamic Fluid Engine -->
     <svg style="visibility: hidden; position: absolute;" width="0" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1">
         <defs>
-            <!-- Extends bounding box via x, y, width, height to prevent edge clipping during liquid expansion -->
-            <filter id="gooey-fluid" x="-30%" y="-30%" width="160%" height="160%">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="25" result="blur" />
-                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="gooey-fluid" />
-                <feBlend in="SourceGraphic" in2="gooey-fluid" />
+            <filter id="gooey-fluid" x="-50%" y="-50%" width="200%" height="200%">
+                <!-- stdDeviation is controlled dynamically by script.js -->
+                <feGaussianBlur id="fluid-blur" in="SourceGraphic" stdDeviation="0" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 25 -10" result="gooey" />
             </filter>
         </defs>
     </svg>
@@ -78,8 +77,7 @@
     <div class="atrunix-morph-container" aria-hidden="true">
         <div class="floating-wrapper" id="parallax-wrapper">
             <div id="geometry-glow" class="shape-glow"></div>
-            <!-- The shape now processes through the liquid SVG filter -->
-            <div id="geometry-morph" class="shape liquid-blob"></div>
+            <div id="geometry-morph" class="shape"></div>
         </div>
     </div>
 
