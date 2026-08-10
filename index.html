@@ -12,7 +12,6 @@
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://your-domain.com/">
 
-    <!-- Favicon and App Manifest -->
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -31,7 +30,6 @@
     <meta name="theme-color" content="#030305">
     <link rel="stylesheet" href="style.css">
 
-    <!-- Structured Data (JSON-LD) for SEO -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -47,7 +45,6 @@
     }
     </script>
 
-    <!-- No-Script Fallback -->
     <noscript>
         <style>
             .atrunix-morph-container, .edge-lights, .tech-grid { display: none; }
@@ -57,16 +54,23 @@
     </noscript>
 </head>
 <body>
+    <!-- Fluid Gooey Filter Engine -->
+    <svg style="visibility: hidden; position: absolute;" width="0" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1">
+        <defs>
+            <!-- Extends bounding box via x, y, width, height to prevent edge clipping during liquid expansion -->
+            <filter id="gooey-fluid" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="25" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="gooey-fluid" />
+                <feBlend in="SourceGraphic" in2="gooey-fluid" />
+            </filter>
+        </defs>
+    </svg>
+
     <div class="tech-grid" aria-hidden="true"></div>
 
-   <!-- Perimeter Edge Lights -->
     <svg class="edge-lights" id="edge-glow" preserveAspectRatio="none" viewBox="0 0 1000 1000" aria-hidden="true">
-        <!-- Top Origin Node -->
         <circle cx="500" cy="5" r="6" class="origin-spot" />
-        <!-- Bottom Destination Node -->
         <circle cx="500" cy="995" r="8" class="destination-spot" id="dest-spot" />
-        
-        <!-- Paths extended past the center (400 and 600) to force an overlap, preventing rendering gaps -->
         <path class="light-line" vector-effect="non-scaling-stroke" d="M 500 5 L 995 5 L 995 995 L 400 995" pathLength="100" />
         <path class="light-line" vector-effect="non-scaling-stroke" d="M 500 5 L 5 5 L 5 995 L 600 995" pathLength="100" />
     </svg>
@@ -74,11 +78,11 @@
     <div class="atrunix-morph-container" aria-hidden="true">
         <div class="floating-wrapper" id="parallax-wrapper">
             <div id="geometry-glow" class="shape-glow"></div>
-            <div id="geometry-morph" class="shape"></div>
+            <!-- The shape now processes through the liquid SVG filter -->
+            <div id="geometry-morph" class="shape liquid-blob"></div>
         </div>
     </div>
 
-    <!-- Side Dot Navigation -->
     <nav class="side-nav" aria-label="Page Sections">
         <a href="#home" class="nav-dot active" aria-label="Home section" data-target="home"></a>
         <a href="#foundation" class="nav-dot" aria-label="Foundation section" data-target="foundation"></a>
