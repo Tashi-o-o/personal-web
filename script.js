@@ -6,7 +6,8 @@ const shapes = [
     { p: [[30,0], [70,0], [100,30], [100,70], [70,100], [30,100], [0,70], [0,30]], c: [255, 0, 85] }
 ];
 
-const xPositions = [-25, 25, -25, 25, -25];
+// Pushed coordinates outward to perfectly clear the text block margins
+const xPositions = [-35, 35, -35, 35, -35];
 
 let targetScroll = 0;
 let currentScroll = 0;
@@ -82,8 +83,8 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 
 const renderLoop = () => {
-    // Increased multiplier significantly for 100x snappier tracking
-    currentScroll += (targetScroll - currentScroll) * 0.7;
+    // Smoothed interpolation multiplier. Lower = buttery fluid trailing, Higher = robotic snapping.
+    currentScroll += (targetScroll - currentScroll) * 0.15;
     const maxScroll = getMaxScroll();
     
     let scrollProgress = currentScroll / maxScroll;
@@ -104,26 +105,24 @@ const renderLoop = () => {
     const shapeX = xPositions[currentIndex] + (xPositions[nextIndex] - xPositions[currentIndex]) * localProgress;
     const fluidIntensity = prefersReducedMotion.matches ? 0 : Math.sin(localProgress * Math.PI);
     
-    // Performance optimization: Only apply the expensive SVG filter when actively moving
+    // Adjusted filter strength for the smaller geometry scale
     if (fluidIntensity > 0.05 && !prefersReducedMotion.matches) {
         liquidContainer.style.filter = "url('#gooey-fluid')";
-        fluidBlurEl.setAttribute('stdDeviation', fluidIntensity * 22);
+        fluidBlurEl.setAttribute('stdDeviation', fluidIntensity * 12);
     } else {
         liquidContainer.style.filter = "none";
     }
 
-    const gravitySag = prefersReducedMotion.matches ? 0 : Math.pow(fluidIntensity, 1.5) * 180;
+    const gravitySag = prefersReducedMotion.matches ? 0 : Math.pow(fluidIntensity, 1.5) * 120;
     
-    // Faster mouse parallax interpolation
-    mouseX += (targetX - mouseX) * 0.3;
-    mouseY += (targetY - mouseY) * 0.3;
+    mouseX += (targetX - mouseX) * 0.15;
+    mouseY += (targetY - mouseY) * 0.15;
     
     const floatY = prefersReducedMotion.matches ? 0 : Math.sin(Date.now() * 0.003) * -12; 
     const viewportX = (shapeX * winWidth) / 100;
     
     parallaxWrapper.style.transform = `translate3d(${viewportX + (mouseX * 15)}px, ${mouseY * 15 + floatY + gravitySag}px, 0)`;
 
-    // 100x Volume Pop: Scales up heavily in the empty spaces (when fluidIntensity is 0)
     const basePopScale = 1 + ((1 - fluidIntensity) * 0.45); 
     const movementDelta = xPositions[nextIndex] - xPositions[currentIndex];
     const directionSign = movementDelta < 0 ? 1 : -1;
@@ -134,7 +133,8 @@ const renderLoop = () => {
     
     liquidContainer.style.transform = `scale(${scaleX}, ${scaleY}) skewX(${skewAmount}deg) translateZ(0)`;
 
-    const spread = fluidIntensity * 180;
+    // Recalibrated splash trajectories for the smaller droplets
+    const spread = fluidIntensity * 120;
     droplets[0].style.transform = `translate3d(${directionSign * spread}px, ${-spread * 0.8}px, 0) scale(${0.2 + fluidIntensity * 0.8})`;
     droplets[1].style.transform = `translate3d(${directionSign * spread * 1.5}px, 0px, 0) scale(${0.1 + fluidIntensity * 0.9})`;
     droplets[2].style.transform = `translate3d(${directionSign * spread * 0.5}px, ${spread * 1.3}px, 0) scale(${0.3 + fluidIntensity * 0.7})`;
@@ -173,12 +173,12 @@ const renderLoop = () => {
 
     edgeLights.style.stroke = interpolatedColor;
     originSpot.style.fill = interpolatedColor;
-    edgeLights.style.filter = `drop-shadow(0 0 20px ${interpolatedColor}) drop-shadow(0 0 10px ${interpolatedColor})`;
+    edgeLights.style.filter = `drop-shadow(0 0 15px ${interpolatedColor})`;
 
     if (scrollProgress >= 0.99) {
         destSpot.style.opacity = '1';
         destSpot.style.fill = interpolatedColor;
-        destSpot.style.filter = `drop-shadow(0 0 20px ${interpolatedColor})`;
+        destSpot.style.filter = `drop-shadow(0 0 15px ${interpolatedColor})`;
     } else {
         destSpot.style.opacity = '0';
     }
