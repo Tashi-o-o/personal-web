@@ -6,14 +6,12 @@ const shapes = [
     { p: [[30,0], [70,0], [100,30], [100,70], [70,100], [30,100], [0,70], [0,30]], c: [255, 0, 85] }
 ];
 
-// Target VW positions for slides 1 through 5
+// Target VW positions for slides 1 through 5 (Left to Right movement)
 const xPositions = [-25, 25, -25, 25, -25];
 
 let targetScroll = 0;
 let currentScroll = 0;
 let isAnimating = false;
-let maxScroll = 0;
-let resizeTimeout;
 
 const shapeEl = document.getElementById('geometry-morph');
 const glowEl = document.getElementById('geometry-glow');
@@ -30,20 +28,12 @@ const fluidBlurEl = document.getElementById('fluid-blur');
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-const calculateMetrics = () => {
+// Bulletproof height calculation preventing Division By Zero (NaN) errors
+const getMaxScroll = () => {
     const lastSection = document.getElementById('contact');
-    if (lastSection) {
-        maxScroll = lastSection.offsetTop;
-    } else {
-        maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    }
+    const computedScroll = lastSection ? lastSection.offsetTop : (document.documentElement.scrollHeight - window.innerHeight);
+    return Math.max(1, computedScroll); 
 };
-
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(calculateMetrics, 150);
-});
-setTimeout(calculateMetrics, 100); 
 
 let targetX = 0, targetY = 0;
 let mouseX = 0, mouseY = 0;
@@ -78,40 +68,26 @@ const setupObserver = () => {
 
 window.addEventListener('scroll', () => {
     targetScroll = window.scrollY;
-    if (!isAnimating && !prefersReducedMotion.matches) {
+    if (!isAnimating) {
         isAnimating = true;
         window.requestAnimationFrame(renderLoop);
     }
 });
 
-const applyStaticVisuals = () => {
-    let scrollProgress = window.scrollY / maxScroll;
-    scrollProgress = Math.max(0, Math.min(1, scrollProgress));
-    const numShapes = shapes.length;
-    const scaledProgress = scrollProgress * (numShapes - 1);
-    const currentIndex = Math.floor(scaledProgress);
-    
-    const cShape = shapes[currentIndex];
-    let polygonString = 'polygon(';
-    cShape.p.forEach((point, i) => {
-        polygonString += `${point[0]}% ${point[1]}%${i < 7 ? ', ' : ''}`;
-    });
-    polygonString += ')';
-    const colorStr = `rgb(${cShape.c[0]}, ${cShape.c[1]}, ${cShape.c[2]})`;
-    
-    shapeEl.style.clipPath = polygonString;
-    shapeEl.style.backgroundColor = colorStr;
-    glowEl.style.clipPath = polygonString;
-    glowEl.style.backgroundColor = colorStr;
-    
-    if (fluidBlurEl) fluidBlurEl.setAttribute('stdDeviation', 0);
-};
-
 const renderLoop = () => {
     currentScroll += (targetScroll - currentScroll) * 0.35;
     
+    // Dynamically calculate max height every frame to account for late CSS/Font loading
+    const maxScroll = getMaxScroll();
+    
     let scrollProgress = currentScroll / maxScroll;
+    
+    // Safety boundary clamping
+    if (scrollProgress > 0.985) scrollProgress = 1;
     scrollProgress = Math.max(0, Math.min(1, scrollProgress)); 
+    
+    // Failsafe to ensure progress is a valid number
+    if (isNaN(scrollProgress)) scrollProgress = 0;
 
     const numShapes = shapes.length;
     const scaledProgress = scrollProgress * (numShapes - 1);
@@ -119,29 +95,34 @@ const renderLoop = () => {
     const nextIndex = Math.min(currentIndex + 1, numShapes - 1);
     const localProgress = scaledProgress - currentIndex; 
 
-    const fluidIntensity = Math.sin(localProgress * Math.PI);
-    
+    // Extract horizontal position and fluid math
     const shapeX = xPositions[currentIndex] + (xPositions[nextIndex] - xPositions[currentIndex]) * localProgress;
-
-    // Bulletproof transform math applied natively in Javascript without calc()
+    const fluidIntensity = prefersReducedMotion.matches ? 0 : Math.sin(localProgress * Math.PI);
+    
+    // Parallax Interpolation
     mouseX += (targetX - mouseX) * 0.1;
     mouseY += (targetY - mouseY) * 0.1;
+    
+    // Unified Transform coordinates mapping
     const viewportX = (shapeX * window.innerWidth) / 100;
     parallaxWrapper.style.transform = `translate(${viewportX + (mouseX * 15)}px, ${mouseY * 15}px)`;
 
-    // Capped intensity ensures the filter doesn't delete the shape
+    // Apply the Gooey Liquid Matrix
     if (fluidBlurEl) {
         fluidBlurEl.setAttribute('stdDeviation', fluidIntensity * 20);
     }
     
+    // Stretch and Skew algorithms for fluid droplet physics
     const volumeCompensator = 1 + (fluidIntensity * 0.15);
     const skewAmount = (xPositions[nextIndex] - xPositions[currentIndex]) * fluidIntensity * -0.2;
     liquidContainer.style.transform = `scale(${volumeCompensator}) skewX(${skewAmount}deg)`;
 
+    // Edge Light calculations
     let offset = 100 - (scrollProgress * 100);
     if (scrollProgress > 0.99) offset = 0;
     lightLines.forEach(line => line.style.strokeDashoffset = offset);
 
+    // Frame-by-Frame Geometry Interpolation
     let polygonString = 'polygon(';
     for (let i = 0; i < 8; i++) {
         const cx = currentShape.p[i][0];
@@ -156,11 +137,13 @@ const renderLoop = () => {
     }
     polygonString += ')';
 
+    // RGB Interpolation
     const r = Math.round(currentShape.c[0] + (nextShape.c[0] - currentShape.c[0]) * localProgress);
     const g = Math.round(currentShape.c[1] + (nextShape.c[1] - currentShape.c[1]) * localProgress);
     const b = Math.round(currentShape.c[2] + (nextShape.c[2] - currentShape.c[2]) * localProgress);
     const interpolatedColor = `rgb(${r}, ${g}, ${b})`;
 
+    // Apply Output to DOM
     shapeEl.style.clipPath = polygonString;
     shapeEl.style.backgroundColor = interpolatedColor;
     glowEl.style.clipPath = polygonString;
@@ -191,6 +174,7 @@ const renderLoop = () => {
         }
     });
 
+    // Check conditions to continue the animation loop
     if (Math.abs(targetScroll - currentScroll) > 0.5 || Math.abs(targetX - mouseX) > 0.01 || fluidIntensity > 0.01) {
         window.requestAnimationFrame(renderLoop);
     } else {
@@ -198,16 +182,12 @@ const renderLoop = () => {
     }
 };
 
+// Initialize sequence
 window.requestAnimationFrame(() => {
     targetScroll = window.scrollY;
     currentScroll = window.scrollY;
-    calculateMetrics();
     setupObserver();
     
-    if (prefersReducedMotion.matches) {
-        applyStaticVisuals();
-    } else {
-        isAnimating = true;
-        renderLoop();
-    }
+    isAnimating = true;
+    renderLoop();
 });
