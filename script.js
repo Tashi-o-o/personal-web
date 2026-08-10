@@ -27,8 +27,8 @@ window.addEventListener('scroll', () => {
 });
 
 const renderLoop = () => {
-    // Lerp friction reduced to 0.035 for an exceptionally soft and fluid morph
-    currentScroll += (targetScroll - currentScroll) * 0.035;
+    // Increased interpolation speed from 0.035 to 0.15 for snappier, less laggy morphing
+    currentScroll += (targetScroll - currentScroll) * 0.15;
     
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     let scrollProgress = currentScroll / maxScroll;
@@ -79,10 +79,10 @@ const renderLoop = () => {
     // Background Shape Bloom
     morphWrapper.style.filter = `drop-shadow(0 0 30px rgba(${r}, ${g}, ${b}, 0.6)) drop-shadow(0 0 80px rgba(${r}, ${g}, ${b}, 0.3))`;
 
-    // Edge Line and Spot Bloom synchronization
+    // Amplified Triple Bloom for Edge Lines and Spot
     edgeLights.style.stroke = interpolatedColor;
     originSpot.style.fill = interpolatedColor;
-    edgeLights.style.filter = `drop-shadow(0 0 10px rgba(${r}, ${g}, ${b}, 0.9)) drop-shadow(0 0 25px rgba(${r}, ${g}, ${b}, 0.6))`;
+    edgeLights.style.filter = `drop-shadow(0 0 12px rgba(${r}, ${g}, ${b}, 1)) drop-shadow(0 0 30px rgba(${r}, ${g}, ${b}, 0.8)) drop-shadow(0 0 60px rgba(${r}, ${g}, ${b}, 0.5))`;
 
     // --- 4. Render Loop Logic ---
     if (Math.abs(targetScroll - currentScroll) > 0.5) {
