@@ -6,14 +6,15 @@ const shapes = [
     { p: [[30,0], [70,0], [100,30], [100,70], [70,100], [30,100], [0,70], [0,30]], c: [255, 0, 85] }
 ];
 
-// System State
+// Target VW positions for slides 1 through 5
+const xPositions = [-25, 25, -25, 25, -25];
+
 let targetScroll = 0;
 let currentScroll = 0;
 let isAnimating = false;
 let maxScroll = 0;
 let resizeTimeout;
 
-// DOM Elements
 const shapeEl = document.getElementById('geometry-morph');
 const glowEl = document.getElementById('geometry-glow');
 const edgeLights = document.getElementById('edge-glow');
@@ -23,42 +24,42 @@ const lightLines = document.querySelectorAll('.light-line');
 const subheadings = document.querySelectorAll('.subheading');
 const primaryButtons = document.querySelectorAll('.primary-btn');
 const parallaxWrapper = document.getElementById('parallax-wrapper');
+const liquidContainer = document.querySelector('.liquid-container');
 const navDots = document.querySelectorAll('.nav-dot');
+const fluidBlurEl = document.getElementById('fluid-blur');
 
-// Accessibility Check
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-// --- Window Resize Debounce ---
 const calculateMetrics = () => {
-    maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const lastSection = document.getElementById('contact');
+    if (lastSection) {
+        maxScroll = lastSection.offsetTop;
+    } else {
+        maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    }
 };
+
 window.addEventListener('resize', () => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(calculateMetrics, 150);
 });
-calculateMetrics();
+setTimeout(calculateMetrics, 100); 
 
-// --- Mouse Parallax ---
 let targetX = 0, targetY = 0;
-let currentX = 0, currentY = 0;
+let mouseX = 0, mouseY = 0;
 
 window.addEventListener('mousemove', (e) => {
     if (prefersReducedMotion.matches) return;
-    // Normalize coordinates from -1 to 1
     targetX = (e.clientX / window.innerWidth) * 2 - 1;
     targetY = (e.clientY / window.innerHeight) * 2 - 1;
 });
 
-// --- Intersection Observers ---
 const setupObserver = () => {
     const observerOptions = { root: null, rootMargin: '0px', threshold: 0.5 };
-
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('is-visible');
-                
-                // Update side dot navigation
                 const id = entry.target.parentElement.id;
                 navDots.forEach(dot => {
                     dot.classList.remove('active');
@@ -75,7 +76,6 @@ const setupObserver = () => {
     });
 };
 
-// --- Main Render Loop ---
 window.addEventListener('scroll', () => {
     targetScroll = window.scrollY;
     if (!isAnimating && !prefersReducedMotion.matches) {
@@ -85,15 +85,12 @@ window.addEventListener('scroll', () => {
 });
 
 const applyStaticVisuals = () => {
-    // Fallback if reduced motion is enabled (skips interpolation loop)
-    let scrollProgress = (window.scrollY / maxScroll) * 1.02;
+    let scrollProgress = window.scrollY / maxScroll;
     scrollProgress = Math.max(0, Math.min(1, scrollProgress));
-    
     const numShapes = shapes.length;
     const scaledProgress = scrollProgress * (numShapes - 1);
     const currentIndex = Math.floor(scaledProgress);
     
-    // Apply exact shape and color without morphing
     const cShape = shapes[currentIndex];
     let polygonString = 'polygon(';
     cShape.p.forEach((point, i) => {
@@ -106,21 +103,15 @@ const applyStaticVisuals = () => {
     shapeEl.style.backgroundColor = colorStr;
     glowEl.style.clipPath = polygonString;
     glowEl.style.backgroundColor = colorStr;
+    
+    if (fluidBlurEl) fluidBlurEl.setAttribute('stdDeviation', 0);
 };
 
 const renderLoop = () => {
     currentScroll += (targetScroll - currentScroll) * 0.35;
     
-    // Parallax Interpolation
-    currentX += (targetX - currentX) * 0.1;
-    currentY += (targetY - currentY) * 0.1;
-    parallaxWrapper.style.transform = `translate(${currentX * 15}px, ${currentY * 15}px)`;
-    
-    let scrollProgress = (currentScroll / maxScroll) * 1.02;
+    let scrollProgress = currentScroll / maxScroll;
     scrollProgress = Math.max(0, Math.min(1, scrollProgress)); 
-
-    const offset = 100 - (scrollProgress * 100);
-    lightLines.forEach(line => line.style.strokeDashoffset = offset);
 
     const numShapes = shapes.length;
     const scaledProgress = scrollProgress * (numShapes - 1);
@@ -128,8 +119,35 @@ const renderLoop = () => {
     const nextIndex = Math.min(currentIndex + 1, numShapes - 1);
     const localProgress = scaledProgress - currentIndex; 
 
-    const currentShape = shapes[currentIndex];
-    const nextShape = shapes[nextIndex];
+    // Fluid Math: Peaks at 1 in the middle of a transition, 0 when resting on a slide
+    const fluidIntensity = Math.sin(localProgress * Math.PI);
+    
+    // Position Math: Maps X coordinates from array based on scroll depth
+    const shapeX = xPositions[currentIndex] + (xPositions[nextIndex] - xPositions[currentIndex]) * localProgress;
+
+    // Mouse Parallax
+    mouseX += (targetX - mouseX) * 0.1;
+    mouseY += (targetY - mouseY) * 0.1;
+    
+    // Combine base X movement with Parallax
+    parallaxWrapper.style.transform = `translate(calc(${shapeX}vw + ${mouseX * 15}px), ${mouseY * 15}px)`;
+
+    // Apply Gooey Filter (Melts the shape heavily when moving)
+    if (fluidBlurEl) {
+        fluidBlurEl.setAttribute('stdDeviation', fluidIntensity * 40);
+    }
+    
+    // Scale shape up slightly during fluid phase to prevent visual volume loss from blur clipping
+    const volumeCompensator = 1 + (fluidIntensity * 0.25);
+    // Skews the droplet in the direction it's travelling
+    const skewAmount = (xPositions[nextIndex] - xPositions[currentIndex]) * fluidIntensity * -0.5;
+    
+    liquidContainer.style.transform = `scale(${volumeCompensator}) skewX(${skewAmount}deg)`;
+
+    // Draw Edge Lights (Force offset to 0 if at the absolute bottom to close gap)
+    let offset = 100 - (scrollProgress * 100);
+    if (scrollProgress > 0.99) offset = 0;
+    lightLines.forEach(line => line.style.strokeDashoffset = offset);
 
     let polygonString = 'polygon(';
     for (let i = 0; i < 8; i++) {
@@ -148,12 +166,10 @@ const renderLoop = () => {
     const r = Math.round(currentShape.c[0] + (nextShape.c[0] - currentShape.c[0]) * localProgress);
     const g = Math.round(currentShape.c[1] + (nextShape.c[1] - currentShape.c[1]) * localProgress);
     const b = Math.round(currentShape.c[2] + (nextShape.c[2] - currentShape.c[2]) * localProgress);
-    
     const interpolatedColor = `rgb(${r}, ${g}, ${b})`;
 
     shapeEl.style.clipPath = polygonString;
     shapeEl.style.backgroundColor = interpolatedColor;
-    
     glowEl.style.clipPath = polygonString;
     glowEl.style.backgroundColor = interpolatedColor;
 
@@ -161,7 +177,7 @@ const renderLoop = () => {
     originSpot.style.fill = interpolatedColor;
     edgeLights.style.filter = `drop-shadow(0 0 15px ${interpolatedColor})`;
 
-    if (scrollProgress >= 1) {
+    if (scrollProgress >= 0.99) {
         destSpot.style.opacity = '1';
         destSpot.style.fill = interpolatedColor;
         destSpot.style.filter = `drop-shadow(0 0 10px ${interpolatedColor})`;
@@ -182,17 +198,17 @@ const renderLoop = () => {
         }
     });
 
-    if (Math.abs(targetScroll - currentScroll) > 0.5 || Math.abs(targetX - currentX) > 0.01) {
+    if (Math.abs(targetScroll - currentScroll) > 0.5 || Math.abs(targetX - mouseX) > 0.01 || fluidIntensity > 0.01) {
         window.requestAnimationFrame(renderLoop);
     } else {
         isAnimating = false;
     }
 };
 
-// --- Initialization ---
 window.requestAnimationFrame(() => {
     targetScroll = window.scrollY;
     currentScroll = window.scrollY;
+    calculateMetrics();
     setupObserver();
     
     if (prefersReducedMotion.matches) {
