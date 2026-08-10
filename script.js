@@ -16,6 +16,7 @@ const shapeEl = document.getElementById('geometry-morph');
 const glowEl = document.getElementById('geometry-glow');
 const edgeLights = document.getElementById('edge-glow');
 const originSpot = document.querySelector('.origin-spot');
+const destSpot = document.getElementById('dest-spot');
 const lightLines = document.querySelectorAll('.light-line');
 const subheadings = document.querySelectorAll('.subheading');
 const primaryButtons = document.querySelectorAll('.primary-btn');
@@ -25,7 +26,7 @@ const setupObserver = () => {
     const observerOptions = {
         root: null,
         rootMargin: '0px',
-        threshold: 0.5 // Triggers when 50% of the section is visible
+        threshold: 0.4
     };
 
     const observer = new IntersectionObserver((entries) => {
@@ -33,7 +34,6 @@ const setupObserver = () => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('is-visible');
             } else {
-                // Remove class if you want it to fade out again when scrolling away
                 entry.target.classList.remove('is-visible');
             }
         });
@@ -58,7 +58,9 @@ const renderLoop = () => {
     currentScroll += (targetScroll - currentScroll) * 0.35;
     
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    let scrollProgress = currentScroll / maxScroll;
+    
+    // The 1.02 multiplier buffers against fractional pixel discrepancies, forcing the value to 100%
+    let scrollProgress = (currentScroll / maxScroll) * 1.02;
     scrollProgress = Math.max(0, Math.min(1, scrollProgress)); 
 
     // Edge Lights Tracing
@@ -110,11 +112,20 @@ const renderLoop = () => {
     originSpot.style.fill = interpolatedColor;
     edgeLights.style.filter = `drop-shadow(0 0 15px ${interpolatedColor})`;
 
-    // Sync Text Accents and Buttons with Current Geometric Color
+    // Destination Node Logic
+    if (scrollProgress >= 1) {
+        destSpot.style.opacity = '1';
+        destSpot.style.fill = interpolatedColor;
+        destSpot.style.filter = `drop-shadow(0 0 10px ${interpolatedColor})`;
+    } else {
+        destSpot.style.opacity = '0';
+    }
+
+    // Sync Text Accents and Buttons
     subheadings.forEach(sub => sub.style.color = interpolatedColor);
     primaryButtons.forEach(btn => {
         btn.style.backgroundColor = interpolatedColor;
-        btn.style.boxShadow = `0 0 20px rgba(${r}, ${g}, ${b}, 0.4)`;
+        btn.style.boxShadow = `0 0 20px rgba(${r}, ${g}, ${b}, 0.5)`;
     });
 
     if (Math.abs(targetScroll - currentScroll) > 0.5) {
