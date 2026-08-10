@@ -28,7 +28,7 @@ const fluidBlurEl = document.getElementById('fluid-blur');
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-// Bulletproof height calculation preventing Division By Zero (NaN) errors
+// Height calculation preventing Division By Zero
 const getMaxScroll = () => {
     const lastSection = document.getElementById('contact');
     const computedScroll = lastSection ? lastSection.offsetTop : (document.documentElement.scrollHeight - window.innerHeight);
@@ -76,17 +76,12 @@ window.addEventListener('scroll', () => {
 
 const renderLoop = () => {
     currentScroll += (targetScroll - currentScroll) * 0.35;
-    
-    // Dynamically calculate max height every frame to account for late CSS/Font loading
     const maxScroll = getMaxScroll();
     
     let scrollProgress = currentScroll / maxScroll;
     
-    // Safety boundary clamping
     if (scrollProgress > 0.985) scrollProgress = 1;
     scrollProgress = Math.max(0, Math.min(1, scrollProgress)); 
-    
-    // Failsafe to ensure progress is a valid number
     if (isNaN(scrollProgress)) scrollProgress = 0;
 
     const numShapes = shapes.length;
@@ -95,34 +90,35 @@ const renderLoop = () => {
     const nextIndex = Math.min(currentIndex + 1, numShapes - 1);
     const localProgress = scaledProgress - currentIndex; 
 
-    // Extract horizontal position and fluid math
+    // Retrieve active shape references required for drawing loop
+    const currentShape = shapes[currentIndex];
+    const nextShape = shapes[nextIndex];
+
     const shapeX = xPositions[currentIndex] + (xPositions[nextIndex] - xPositions[currentIndex]) * localProgress;
     const fluidIntensity = prefersReducedMotion.matches ? 0 : Math.sin(localProgress * Math.PI);
     
-    // Parallax Interpolation
     mouseX += (targetX - mouseX) * 0.1;
     mouseY += (targetY - mouseY) * 0.1;
     
-    // Unified Transform coordinates mapping
+    // JS-native float calculation overrides the removed CSS animation
+    const floatY = prefersReducedMotion.matches ? 0 : Math.sin(Date.now() * 0.002) * -15; 
     const viewportX = (shapeX * window.innerWidth) / 100;
-    parallaxWrapper.style.transform = `translate(${viewportX + (mouseX * 15)}px, ${mouseY * 15}px)`;
+    
+    // Apply combined X, Parallax, and Float values
+    parallaxWrapper.style.transform = `translate(${viewportX + (mouseX * 15)}px, ${mouseY * 15 + floatY}px)`;
 
-    // Apply the Gooey Liquid Matrix
     if (fluidBlurEl) {
         fluidBlurEl.setAttribute('stdDeviation', fluidIntensity * 20);
     }
     
-    // Stretch and Skew algorithms for fluid droplet physics
     const volumeCompensator = 1 + (fluidIntensity * 0.15);
     const skewAmount = (xPositions[nextIndex] - xPositions[currentIndex]) * fluidIntensity * -0.2;
     liquidContainer.style.transform = `scale(${volumeCompensator}) skewX(${skewAmount}deg)`;
 
-    // Edge Light calculations
     let offset = 100 - (scrollProgress * 100);
     if (scrollProgress > 0.99) offset = 0;
     lightLines.forEach(line => line.style.strokeDashoffset = offset);
 
-    // Frame-by-Frame Geometry Interpolation
     let polygonString = 'polygon(';
     for (let i = 0; i < 8; i++) {
         const cx = currentShape.p[i][0];
@@ -137,13 +133,11 @@ const renderLoop = () => {
     }
     polygonString += ')';
 
-    // RGB Interpolation
     const r = Math.round(currentShape.c[0] + (nextShape.c[0] - currentShape.c[0]) * localProgress);
     const g = Math.round(currentShape.c[1] + (nextShape.c[1] - currentShape.c[1]) * localProgress);
     const b = Math.round(currentShape.c[2] + (nextShape.c[2] - currentShape.c[2]) * localProgress);
     const interpolatedColor = `rgb(${r}, ${g}, ${b})`;
 
-    // Apply Output to DOM
     shapeEl.style.clipPath = polygonString;
     shapeEl.style.backgroundColor = interpolatedColor;
     glowEl.style.clipPath = polygonString;
@@ -174,7 +168,6 @@ const renderLoop = () => {
         }
     });
 
-    // Check conditions to continue the animation loop
     if (Math.abs(targetScroll - currentScroll) > 0.5 || Math.abs(targetX - mouseX) > 0.01 || fluidIntensity > 0.01) {
         window.requestAnimationFrame(renderLoop);
     } else {
@@ -182,12 +175,10 @@ const renderLoop = () => {
     }
 };
 
-// Initialize sequence
 window.requestAnimationFrame(() => {
     targetScroll = window.scrollY;
     currentScroll = window.scrollY;
     setupObserver();
-    
     isAnimating = true;
     renderLoop();
 });
