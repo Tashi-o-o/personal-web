@@ -1,152 +1,85 @@
-/* Base Reset and Typography */
-html {
-    scroll-behavior: smooth; /* Enables smooth native scrolling */
-}
+// Coordinate and Color Mapping for Interpolation
+const shapes = [
+    { p: [[50,0], [50,0], [100,100], [100,100], [50,100], [0,100], [0,100], [50,0]], c: [0, 229, 255] },     // Triangle
+    { p: [[0,0], [50,0], [100,0], [100,50], [100,100], [50,100], [0,100], [0,50]], c: [181, 0, 255] },       // Square
+    { p: [[50,0], [50,0], [100,38], [100,38], [82,100], [18,100], [0,38], [0,38]], c: [255, 122, 0] },       // Pentagon
+    { p: [[50,0], [100,25], [100,25], [100,75], [50,100], [50,100], [0,75], [0,25]], c: [0, 255, 87] },      // Hexagon
+    { p: [[30,0], [70,0], [100,30], [100,70], [70,100], [30,100], [0,70], [0,30]], c: [255, 0, 85] }         // Circle
+];
 
-body, html {
-    margin: 0;
-    padding: 0;
-    font-family: system-ui, -apple-system, sans-serif;
-    background-color: #08080c;
-    color: #ffffff;
-    overflow-x: hidden;
-}
+let ticking = false;
 
-/* Edge Light SVG Positioning */
-.edge-lights {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 999; /* Keeps lights above everything */
-    pointer-events: none; /* Prevents blocking clicks on links */
-    fill: none;
-    stroke: #00e5ff; /* Default start color */
-    stroke-width: 4px; 
-    filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.8));
-    transition: filter 0.2s ease;
-}
+const updateScrollVisuals = () => {
+    const scrollTop = window.scrollY;
+    // Calculate total scrollable area
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    
+    // Determine progress as a ratio between 0 and 1
+    let scrollProgress = scrollTop / maxScroll;
+    scrollProgress = Math.max(0, Math.min(1, scrollProgress)); // Clamp value
+    
+    // --- 1. Edge Lights Animation ---
+    const lightLines = document.querySelectorAll('.light-line');
+    // SVG pathLength is 100. Offset from 100 down to 0 draws the line.
+    const offset = 100 - (scrollProgress * 100);
+    lightLines.forEach(line => {
+        line.style.strokeDashoffset = offset;
+    });
 
-.light-line {
-    stroke-dasharray: 100;
-    stroke-dashoffset: 100; /* Starts completely hidden (off-screen) */
-}
+    // --- 2. Shape Morphing Interpolation ---
+    const numShapes = shapes.length;
+    const scaledProgress = scrollProgress * (numShapes - 1);
+    
+    const currentIndex = Math.floor(scaledProgress);
+    const nextIndex = Math.min(currentIndex + 1, numShapes - 1);
+    // Determine progress between just the current and next shape
+    const localProgress = scaledProgress - currentIndex; 
 
-/* Background Architecture */
-.atrunix-morph-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 0;
-    background-color: #08080c;
-}
+    const currentShape = shapes[currentIndex];
+    const nextShape = shapes[nextIndex];
 
-/* Base Shape Properties */
-.shape {
-    width: min(80vw, 400px);
-    height: min(80vw, 400px);
-    /* CSS transitions removed; JS now handles frame-by-frame morphing */
-}
-
-/* Foreground Content */
-.content {
-    position: relative;
-    z-index: 10;
-}
-
-.scroll-zone {
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 10vw;
-}
-
-/* Text Containers */
-.text-block {
-    background: rgba(8, 8, 12, 0.7);
-    padding: 40px;
-    border-radius: 12px;
-    max-width: 600px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: transform 0.3s ease;
-}
-
-.text-block:hover {
-    transform: scale(1.02);
-}
-
-.text-block h1 {
-    margin-top: 0;
-    font-size: 3rem;
-    margin-bottom: 20px;
-}
-
-.text-block h2 {
-    margin-top: 0;
-    font-size: 2.5rem;
-    margin-bottom: 20px;
-}
-
-.text-block p {
-    font-size: 1.2rem;
-    line-height: 1.6;
-    color: #d1d1d1;
-}
-
-/* Button Layout */
-.button-container {
-    display: flex;
-    gap: 15px;
-    margin-top: 30px;
-    flex-wrap: wrap;
-}
-
-/* Standard Button */
-.cta-button {
-    display: inline-block;
-    padding: 15px 30px;
-    background-color: #00e5ff;
-    color: #050505;
-    text-decoration: none;
-    font-weight: bold;
-    border-radius: 5px;
-    font-size: 1.1rem;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-    text-align: center;
-    flex-grow: 1;
-}
-
-.cta-button:active {
-    transform: scale(0.98);
-}
-
-/* WhatsApp Override */
-.whatsapp-button {
-    background-color: #25D366;
-    color: #ffffff;
-}
-
-.whatsapp-button:hover {
-    background-color: #128C7E;
-}
-
-/* Mobile Adjustments */
-@media (max-width: 600px) {
-    .text-block h1 {
-        font-size: 2.2rem;
+    // Mathematical coordinate blending
+    let polygonString = 'polygon(';
+    for (let i = 0; i < 8; i++) {
+        const cx = currentShape.p[i][0];
+        const cy = currentShape.p[i][1];
+        const nx = nextShape.p[i][0];
+        const ny = nextShape.p[i][1];
+        
+        const x = cx + (nx - cx) * localProgress;
+        const y = cy + (ny - cy) * localProgress;
+        
+        polygonString += `${x}% ${y}%`;
+        if (i < 7) polygonString += ', ';
     }
-    .text-block h2 {
-        font-size: 1.8rem;
+    polygonString += ')';
+
+    // RGB color blending
+    const r = Math.round(currentShape.c[0] + (nextShape.c[0] - currentShape.c[0]) * localProgress);
+    const g = Math.round(currentShape.c[1] + (nextShape.c[1] - currentShape.c[1]) * localProgress);
+    const b = Math.round(currentShape.c[2] + (nextShape.c[2] - currentShape.c[2]) * localProgress);
+    const interpolatedColor = `rgb(${r}, ${g}, ${b})`;
+
+    // Apply exact frame properties
+    const shapeEl = document.getElementById('geometry-morph');
+    shapeEl.style.clipPath = polygonString;
+    shapeEl.style.backgroundColor = interpolatedColor;
+    
+    // Sync the edge light color to match the current morphing shape
+    const edgeLights = document.querySelector('.edge-lights');
+    edgeLights.style.stroke = interpolatedColor;
+    edgeLights.style.filter = `drop-shadow(0 0 10px rgba(${r}, ${g}, ${b}, 0.8))`;
+    
+    ticking = false;
+};
+
+// Event listener optimized for render frames
+document.addEventListener('scroll', () => {
+    if (!ticking) {
+        window.requestAnimationFrame(updateScrollVisuals);
+        ticking = true;
     }
-    .text-block {
-        padding: 25px;
-    }
-}
+});
+
+// Run once on load to establish the initial visual state
+window.requestAnimationFrame(updateScrollVisuals);
