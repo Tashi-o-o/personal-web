@@ -11,12 +11,40 @@ let targetScroll = 0;
 let currentScroll = 0;
 let isAnimating = false;
 
+// DOM Elements
 const shapeEl = document.getElementById('geometry-morph');
 const glowEl = document.getElementById('geometry-glow');
 const edgeLights = document.getElementById('edge-glow');
 const originSpot = document.querySelector('.origin-spot');
 const lightLines = document.querySelectorAll('.light-line');
+const subheadings = document.querySelectorAll('.subheading');
+const primaryButtons = document.querySelectorAll('.primary-btn');
 
+// --- Intersection Observer for Text Fade-Ins ---
+const setupObserver = () => {
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.5 // Triggers when 50% of the section is visible
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+            } else {
+                // Remove class if you want it to fade out again when scrolling away
+                entry.target.classList.remove('is-visible');
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.fade-in-section').forEach(section => {
+        observer.observe(section);
+    });
+};
+
+// --- Main Render Loop ---
 window.addEventListener('scroll', () => {
     targetScroll = window.scrollY;
     
@@ -27,20 +55,19 @@ window.addEventListener('scroll', () => {
 });
 
 const renderLoop = () => {
-    // Increased multiplier to 0.35 ensures the shape tracks tightly with the scroll snap, eliminating lag
     currentScroll += (targetScroll - currentScroll) * 0.35;
     
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     let scrollProgress = currentScroll / maxScroll;
     scrollProgress = Math.max(0, Math.min(1, scrollProgress)); 
 
-    // --- 1. Edge Lights Tracing ---
+    // Edge Lights Tracing
     const offset = 100 - (scrollProgress * 100);
     lightLines.forEach(line => {
         line.style.strokeDashoffset = offset;
     });
 
-    // --- 2. Shape Morphing Interpolation ---
+    // Shape Morphing Interpolation
     const numShapes = shapes.length;
     const scaledProgress = scrollProgress * (numShapes - 1);
     
@@ -72,22 +99,24 @@ const renderLoop = () => {
     
     const interpolatedColor = `rgb(${r}, ${g}, ${b})`;
 
-    // --- 3. Apply Visuals and Bloom ---
-    
-    // Solid interior shape
+    // Apply Visuals
     shapeEl.style.clipPath = polygonString;
     shapeEl.style.backgroundColor = interpolatedColor;
     
-    // Background blurred shape (Hardware Accelerated Bloom)
     glowEl.style.clipPath = polygonString;
     glowEl.style.backgroundColor = interpolatedColor;
 
-    // Edge Line and Spot Bloom synchronization
     edgeLights.style.stroke = interpolatedColor;
     originSpot.style.fill = interpolatedColor;
     edgeLights.style.filter = `drop-shadow(0 0 15px ${interpolatedColor})`;
 
-    // --- 4. Render Loop Logic ---
+    // Sync Text Accents and Buttons with Current Geometric Color
+    subheadings.forEach(sub => sub.style.color = interpolatedColor);
+    primaryButtons.forEach(btn => {
+        btn.style.backgroundColor = interpolatedColor;
+        btn.style.boxShadow = `0 0 20px rgba(${r}, ${g}, ${b}, 0.4)`;
+    });
+
     if (Math.abs(targetScroll - currentScroll) > 0.5) {
         window.requestAnimationFrame(renderLoop);
     } else {
@@ -95,10 +124,11 @@ const renderLoop = () => {
     }
 };
 
-// Initialize the first frame
+// Initialize
 window.requestAnimationFrame(() => {
     targetScroll = window.scrollY;
     currentScroll = window.scrollY;
     isAnimating = true;
+    setupObserver();
     renderLoop();
 });
