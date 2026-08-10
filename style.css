@@ -11,7 +11,7 @@
 
 html {
     scroll-snap-type: y mandatory;
-    scroll-behavior: smooth;
+    /* scroll-behavior: smooth REMOVED to fix scroll wheel freezing */
 }
 
 body, html {
@@ -21,7 +21,7 @@ body, html {
     background-color: var(--bg-dark);
     color: var(--text-main);
     overflow-x: hidden;
-    overscroll-behavior: none;
+    /* overscroll-behavior removed to restore natural trackpad/wheel momentum */
 }
 
 ::-webkit-scrollbar { width: 8px; }
@@ -84,6 +84,7 @@ body, html {
     fill: none;
     stroke: var(--default-cyan);
     stroke-width: 5px; 
+    /* Simplified to a single drop-shadow for 60fps performance */
     filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.8));
     will-change: stroke-dashoffset;
 }
@@ -110,10 +111,11 @@ body, html {
     contain: strict;
 }
 
+/* Reduced size to fit perfectly into the negative space */
 .floating-wrapper {
     position: relative;
-    width: min(35vw, 240px);
-    height: min(35vw, 240px);
+    width: min(20vw, 150px);
+    height: min(20vw, 150px);
     will-change: transform;
 }
 
@@ -124,22 +126,23 @@ body, html {
     will-change: transform, filter;
 }
 
+/* Reduced droplet sizes to match the scaled-down core geometry */
 .droplet {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 40px;
-    height: 40px;
-    margin-top: -20px;
-    margin-left: -20px;
+    width: 25px;
+    height: 25px;
+    margin-top: -12.5px;
+    margin-left: -12.5px;
     border-radius: 50%;
     background-color: var(--default-cyan);
     will-change: transform, background-color;
     z-index: 2;
 }
 
-.drop-2 { width: 25px; height: 25px; margin-top: -12.5px; margin-left: -12.5px; }
-.drop-3 { width: 55px; height: 55px; margin-top: -27.5px; margin-left: -27.5px; }
+.drop-2 { width: 15px; height: 15px; margin-top: -7.5px; margin-left: -7.5px; }
+.drop-3 { width: 35px; height: 35px; margin-top: -17.5px; margin-left: -17.5px; }
 
 .shape, .shape-glow, .ambient-bloom {
     position: absolute;
@@ -156,18 +159,18 @@ body, html {
     z-index: 2;
 }
 
-/* Removed heavy blend modes to ensure 60fps rendering */
+/* GPU optimizations: Removed heavy mix-blend-mode calculations */
 .shape-glow {
-    filter: blur(25px);
+    filter: blur(15px);
     opacity: 0.9;
     z-index: 1;
 }
 
 .ambient-bloom {
-    filter: blur(60px);
+    filter: blur(40px);
     opacity: 0.5;
     z-index: 0;
-    transform: scale(1.3);
+    transform: scale(1.5);
 }
 
 .content { position: relative; z-index: 10; contain: content; }
@@ -280,4 +283,5 @@ body, html {
     .text-block h1 { font-size: 2.5rem; }
     .text-block h2 { font-size: 2rem; }
     .side-nav { display: none; } 
+    .floating-wrapper { width: min(25vw, 120px); height: min(25vw, 120px); }
 }
