@@ -7,22 +7,19 @@ const shapes = [
     { p: [[30,0], [70,0], [100,30], [100,70], [70,100], [30,100], [0,70], [0,30]], c: [255, 0, 85] }         // Circle
 ];
 
-// Tracking variables for smooth interpolation (Lerp)
 let targetScroll = 0;
 let currentScroll = 0;
 let isAnimating = false;
 
-// Elements
 const shapeEl = document.getElementById('geometry-morph');
 const morphWrapper = document.getElementById('morph-wrapper');
 const edgeLights = document.getElementById('edge-glow');
+const originSpot = document.querySelector('.origin-spot');
 const lightLines = document.querySelectorAll('.light-line');
 
-// Capture the user's raw scroll position immediately
 window.addEventListener('scroll', () => {
     targetScroll = window.scrollY;
     
-    // If the animation loop is asleep, wake it up
     if (!isAnimating) {
         isAnimating = true;
         window.requestAnimationFrame(renderLoop);
@@ -30,15 +27,14 @@ window.addEventListener('scroll', () => {
 });
 
 const renderLoop = () => {
-    // Math Lerp: Move currentScroll 6% of the distance toward targetScroll per frame.
-    // Lowering the 0.06 value makes it softer/slower. Increasing it makes it snap faster.
-    currentScroll += (targetScroll - currentScroll) * 0.06;
+    // Lerp friction reduced to 0.035 for an exceptionally soft and fluid morph
+    currentScroll += (targetScroll - currentScroll) * 0.035;
     
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     let scrollProgress = currentScroll / maxScroll;
     scrollProgress = Math.max(0, Math.min(1, scrollProgress)); 
 
-    // --- 1. Edge Lights Animation ---
+    // --- 1. Edge Lights Tracing ---
     const offset = 100 - (scrollProgress * 100);
     lightLines.forEach(line => {
         line.style.strokeDashoffset = offset;
@@ -76,19 +72,19 @@ const renderLoop = () => {
     
     const interpolatedColor = `rgb(${r}, ${g}, ${b})`;
 
-    // --- 3. Apply Frame Properties ---
+    // --- 3. Apply Visuals and Bloom ---
     shapeEl.style.clipPath = polygonString;
     shapeEl.style.backgroundColor = interpolatedColor;
     
-    // Apply Heavy Drop-Shadow Bloom to the wrapper based on current color
+    // Background Shape Bloom
     morphWrapper.style.filter = `drop-shadow(0 0 30px rgba(${r}, ${g}, ${b}, 0.6)) drop-shadow(0 0 80px rgba(${r}, ${g}, ${b}, 0.3))`;
 
-    // Sync edge light stroke and bloom
+    // Edge Line and Spot Bloom synchronization
     edgeLights.style.stroke = interpolatedColor;
-    edgeLights.style.filter = `drop-shadow(0 0 8px rgba(${r}, ${g}, ${b}, 0.9)) drop-shadow(0 0 20px rgba(${r}, ${g}, ${b}, 0.5))`;
+    originSpot.style.fill = interpolatedColor;
+    edgeLights.style.filter = `drop-shadow(0 0 10px rgba(${r}, ${g}, ${b}, 0.9)) drop-shadow(0 0 25px rgba(${r}, ${g}, ${b}, 0.6))`;
 
-    // --- 4. Loop Logic ---
-    // If current is close enough to target, stop animating to save CPU
+    // --- 4. Render Loop Logic ---
     if (Math.abs(targetScroll - currentScroll) > 0.5) {
         window.requestAnimationFrame(renderLoop);
     } else {
@@ -96,7 +92,6 @@ const renderLoop = () => {
     }
 };
 
-// Initialize the first frame
 window.requestAnimationFrame(() => {
     targetScroll = window.scrollY;
     currentScroll = window.scrollY;
