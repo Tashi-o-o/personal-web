@@ -52,17 +52,8 @@ body, html {
 }
 
 .nav-dot:hover { background-color: rgba(255, 255, 255, 0.6); }
-
-.nav-dot.active {
-    background-color: transparent;
-    border-color: var(--default-cyan);
-    transform: scale(1.4);
-}
-
-:focus-visible {
-    outline: 2px solid var(--default-cyan);
-    outline-offset: 4px;
-}
+.nav-dot.active { background-color: transparent; border-color: var(--default-cyan); transform: scale(1.4); }
+:focus-visible { outline: 2px solid var(--default-cyan); outline-offset: 4px; }
 
 .tech-grid {
     position: fixed;
@@ -116,19 +107,18 @@ body, html {
     z-index: 0;
 }
 
-/* Updated Animation: Drifts fluidly from left to right across the screen */
-@keyframes fluid-drift {
-    0%, 100% { transform: translateX(-20vw) translateY(10px) scale(1) rotate(-3deg); }
-    50% { transform: translateX(20vw) translateY(-10px) scale(1.05) rotate(3deg); }
+@keyframes float {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-15px) scale(1.02); }
 }
 
 .floating-wrapper {
     position: relative;
     width: min(70vw, 400px);
     height: min(70vw, 400px);
-    /* Extended to 16s for a slow, organic, liquid movement */
-    animation: fluid-drift 16s ease-in-out infinite; 
-    transition: transform 0.1s linear;
+    animation: float 8s ease-in-out infinite;
+    /* transition handles the parallax and fluid sway injected by JS */
+    transition: transform 0.1s linear; 
 }
 
 .shape, .shape-glow {
@@ -142,10 +132,10 @@ body, html {
     will-change: clip-path, background-color, transform;
 }
 
-/* Injects the SVG Gooey Filter to melt the geometric points into a fluid droplet */
-.liquid-blob {
-    filter: url('#gooey-fluid');
+.shape {
     z-index: 2;
+    /* Locks the shape to the SVG filter engine */
+    filter: url('#gooey-fluid'); 
 }
 
 .shape-glow {
@@ -196,10 +186,7 @@ body, html {
     will-change: opacity, transform;
 }
 
-.fade-in-section.is-visible {
-    opacity: 1;
-    transform: none;
-}
+.fade-in-section.is-visible { opacity: 1; transform: none; }
 
 .subheading {
     display: inline-block;
@@ -227,21 +214,9 @@ body, html {
 
 .text-block h1 { font-size: 3.5rem; }
 .text-block h2 { font-size: 2.8rem; }
+.text-block p { font-size: 1.15rem; line-height: 1.7; color: var(--text-muted); font-weight: 300; margin-bottom: 0; }
 
-.text-block p {
-    font-size: 1.15rem;
-    line-height: 1.7;
-    color: var(--text-muted);
-    font-weight: 300;
-    margin-bottom: 0;
-}
-
-.button-container {
-    display: flex;
-    gap: 20px;
-    margin-top: 40px;
-    flex-wrap: wrap;
-}
+.button-container { display: flex; gap: 20px; margin-top: 40px; flex-wrap: wrap; }
 
 .cta-button {
     position: relative;
@@ -259,12 +234,8 @@ body, html {
 }
 
 .btn-text { position: relative; z-index: 2; }
-
 .primary-btn { color: var(--bg-dark); }
-.primary-btn:hover {
-    transform: translateY(-3px);
-    filter: brightness(1.2);
-}
+.primary-btn:hover { transform: translateY(-3px); filter: brightness(1.2); }
 
 .whatsapp-btn {
     background-color: rgba(37, 211, 102, 0.05);
@@ -295,4 +266,5 @@ body, html {
     .fade-in-section { opacity: 1; transform: none; transition: none; }
     .cta-button { transition: none; }
     .cta-button:hover { transform: none; }
+    .shape { filter: none; }
 }
