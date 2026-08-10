@@ -10,9 +10,17 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Perimeter Edge Lights -->
+    <svg class="edge-lights" preserveAspectRatio="none" viewBox="0 0 100 100">
+        <!-- Right side trace -->
+        <path class="light-line" vector-effect="non-scaling-stroke" d="M 50 0 L 100 0 L 100 100 L 50 100" pathLength="100" />
+        <!-- Left side trace -->
+        <path class="light-line" vector-effect="non-scaling-stroke" d="M 50 0 L 0 0 L 0 100 L 50 100" pathLength="100" />
+    </svg>
+
     <!-- Interactive Background Container -->
     <div class="atrunix-morph-container">
-        <div id="geometry-morph" class="shape stage-triangle"></div>
+        <div id="geometry-morph" class="shape"></div>
     </div>
 
     <!-- Foreground Content -->
@@ -51,10 +59,7 @@
                 <p>Direct communication for technical requirements and operational scoping.</p>
                 
                 <div class="button-container">
-                    <!-- Telephone Link -->
                     <a href="tel:+916350062238" class="cta-button">Call +91 6350062238</a>
-                    
-                    <!-- WhatsApp Link -->
                     <a href="https://wa.me/916350062238?text=Hi,%20I%20am%20interested%20in%20discussing%20a%20web%20development%20project." class="cta-button whatsapp-button" target="_blank" rel="noopener noreferrer">Message on WhatsApp</a>
                 </div>
             </div>
