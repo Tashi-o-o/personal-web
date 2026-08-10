@@ -6,7 +6,6 @@ const shapes = [
     { p: [[30,0], [70,0], [100,30], [100,70], [70,100], [30,100], [0,70], [0,30]], c: [255, 0, 85] }
 ];
 
-// Pushed coordinates outward to perfectly clear the text block margins
 const xPositions = [-35, 35, -35, 35, -35];
 
 let targetScroll = 0;
@@ -20,7 +19,6 @@ const glowEl = document.getElementById('geometry-glow');
 const ambientBloom = document.getElementById('ambient-bloom');
 const edgeLights = document.getElementById('edge-glow');
 const originSpot = document.querySelector('.origin-spot');
-const destSpot = document.getElementById('dest-spot');
 const lightLines = document.querySelectorAll('.light-line');
 const subheadings = document.querySelectorAll('.subheading');
 const primaryButtons = document.querySelectorAll('.primary-btn');
@@ -83,7 +81,6 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 
 const renderLoop = () => {
-    // Smoothed interpolation multiplier. Lower = buttery fluid trailing, Higher = robotic snapping.
     currentScroll += (targetScroll - currentScroll) * 0.15;
     const maxScroll = getMaxScroll();
     
@@ -105,7 +102,6 @@ const renderLoop = () => {
     const shapeX = xPositions[currentIndex] + (xPositions[nextIndex] - xPositions[currentIndex]) * localProgress;
     const fluidIntensity = prefersReducedMotion.matches ? 0 : Math.sin(localProgress * Math.PI);
     
-    // Adjusted filter strength for the smaller geometry scale
     if (fluidIntensity > 0.05 && !prefersReducedMotion.matches) {
         liquidContainer.style.filter = "url('#gooey-fluid')";
         fluidBlurEl.setAttribute('stdDeviation', fluidIntensity * 12);
@@ -133,7 +129,6 @@ const renderLoop = () => {
     
     liquidContainer.style.transform = `scale(${scaleX}, ${scaleY}) skewX(${skewAmount}deg) translateZ(0)`;
 
-    // Recalibrated splash trajectories for the smaller droplets
     const spread = fluidIntensity * 120;
     droplets[0].style.transform = `translate3d(${directionSign * spread}px, ${-spread * 0.8}px, 0) scale(${0.2 + fluidIntensity * 0.8})`;
     droplets[1].style.transform = `translate3d(${directionSign * spread * 1.5}px, 0px, 0) scale(${0.1 + fluidIntensity * 0.9})`;
@@ -174,14 +169,6 @@ const renderLoop = () => {
     edgeLights.style.stroke = interpolatedColor;
     originSpot.style.fill = interpolatedColor;
     edgeLights.style.filter = `drop-shadow(0 0 15px ${interpolatedColor})`;
-
-    if (scrollProgress >= 0.99) {
-        destSpot.style.opacity = '1';
-        destSpot.style.fill = interpolatedColor;
-        destSpot.style.filter = `drop-shadow(0 0 15px ${interpolatedColor})`;
-    } else {
-        destSpot.style.opacity = '0';
-    }
 
     subheadings.forEach(sub => {
         sub.style.color = interpolatedColor;
