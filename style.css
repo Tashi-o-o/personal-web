@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap');
 
-/* CSS Variables */
 :root {
     --bg-dark: #030305;
     --text-main: #ffffff;
@@ -14,7 +13,7 @@
 
 html {
     scroll-snap-type: y mandatory;
-    scroll-behavior: smooth; /* Allowed for dot navigation jumping */
+    scroll-behavior: smooth;
 }
 
 body, html {
@@ -26,22 +25,11 @@ body, html {
     overflow-x: hidden;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-    width: 8px;
-}
-::-webkit-scrollbar-track {
-    background: var(--bg-dark);
-}
-::-webkit-scrollbar-thumb {
-    background: #1a1a24;
-    border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: #2a2a3a;
-}
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-dark); }
+::-webkit-scrollbar-thumb { background: #1a1a24; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #2a2a3a; }
 
-/* Side Navigation */
 .side-nav {
     position: fixed;
     right: 3vw;
@@ -63,17 +51,14 @@ body, html {
     cursor: pointer;
 }
 
-.nav-dot:hover {
-    background-color: rgba(255, 255, 255, 0.6);
-}
+.nav-dot:hover { background-color: rgba(255, 255, 255, 0.6); }
 
 .nav-dot.active {
     background-color: transparent;
-    border-color: var(--default-cyan); /* Dynamically overwritten by JS */
+    border-color: var(--default-cyan);
     transform: scale(1.4);
 }
 
-/* Focus States for Keyboard Navigation */
 :focus-visible {
     outline: 2px solid var(--default-cyan);
     outline-offset: 4px;
@@ -131,20 +116,21 @@ body, html {
     z-index: 0;
 }
 
-@keyframes float {
-    0%, 100% { transform: translateY(0px) scale(1); }
-    50% { transform: translateY(-15px) scale(1.02); }
+/* Updated Animation: Drifts fluidly from left to right across the screen */
+@keyframes fluid-drift {
+    0%, 100% { transform: translateX(-20vw) translateY(10px) scale(1) rotate(-3deg); }
+    50% { transform: translateX(20vw) translateY(-10px) scale(1.05) rotate(3deg); }
 }
 
 .floating-wrapper {
     position: relative;
     width: min(70vw, 400px);
     height: min(70vw, 400px);
-    animation: float 8s ease-in-out infinite;
-    transition: transform 0.1s linear; /* Enables smooth mouse parallax */
+    /* Extended to 16s for a slow, organic, liquid movement */
+    animation: fluid-drift 16s ease-in-out infinite; 
+    transition: transform 0.1s linear;
 }
 
-/* Initial State setup to prevent FOUC */
 .shape, .shape-glow {
     position: absolute;
     top: 0;
@@ -156,7 +142,11 @@ body, html {
     will-change: clip-path, background-color, transform;
 }
 
-.shape { z-index: 2; }
+/* Injects the SVG Gooey Filter to melt the geometric points into a fluid droplet */
+.liquid-blob {
+    filter: url('#gooey-fluid');
+    z-index: 2;
+}
 
 .shape-glow {
     filter: blur(50px);
@@ -164,10 +154,7 @@ body, html {
     z-index: 1;
 }
 
-.content {
-    position: relative;
-    z-index: 10;
-}
+.content { position: relative; z-index: 10; }
 
 .scroll-zone {
     height: 100dvh;
@@ -193,11 +180,8 @@ body, html {
     transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.5s ease;
 }
 
-/* Glassmorphism Fallback for older GPUs */
 @supports not (backdrop-filter: blur(1px)) {
-    .text-block {
-        background: rgba(10, 10, 15, 0.95);
-    }
+    .text-block { background: rgba(10, 10, 15, 0.95); }
 }
 
 .text-block:hover {
@@ -300,10 +284,9 @@ body, html {
     .text-block { padding: 35px; border-radius: 16px; }
     .text-block h1 { font-size: 2.5rem; }
     .text-block h2 { font-size: 2rem; }
-    .side-nav { display: none; } /* Hide dots on mobile to save space */
+    .side-nav { display: none; } 
 }
 
-/* Reduced Motion Accessibility Overrides */
 @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .floating-wrapper { animation: none; transform: none !important; }
