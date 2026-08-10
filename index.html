@@ -17,12 +17,12 @@
     </noscript>
 </head>
 <body>
-    <!-- Fluid Gooey Filter Engine -->
-    <svg style="visibility: hidden; position: absolute;" width="0" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1">
+    <!-- Fluid Gooey Filter Engine (Safely hidden off-screen to fix Safari bugs) -->
+    <svg style="width: 0; height: 0; position: absolute; left: -9999px;" xmlns="http://www.w3.org/2000/svg" version="1.1">
         <defs>
             <filter id="gooey-fluid" x="-50%" y="-50%" width="200%" height="200%">
                 <feGaussianBlur id="fluid-blur" in="SourceGraphic" stdDeviation="0" result="blur" />
-                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="gooey" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="gooey" />
                 <feBlend in="SourceGraphic" in2="gooey" />
             </filter>
         </defs>
@@ -30,7 +30,6 @@
 
     <div class="tech-grid" aria-hidden="true"></div>
 
-    <!-- Edge Lights (Paths extended to 1000 to guarantee absolute bottom closure) -->
     <svg class="edge-lights" id="edge-glow" preserveAspectRatio="none" viewBox="0 0 1000 1000" aria-hidden="true">
         <circle cx="500" cy="0" r="6" class="origin-spot" />
         <circle cx="500" cy="1000" r="8" class="destination-spot" id="dest-spot" />
@@ -40,7 +39,6 @@
 
     <div class="atrunix-morph-container" aria-hidden="true">
         <div class="floating-wrapper" id="parallax-wrapper">
-            <!-- New Liquid Container groups both elements for unified melting -->
             <div class="liquid-container">
                 <div id="geometry-glow" class="shape-glow"></div>
                 <div id="geometry-morph" class="shape"></div>
