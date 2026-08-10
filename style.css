@@ -1,6 +1,6 @@
-/* Base Reset, Typography, and Scroll Snapping */
+/* Base Reset and Strict Scroll Snapping */
 html {
-    scroll-behavior: smooth;
+    /* smooth scroll removed to stop conflict with JS interpolation */
     scroll-snap-type: y mandatory;
 }
 
@@ -13,7 +13,7 @@ body, html {
     overflow-x: hidden;
 }
 
-/* Edge Light SVG Positioning & Amplified Triple Bloom */
+/* Edge Light Architecture */
 .edge-lights {
     position: fixed;
     top: 0;
@@ -24,10 +24,9 @@ body, html {
     pointer-events: none;
     fill: none;
     stroke: #00e5ff;
-    stroke-width: 5px; /* Slightly thicker line to carry more glow */
-    filter: drop-shadow(0 0 12px rgba(0, 229, 255, 1)) 
-            drop-shadow(0 0 30px rgba(0, 229, 255, 0.8)) 
-            drop-shadow(0 0 60px rgba(0, 229, 255, 0.5));
+    stroke-width: 6px; 
+    /* Simplified to a single drop-shadow to fix GPU lag */
+    filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.9));
 }
 
 .origin-spot {
@@ -39,10 +38,9 @@ body, html {
     stroke-linecap: round;
     stroke-dasharray: 100;
     stroke-dashoffset: 100;
-    transition: stroke-dashoffset 0.05s linear; 
 }
 
-/* Background Container Bloom Wrapper */
+/* Background Container */
 .atrunix-morph-container {
     position: fixed;
     top: 0;
@@ -53,15 +51,28 @@ body, html {
     align-items: center;
     justify-content: center;
     z-index: 0;
-    will-change: filter;
 }
 
 /* Base Shape Properties */
 .shape {
-    width: min(75vw, 400px);
-    height: min(75vw, 400px);
+    position: relative;
+    width: min(70vw, 400px);
+    height: min(70vw, 400px);
     background-color: #00e5ff;
     will-change: clip-path, background-color;
+    z-index: 2;
+}
+
+/* Replaces laggy drop-shadow with a high-performance blur element */
+.shape-glow {
+    position: absolute;
+    width: min(70vw, 400px);
+    height: min(70vw, 400px);
+    background-color: #00e5ff;
+    will-change: clip-path, background-color;
+    filter: blur(45px); /* Creates the heavy bloom effect smoothly */
+    opacity: 0.8;
+    z-index: 1;
 }
 
 /* Foreground Content */
@@ -76,7 +87,8 @@ body, html {
     align-items: center;
     justify-content: center;
     padding: 0 10vw;
-    scroll-snap-align: center;
+    /* 'start' creates a perfect mathematical lock on the slide */
+    scroll-snap-align: start; 
     scroll-snap-stop: always;
 }
 
