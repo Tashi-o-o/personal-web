@@ -24,5 +24,5 @@ document.addEventListener('scroll', () => {
         shape.classList.add('stage-hexagon');
     } else {
         shape.classList.add('stage-circle');
-    }
+    } 
 });
