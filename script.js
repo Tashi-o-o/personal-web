@@ -12,7 +12,7 @@ let currentScroll = 0;
 let isAnimating = false;
 
 const shapeEl = document.getElementById('geometry-morph');
-const morphWrapper = document.getElementById('morph-wrapper');
+const glowEl = document.getElementById('geometry-glow');
 const edgeLights = document.getElementById('edge-glow');
 const originSpot = document.querySelector('.origin-spot');
 const lightLines = document.querySelectorAll('.light-line');
@@ -27,8 +27,8 @@ window.addEventListener('scroll', () => {
 });
 
 const renderLoop = () => {
-    // Increased interpolation speed from 0.035 to 0.15 for snappier, less laggy morphing
-    currentScroll += (targetScroll - currentScroll) * 0.15;
+    // Increased multiplier to 0.35 ensures the shape tracks tightly with the scroll snap, eliminating lag
+    currentScroll += (targetScroll - currentScroll) * 0.35;
     
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     let scrollProgress = currentScroll / maxScroll;
@@ -73,16 +73,19 @@ const renderLoop = () => {
     const interpolatedColor = `rgb(${r}, ${g}, ${b})`;
 
     // --- 3. Apply Visuals and Bloom ---
+    
+    // Solid interior shape
     shapeEl.style.clipPath = polygonString;
     shapeEl.style.backgroundColor = interpolatedColor;
     
-    // Background Shape Bloom
-    morphWrapper.style.filter = `drop-shadow(0 0 30px rgba(${r}, ${g}, ${b}, 0.6)) drop-shadow(0 0 80px rgba(${r}, ${g}, ${b}, 0.3))`;
+    // Background blurred shape (Hardware Accelerated Bloom)
+    glowEl.style.clipPath = polygonString;
+    glowEl.style.backgroundColor = interpolatedColor;
 
-    // Amplified Triple Bloom for Edge Lines and Spot
+    // Edge Line and Spot Bloom synchronization
     edgeLights.style.stroke = interpolatedColor;
     originSpot.style.fill = interpolatedColor;
-    edgeLights.style.filter = `drop-shadow(0 0 12px rgba(${r}, ${g}, ${b}, 1)) drop-shadow(0 0 30px rgba(${r}, ${g}, ${b}, 0.8)) drop-shadow(0 0 60px rgba(${r}, ${g}, ${b}, 0.5))`;
+    edgeLights.style.filter = `drop-shadow(0 0 15px ${interpolatedColor})`;
 
     // --- 4. Render Loop Logic ---
     if (Math.abs(targetScroll - currentScroll) > 0.5) {
@@ -92,6 +95,7 @@ const renderLoop = () => {
     }
 };
 
+// Initialize the first frame
 window.requestAnimationFrame(() => {
     targetScroll = window.scrollY;
     currentScroll = window.scrollY;
