@@ -6,15 +6,17 @@ const shapes = [
     { p: [[30,0], [70,0], [100,30], [100,70], [70,100], [30,100], [0,70], [0,30]], c: [255, 0, 85] }
 ];
 
-// Target VW positions for slides 1 through 5 (Left to Right movement)
 const xPositions = [-25, 25, -25, 25, -25];
 
 let targetScroll = 0;
 let currentScroll = 0;
 let isAnimating = false;
+let winWidth = window.innerWidth;
+let winHeight = window.innerHeight;
 
 const shapeEl = document.getElementById('geometry-morph');
 const glowEl = document.getElementById('geometry-glow');
+const ambientBloom = document.getElementById('ambient-bloom');
 const edgeLights = document.getElementById('edge-glow');
 const originSpot = document.querySelector('.origin-spot');
 const destSpot = document.getElementById('dest-spot');
@@ -25,23 +27,28 @@ const parallaxWrapper = document.getElementById('parallax-wrapper');
 const liquidContainer = document.querySelector('.liquid-container');
 const navDots = document.querySelectorAll('.nav-dot');
 const fluidBlurEl = document.getElementById('fluid-blur');
+const droplets = document.querySelectorAll('.droplet');
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-// Height calculation preventing Division By Zero
 const getMaxScroll = () => {
     const lastSection = document.getElementById('contact');
-    const computedScroll = lastSection ? lastSection.offsetTop : (document.documentElement.scrollHeight - window.innerHeight);
+    const computedScroll = lastSection ? lastSection.offsetTop : (document.documentElement.scrollHeight - winHeight);
     return Math.max(1, computedScroll); 
 };
 
 let targetX = 0, targetY = 0;
 let mouseX = 0, mouseY = 0;
 
+window.addEventListener('resize', () => {
+    winWidth = window.innerWidth;
+    winHeight = window.innerHeight;
+});
+
 window.addEventListener('mousemove', (e) => {
     if (prefersReducedMotion.matches) return;
-    targetX = (e.clientX / window.innerWidth) * 2 - 1;
-    targetY = (e.clientY / window.innerHeight) * 2 - 1;
+    targetX = (e.clientX / winWidth) * 2 - 1;
+    targetY = (e.clientY / winHeight) * 2 - 1;
 });
 
 const setupObserver = () => {
@@ -72,10 +79,10 @@ window.addEventListener('scroll', () => {
         isAnimating = true;
         window.requestAnimationFrame(renderLoop);
     }
-});
+}, { passive: true });
 
 const renderLoop = () => {
-    currentScroll += (targetScroll - currentScroll) * 0.35;
+    currentScroll += (targetScroll - currentScroll) * 0.2;
     const maxScroll = getMaxScroll();
     
     let scrollProgress = currentScroll / maxScroll;
@@ -90,30 +97,38 @@ const renderLoop = () => {
     const nextIndex = Math.min(currentIndex + 1, numShapes - 1);
     const localProgress = scaledProgress - currentIndex; 
 
-    // Retrieve active shape references required for drawing loop
     const currentShape = shapes[currentIndex];
     const nextShape = shapes[nextIndex];
 
     const shapeX = xPositions[currentIndex] + (xPositions[nextIndex] - xPositions[currentIndex]) * localProgress;
     const fluidIntensity = prefersReducedMotion.matches ? 0 : Math.sin(localProgress * Math.PI);
     
+    const gravitySag = prefersReducedMotion.matches ? 0 : Math.pow(fluidIntensity, 1.5) * 150;
+    
     mouseX += (targetX - mouseX) * 0.1;
     mouseY += (targetY - mouseY) * 0.1;
     
-    // JS-native float calculation overrides the removed CSS animation
     const floatY = prefersReducedMotion.matches ? 0 : Math.sin(Date.now() * 0.002) * -15; 
-    const viewportX = (shapeX * window.innerWidth) / 100;
+    const viewportX = (shapeX * winWidth) / 100;
     
-    // Apply combined X, Parallax, and Float values
-    parallaxWrapper.style.transform = `translate(${viewportX + (mouseX * 15)}px, ${mouseY * 15 + floatY}px)`;
+    parallaxWrapper.style.transform = `translate3d(${viewportX + (mouseX * 15)}px, ${mouseY * 15 + floatY + gravitySag}px, 0)`;
 
     if (fluidBlurEl) {
-        fluidBlurEl.setAttribute('stdDeviation', fluidIntensity * 20);
+        fluidBlurEl.setAttribute('stdDeviation', fluidIntensity * 25);
     }
     
-    const volumeCompensator = 1 + (fluidIntensity * 0.15);
-    const skewAmount = (xPositions[nextIndex] - xPositions[currentIndex]) * fluidIntensity * -0.2;
-    liquidContainer.style.transform = `scale(${volumeCompensator}) skewX(${skewAmount}deg)`;
+    const movementDelta = xPositions[nextIndex] - xPositions[currentIndex];
+    const directionSign = movementDelta < 0 ? 1 : -1;
+    
+    const scaleX = 1 + (fluidIntensity * 0.3);
+    const scaleY = 1 - (fluidIntensity * 0.1);
+    const skewAmount = movementDelta * fluidIntensity * -0.2;
+    liquidContainer.style.transform = `scale(${scaleX}, ${scaleY}) skewX(${skewAmount}deg) translateZ(0)`;
+
+    const spread = fluidIntensity * 160;
+    droplets[0].style.transform = `translate3d(${directionSign * spread}px, ${-spread * 0.7}px, 0) scale(${0.2 + fluidIntensity * 0.8})`;
+    droplets[1].style.transform = `translate3d(${directionSign * spread * 1.4}px, 0px, 0) scale(${0.1 + fluidIntensity * 0.9})`;
+    droplets[2].style.transform = `translate3d(${directionSign * spread * 0.4}px, ${spread * 1.1}px, 0) scale(${0.3 + fluidIntensity * 0.7})`;
 
     let offset = 100 - (scrollProgress * 100);
     if (scrollProgress > 0.99) offset = 0;
@@ -142,29 +157,38 @@ const renderLoop = () => {
     shapeEl.style.backgroundColor = interpolatedColor;
     glowEl.style.clipPath = polygonString;
     glowEl.style.backgroundColor = interpolatedColor;
+    ambientBloom.style.clipPath = polygonString;
+    ambientBloom.style.backgroundColor = interpolatedColor;
+    
+    droplets.forEach(drop => drop.style.backgroundColor = interpolatedColor);
 
     edgeLights.style.stroke = interpolatedColor;
     originSpot.style.fill = interpolatedColor;
-    edgeLights.style.filter = `drop-shadow(0 0 15px ${interpolatedColor})`;
+    edgeLights.style.filter = `drop-shadow(0 0 20px ${interpolatedColor}) drop-shadow(0 0 10px ${interpolatedColor})`;
 
     if (scrollProgress >= 0.99) {
         destSpot.style.opacity = '1';
         destSpot.style.fill = interpolatedColor;
-        destSpot.style.filter = `drop-shadow(0 0 10px ${interpolatedColor})`;
+        destSpot.style.filter = `drop-shadow(0 0 20px ${interpolatedColor})`;
     } else {
         destSpot.style.opacity = '0';
     }
 
-    subheadings.forEach(sub => sub.style.color = interpolatedColor);
+    subheadings.forEach(sub => {
+        sub.style.color = interpolatedColor;
+        sub.style.textShadow = `0 0 10px ${interpolatedColor}`;
+    });
     primaryButtons.forEach(btn => {
         btn.style.backgroundColor = interpolatedColor;
-        btn.style.boxShadow = `0 0 20px rgba(${r}, ${g}, ${b}, 0.5)`;
+        btn.style.boxShadow = `0 0 25px ${interpolatedColor}, inset 0 0 10px rgba(255,255,255,0.3)`;
     });
     navDots.forEach(dot => {
         if (dot.classList.contains('active')) {
             dot.style.borderColor = interpolatedColor;
+            dot.style.boxShadow = `0 0 12px ${interpolatedColor}`;
         } else {
             dot.style.borderColor = 'transparent';
+            dot.style.boxShadow = 'none';
         }
     });
 
