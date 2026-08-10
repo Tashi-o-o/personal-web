@@ -12,6 +12,12 @@
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://your-domain.com/">
 
+    <!-- Favicon and App Manifest -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://your-domain.com/">
     <meta property="og:title" content="Atrunix | Engineered Web Architecture">
@@ -24,31 +30,58 @@
 
     <meta name="theme-color" content="#030305">
     <link rel="stylesheet" href="style.css">
+
+    <!-- Structured Data (JSON-LD) for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Atrunix",
+      "url": "https://your-domain.com",
+      "logo": "https://your-domain.com/icon.svg",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+91-6350062238",
+        "contactType": "customer service"
+      }
+    }
+    </script>
+
+    <!-- No-Script Fallback -->
+    <noscript>
+        <style>
+            .atrunix-morph-container, .edge-lights, .tech-grid { display: none; }
+            .content { background-color: #030305; }
+            .fade-in-section { opacity: 1; transform: none; }
+        </style>
+    </noscript>
 </head>
 <body>
-    <!-- Subtle Technological Grid Background -->
     <div class="tech-grid" aria-hidden="true"></div>
 
-    <!-- Perimeter Edge Lights -->
     <svg class="edge-lights" id="edge-glow" preserveAspectRatio="none" viewBox="0 0 1000 1000" aria-hidden="true">
-        <!-- Top Origin Node -->
         <circle cx="500" cy="5" r="6" class="origin-spot" />
-        <!-- Bottom Destination Node (Ignites at 100%) -->
         <circle cx="500" cy="995" r="8" class="destination-spot" id="dest-spot" />
-        
         <path class="light-line" vector-effect="non-scaling-stroke" d="M 500 5 L 995 5 L 995 995 L 500 995" pathLength="100" />
         <path class="light-line" vector-effect="non-scaling-stroke" d="M 500 5 L 5 5 L 5 995 L 500 995" pathLength="100" />
     </svg>
 
-    <!-- Interactive Background Container -->
     <div class="atrunix-morph-container" aria-hidden="true">
-        <div class="floating-wrapper">
+        <div class="floating-wrapper" id="parallax-wrapper">
             <div id="geometry-glow" class="shape-glow"></div>
             <div id="geometry-morph" class="shape"></div>
         </div>
     </div>
 
-    <!-- Foreground Content -->
+    <!-- Side Dot Navigation -->
+    <nav class="side-nav" aria-label="Page Sections">
+        <a href="#home" class="nav-dot active" aria-label="Home section" data-target="home"></a>
+        <a href="#foundation" class="nav-dot" aria-label="Foundation section" data-target="foundation"></a>
+        <a href="#capabilities" class="nav-dot" aria-label="Capabilities section" data-target="capabilities"></a>
+        <a href="#growth" class="nav-dot" aria-label="Growth section" data-target="growth"></a>
+        <a href="#contact" class="nav-dot" aria-label="Contact section" data-target="contact"></a>
+    </nav>
+
     <main class="content">
         <section class="scroll-zone" id="home">
             <article class="text-block fade-in-section">
