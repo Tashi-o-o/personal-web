@@ -119,32 +119,25 @@ const renderLoop = () => {
     const nextIndex = Math.min(currentIndex + 1, numShapes - 1);
     const localProgress = scaledProgress - currentIndex; 
 
-    // Fluid Math: Peaks at 1 in the middle of a transition, 0 when resting on a slide
     const fluidIntensity = Math.sin(localProgress * Math.PI);
     
-    // Position Math: Maps X coordinates from array based on scroll depth
     const shapeX = xPositions[currentIndex] + (xPositions[nextIndex] - xPositions[currentIndex]) * localProgress;
 
-    // Mouse Parallax
+    // Bulletproof transform math applied natively in Javascript without calc()
     mouseX += (targetX - mouseX) * 0.1;
     mouseY += (targetY - mouseY) * 0.1;
-    
-    // Combine base X movement with Parallax
-    parallaxWrapper.style.transform = `translate(calc(${shapeX}vw + ${mouseX * 15}px), ${mouseY * 15}px)`;
+    const viewportX = (shapeX * window.innerWidth) / 100;
+    parallaxWrapper.style.transform = `translate(${viewportX + (mouseX * 15)}px, ${mouseY * 15}px)`;
 
-    // Apply Gooey Filter (Melts the shape heavily when moving)
+    // Capped intensity ensures the filter doesn't delete the shape
     if (fluidBlurEl) {
-        fluidBlurEl.setAttribute('stdDeviation', fluidIntensity * 40);
+        fluidBlurEl.setAttribute('stdDeviation', fluidIntensity * 20);
     }
     
-    // Scale shape up slightly during fluid phase to prevent visual volume loss from blur clipping
-    const volumeCompensator = 1 + (fluidIntensity * 0.25);
-    // Skews the droplet in the direction it's travelling
-    const skewAmount = (xPositions[nextIndex] - xPositions[currentIndex]) * fluidIntensity * -0.5;
-    
+    const volumeCompensator = 1 + (fluidIntensity * 0.15);
+    const skewAmount = (xPositions[nextIndex] - xPositions[currentIndex]) * fluidIntensity * -0.2;
     liquidContainer.style.transform = `scale(${volumeCompensator}) skewX(${skewAmount}deg)`;
 
-    // Draw Edge Lights (Force offset to 0 if at the absolute bottom to close gap)
     let offset = 100 - (scrollProgress * 100);
     if (scrollProgress > 0.99) offset = 0;
     lightLines.forEach(line => line.style.strokeDashoffset = offset);
