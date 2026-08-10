@@ -1,13 +1,15 @@
+/* Google Fonts Import for Premium Typography */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap');
+
 /* Base Reset and Strict Scroll Snapping */
 html {
-    /* smooth scroll removed to stop conflict with JS interpolation */
     scroll-snap-type: y mandatory;
 }
 
 body, html {
     margin: 0;
     padding: 0;
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family: 'Outfit', system-ui, sans-serif;
     background-color: #050508;
     color: #ffffff;
     overflow-x: hidden;
@@ -25,7 +27,6 @@ body, html {
     fill: none;
     stroke: #00e5ff;
     stroke-width: 6px; 
-    /* Simplified to a single drop-shadow to fix GPU lag */
     filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.9));
 }
 
@@ -63,14 +64,13 @@ body, html {
     z-index: 2;
 }
 
-/* Replaces laggy drop-shadow with a high-performance blur element */
 .shape-glow {
     position: absolute;
     width: min(70vw, 400px);
     height: min(70vw, 400px);
     background-color: #00e5ff;
     will-change: clip-path, background-color;
-    filter: blur(45px); /* Creates the heavy bloom effect smoothly */
+    filter: blur(45px);
     opacity: 0.8;
     z-index: 1;
 }
@@ -87,89 +87,132 @@ body, html {
     align-items: center;
     justify-content: center;
     padding: 0 10vw;
-    /* 'start' creates a perfect mathematical lock on the slide */
     scroll-snap-align: start; 
     scroll-snap-stop: always;
 }
 
-/* Text Containers */
+/* Upgraded Glassmorphism Text Containers */
 .text-block {
-    background: rgba(8, 8, 12, 0.75);
-    padding: 40px;
-    border-radius: 12px;
-    max-width: 600px;
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.02);
+    background: linear-gradient(135deg, rgba(20, 20, 25, 0.8) 0%, rgba(10, 10, 15, 0.6) 100%);
+    padding: 50px;
+    border-radius: 16px;
+    max-width: 650px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
     transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease;
 }
 
 .text-block:hover {
-    transform: scale(1.02) translateY(-5px);
-    box-shadow: 0 10px 40px rgba(0, 229, 255, 0.15), inset 0 0 20px rgba(255, 255, 255, 0.05);
+    transform: translateY(-8px);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Intersection Observer Initial State */
+.fade-in-section {
+    opacity: 0;
+    transform: translateY(40px) scale(0.98);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+/* Intersection Observer Visible State */
+.fade-in-section.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* Typography Enhancements */
+.subheading {
+    display: block;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #00e5ff; /* Dynamically overwritten by JS */
+    margin-bottom: 15px;
+    font-weight: 500;
 }
 
 .text-block h1, .text-block h2 {
     margin-top: 0;
-    margin-bottom: 20px;
-    text-shadow: 0 0 15px rgba(255,255,255, 0.3);
+    margin-bottom: 25px;
+    font-weight: 700;
+    line-height: 1.1;
+    background: linear-gradient(to right, #ffffff, #a0a0a0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.text-block h1 { font-size: 3rem; }
-.text-block h2 { font-size: 2.5rem; }
+.text-block h1 { font-size: 3.5rem; }
+.text-block h2 { font-size: 2.8rem; }
 
 .text-block p {
-    font-size: 1.2rem;
-    line-height: 1.6;
-    color: #e0e0e0;
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: #b0b0b0;
+    font-weight: 300;
+    margin-bottom: 0;
 }
 
-/* Button Layout */
+/* Premium Button Layout */
 .button-container {
     display: flex;
-    gap: 15px;
-    margin-top: 30px;
+    gap: 20px;
+    margin-top: 40px;
     flex-wrap: wrap;
 }
 
-/* Standard Glowing Button */
 .cta-button {
-    display: inline-block;
-    padding: 15px 30px;
-    background-color: #00e5ff;
-    color: #050505;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 32px;
     text-decoration: none;
-    font-weight: bold;
-    border-radius: 5px;
+    font-weight: 700;
+    border-radius: 8px;
     font-size: 1.1rem;
-    text-align: center;
     flex-grow: 1;
-    box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+    overflow: hidden;
     transition: all 0.3s ease;
 }
 
-.cta-button:hover {
-    box-shadow: 0 0 30px rgba(0, 229, 255, 0.7);
-    transform: translateY(-2px);
+.btn-text {
+    position: relative;
+    z-index: 2;
 }
 
-.cta-button:active {
-    transform: scale(0.98);
+/* Dynamic Primary Button */
+.primary-btn {
+    background-color: #00e5ff; /* Dynamically overwritten by JS */
+    color: #050508;
 }
 
-.whatsapp-button {
+.primary-btn:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.2);
+}
+
+/* WhatsApp Button */
+.whatsapp-btn {
+    background-color: transparent;
+    color: #25D366;
+    border: 2px solid #25D366;
+    box-shadow: 0 0 15px rgba(37, 211, 102, 0.1);
+}
+
+.whatsapp-btn:hover {
     background-color: #25D366;
     color: #ffffff;
-    box-shadow: 0 0 20px rgba(37, 211, 102, 0.4);
+    box-shadow: 0 0 25px rgba(37, 211, 102, 0.4);
+    transform: translateY(-3px);
 }
 
-.whatsapp-button:hover {
-    background-color: #128C7E;
-    box-shadow: 0 0 30px rgba(37, 211, 102, 0.7);
-}
-
-@media (max-width: 600px) {
-    .text-block h1 { font-size: 2.2rem; }
-    .text-block h2 { font-size: 1.8rem; }
-    .text-block { padding: 25px; }
+@media (max-width: 768px) {
+    .text-block { padding: 30px; }
+    .text-block h1 { font-size: 2.5rem; }
+    .text-block h2 { font-size: 2rem; }
 }
