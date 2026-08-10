@@ -1,84 +1,136 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap');
 
+/* CSS Variables */
+:root {
+    --bg-dark: #030305;
+    --text-main: #ffffff;
+    --text-muted: #a3a3a3;
+    --default-cyan: #00e5ff;
+    --glass-bg-start: rgba(20, 20, 25, 0.8);
+    --glass-bg-end: rgba(5, 5, 8, 0.9);
+    --nav-dot-size: 10px;
+    --nav-dot-spacing: 20px;
+}
+
 html {
     scroll-snap-type: y mandatory;
+    scroll-behavior: smooth; /* Allowed for dot navigation jumping */
 }
 
 body, html {
     margin: 0;
     padding: 0;
     font-family: 'Outfit', system-ui, sans-serif;
-    background-color: #030305; /* Deepened black for contrast */
-    color: #ffffff;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
     overflow-x: hidden;
 }
 
-/* Background Tech Grid */
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+    background: #1a1a24;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #2a2a3a;
+}
+
+/* Side Navigation */
+.side-nav {
+    position: fixed;
+    right: 3vw;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: var(--nav-dot-spacing);
+    z-index: 100;
+}
+
+.nav-dot {
+    width: var(--nav-dot-size);
+    height: var(--nav-dot-size);
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.nav-dot:hover {
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+.nav-dot.active {
+    background-color: transparent;
+    border-color: var(--default-cyan); /* Dynamically overwritten by JS */
+    transform: scale(1.4);
+}
+
+/* Focus States for Keyboard Navigation */
+:focus-visible {
+    outline: 2px solid var(--default-cyan);
+    outline-offset: 4px;
+}
+
 .tech-grid {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;
     background-image: 
         linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
     background-size: 60px 60px;
     z-index: -1;
     pointer-events: none;
-    /* Fades the grid out toward the edges of the screen */
     -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
     mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
 }
 
-/* Edge Light Architecture */
 .edge-lights {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;
     z-index: 999;
     pointer-events: none;
     fill: none;
-    stroke: #00e5ff;
+    stroke: var(--default-cyan);
     stroke-width: 5px; 
     filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.9));
 }
 
-.origin-spot {
-    fill: #00e5ff;
-    stroke: none;
-}
-
-.destination-spot {
-    opacity: 0;
-    stroke: none;
-    transition: opacity 0.3s ease;
-}
+.origin-spot { fill: var(--default-cyan); stroke: none; }
+.destination-spot { opacity: 0; stroke: none; transition: opacity 0.3s ease; }
 
 .light-line {
     stroke-linecap: round;
     stroke-dasharray: 100;
     stroke-dashoffset: 100;
-    /* Smooths out the line rendering between scroll snaps */
     transition: stroke-dashoffset 0.1s ease-out; 
 }
 
-/* Background Morphing Architecture */
 .atrunix-morph-container {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 0;
 }
 
-/* Continuous breathing animation applied to the wrapper */
 @keyframes float {
     0%, 100% { transform: translateY(0px) scale(1); }
     50% { transform: translateY(-15px) scale(1.02); }
@@ -89,16 +141,19 @@ body, html {
     width: min(70vw, 400px);
     height: min(70vw, 400px);
     animation: float 8s ease-in-out infinite;
+    transition: transform 0.1s linear; /* Enables smooth mouse parallax */
 }
 
+/* Initial State setup to prevent FOUC */
 .shape, .shape-glow {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: #00e5ff;
-    will-change: clip-path, background-color;
+    background-color: var(--default-cyan);
+    clip-path: polygon(50% 0%, 50% 0%, 100% 100%, 100% 100%, 50% 100%, 0% 100%, 0% 100%, 50% 0%);
+    will-change: clip-path, background-color, transform;
 }
 
 .shape { z-index: 2; }
@@ -109,14 +164,13 @@ body, html {
     z-index: 1;
 }
 
-/* Foreground Content */
 .content {
     position: relative;
     z-index: 10;
 }
 
 .scroll-zone {
-    height: 100vh;
+    height: 100dvh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -125,20 +179,25 @@ body, html {
     scroll-snap-stop: always;
 }
 
-/* Upgraded Glassmorphism */
 .text-block {
-    background: linear-gradient(135deg, rgba(20, 20, 25, 0.8) 0%, rgba(5, 5, 8, 0.9) 100%);
+    background: linear-gradient(135deg, var(--glass-bg-start) 0%, var(--glass-bg-end) 100%);
     padding: 55px;
     border-radius: 20px;
     max-width: 650px;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    /* Multi-layered border for a polished glass edge */
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-top: 1px solid rgba(255, 255, 255, 0.25);
     border-left: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 2px 15px rgba(255, 255, 255, 0.05);
     transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.5s ease;
+}
+
+/* Glassmorphism Fallback for older GPUs */
+@supports not (backdrop-filter: blur(1px)) {
+    .text-block {
+        background: rgba(10, 10, 15, 0.95);
+    }
 }
 
 .text-block:hover {
@@ -158,7 +217,6 @@ body, html {
     transform: none;
 }
 
-/* Typography Enhancements */
 .subheading {
     display: inline-block;
     font-size: 0.85rem;
@@ -178,7 +236,7 @@ body, html {
     font-weight: 700;
     line-height: 1.15;
     letter-spacing: -0.5px;
-    background: linear-gradient(to right, #ffffff, #b3b3b3);
+    background: linear-gradient(to right, var(--text-main), #b3b3b3);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -189,12 +247,11 @@ body, html {
 .text-block p {
     font-size: 1.15rem;
     line-height: 1.7;
-    color: #a3a3a3;
+    color: var(--text-muted);
     font-weight: 300;
     margin-bottom: 0;
 }
 
-/* Premium Buttons */
 .button-container {
     display: flex;
     gap: 20px;
@@ -217,15 +274,9 @@ body, html {
     transition: all 0.3s ease;
 }
 
-.btn-text {
-    position: relative;
-    z-index: 2;
-}
+.btn-text { position: relative; z-index: 2; }
 
-.primary-btn {
-    color: #050508;
-}
-
+.primary-btn { color: var(--bg-dark); }
 .primary-btn:hover {
     transform: translateY(-3px);
     filter: brightness(1.2);
@@ -240,7 +291,7 @@ body, html {
 
 .whatsapp-btn:hover {
     background-color: #25D366;
-    color: #ffffff;
+    color: var(--text-main);
     box-shadow: 0 0 25px rgba(37, 211, 102, 0.4);
     transform: translateY(-3px);
 }
@@ -249,4 +300,16 @@ body, html {
     .text-block { padding: 35px; border-radius: 16px; }
     .text-block h1 { font-size: 2.5rem; }
     .text-block h2 { font-size: 2rem; }
+    .side-nav { display: none; } /* Hide dots on mobile to save space */
+}
+
+/* Reduced Motion Accessibility Overrides */
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .floating-wrapper { animation: none; transform: none !important; }
+    .text-block { transition: none; }
+    .text-block:hover { transform: none; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 2px 15px rgba(255, 255, 255, 0.05); }
+    .fade-in-section { opacity: 1; transform: none; transition: none; }
+    .cta-button { transition: none; }
+    .cta-button:hover { transform: none; }
 }
