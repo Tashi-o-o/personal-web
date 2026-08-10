@@ -7,8 +7,6 @@
     --default-cyan: #00e5ff;
     --glass-bg-start: rgba(20, 20, 25, 0.8);
     --glass-bg-end: rgba(5, 5, 8, 0.9);
-    --nav-dot-size: 10px;
-    --nav-dot-spacing: 20px;
 }
 
 html {
@@ -37,13 +35,13 @@ body, html {
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
-    gap: var(--nav-dot-spacing);
+    gap: 20px;
     z-index: 100;
 }
 
 .nav-dot {
-    width: var(--nav-dot-size);
-    height: var(--nav-dot-size);
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.2);
     border: 2px solid transparent;
@@ -51,9 +49,11 @@ body, html {
     cursor: pointer;
 }
 
-.nav-dot:hover { background-color: rgba(255, 255, 255, 0.6); }
-.nav-dot.active { background-color: transparent; border-color: var(--default-cyan); transform: scale(1.4); }
-:focus-visible { outline: 2px solid var(--default-cyan); outline-offset: 4px; }
+.nav-dot.active {
+    background-color: transparent;
+    border-color: var(--default-cyan);
+    transform: scale(1.4);
+}
 
 .tech-grid {
     position: fixed;
@@ -108,17 +108,23 @@ body, html {
 }
 
 @keyframes float {
-    0%, 100% { transform: translateY(0px) scale(1); }
-    50% { transform: translateY(-15px) scale(1.02); }
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
 }
 
 .floating-wrapper {
     position: relative;
-    width: min(70vw, 400px);
-    height: min(70vw, 400px);
+    width: min(60vw, 350px);
+    height: min(60vw, 350px);
     animation: float 8s ease-in-out infinite;
-    /* transition handles the parallax and fluid sway injected by JS */
-    transition: transform 0.1s linear; 
+}
+
+.liquid-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    filter: url('#gooey-fluid'); 
+    will-change: filter, transform;
 }
 
 .shape, .shape-glow {
@@ -129,18 +135,14 @@ body, html {
     height: 100%;
     background-color: var(--default-cyan);
     clip-path: polygon(50% 0%, 50% 0%, 100% 100%, 100% 100%, 50% 100%, 0% 100%, 0% 100%, 50% 0%);
-    will-change: clip-path, background-color, transform;
+    will-change: clip-path, background-color;
 }
 
-.shape {
-    z-index: 2;
-    /* Locks the shape to the SVG filter engine */
-    filter: url('#gooey-fluid'); 
-}
+.shape { z-index: 2; }
 
 .shape-glow {
-    filter: blur(50px);
-    opacity: 0.85;
+    filter: blur(40px);
+    opacity: 0.9;
     z-index: 1;
 }
 
@@ -168,10 +170,6 @@ body, html {
     border-left: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 2px 15px rgba(255, 255, 255, 0.05);
     transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.5s ease;
-}
-
-@supports not (backdrop-filter: blur(1px)) {
-    .text-block { background: rgba(10, 10, 15, 0.95); }
 }
 
 .text-block:hover {
@@ -214,7 +212,7 @@ body, html {
 
 .text-block h1 { font-size: 3.5rem; }
 .text-block h2 { font-size: 2.8rem; }
-.text-block p { font-size: 1.15rem; line-height: 1.7; color: var(--text-muted); font-weight: 300; margin-bottom: 0; }
+.text-block p { font-size: 1.15rem; line-height: 1.7; color: var(--text-muted); margin-bottom: 0; }
 
 .button-container { display: flex; gap: 20px; margin-top: 40px; flex-wrap: wrap; }
 
@@ -229,7 +227,6 @@ body, html {
     border-radius: 10px;
     font-size: 1.1rem;
     flex-grow: 1;
-    overflow: hidden;
     transition: all 0.3s ease;
 }
 
@@ -256,15 +253,4 @@ body, html {
     .text-block h1 { font-size: 2.5rem; }
     .text-block h2 { font-size: 2rem; }
     .side-nav { display: none; } 
-}
-
-@media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
-    .floating-wrapper { animation: none; transform: none !important; }
-    .text-block { transition: none; }
-    .text-block:hover { transform: none; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 2px 15px rgba(255, 255, 255, 0.05); }
-    .fade-in-section { opacity: 1; transform: none; transition: none; }
-    .cta-button { transition: none; }
-    .cta-button:hover { transform: none; }
-    .shape { filter: none; }
 }
