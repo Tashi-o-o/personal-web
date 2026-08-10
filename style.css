@@ -124,7 +124,7 @@ body, html {
     width: 100%;
     height: 100%;
     filter: url('#gooey-fluid'); 
-    will-change: filter, transform;
+    /* Removed will-change to prevent rendering crashes on mobile */
 }
 
 .shape, .shape-glow {
