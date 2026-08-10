@@ -7,20 +7,38 @@ const shapes = [
     { p: [[30,0], [70,0], [100,30], [100,70], [70,100], [30,100], [0,70], [0,30]], c: [255, 0, 85] }         // Circle
 ];
 
-let ticking = false;
+// Tracking variables for smooth interpolation (Lerp)
+let targetScroll = 0;
+let currentScroll = 0;
+let isAnimating = false;
 
-const updateScrollVisuals = () => {
-    const scrollTop = window.scrollY;
-    // Calculate total scrollable area
+// Elements
+const shapeEl = document.getElementById('geometry-morph');
+const morphWrapper = document.getElementById('morph-wrapper');
+const edgeLights = document.getElementById('edge-glow');
+const lightLines = document.querySelectorAll('.light-line');
+
+// Capture the user's raw scroll position immediately
+window.addEventListener('scroll', () => {
+    targetScroll = window.scrollY;
+    
+    // If the animation loop is asleep, wake it up
+    if (!isAnimating) {
+        isAnimating = true;
+        window.requestAnimationFrame(renderLoop);
+    }
+});
+
+const renderLoop = () => {
+    // Math Lerp: Move currentScroll 6% of the distance toward targetScroll per frame.
+    // Lowering the 0.06 value makes it softer/slower. Increasing it makes it snap faster.
+    currentScroll += (targetScroll - currentScroll) * 0.06;
+    
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    
-    // Determine progress as a ratio between 0 and 1
-    let scrollProgress = scrollTop / maxScroll;
-    scrollProgress = Math.max(0, Math.min(1, scrollProgress)); // Clamp value
-    
+    let scrollProgress = currentScroll / maxScroll;
+    scrollProgress = Math.max(0, Math.min(1, scrollProgress)); 
+
     // --- 1. Edge Lights Animation ---
-    const lightLines = document.querySelectorAll('.light-line');
-    // SVG pathLength is 100. Offset from 100 down to 0 draws the line.
     const offset = 100 - (scrollProgress * 100);
     lightLines.forEach(line => {
         line.style.strokeDashoffset = offset;
@@ -32,13 +50,11 @@ const updateScrollVisuals = () => {
     
     const currentIndex = Math.floor(scaledProgress);
     const nextIndex = Math.min(currentIndex + 1, numShapes - 1);
-    // Determine progress between just the current and next shape
     const localProgress = scaledProgress - currentIndex; 
 
     const currentShape = shapes[currentIndex];
     const nextShape = shapes[nextIndex];
 
-    // Mathematical coordinate blending
     let polygonString = 'polygon(';
     for (let i = 0; i < 8; i++) {
         const cx = currentShape.p[i][0];
@@ -54,32 +70,36 @@ const updateScrollVisuals = () => {
     }
     polygonString += ')';
 
-    // RGB color blending
     const r = Math.round(currentShape.c[0] + (nextShape.c[0] - currentShape.c[0]) * localProgress);
     const g = Math.round(currentShape.c[1] + (nextShape.c[1] - currentShape.c[1]) * localProgress);
     const b = Math.round(currentShape.c[2] + (nextShape.c[2] - currentShape.c[2]) * localProgress);
+    
     const interpolatedColor = `rgb(${r}, ${g}, ${b})`;
 
-    // Apply exact frame properties
-    const shapeEl = document.getElementById('geometry-morph');
+    // --- 3. Apply Frame Properties ---
     shapeEl.style.clipPath = polygonString;
     shapeEl.style.backgroundColor = interpolatedColor;
     
-    // Sync the edge light color to match the current morphing shape
-    const edgeLights = document.querySelector('.edge-lights');
+    // Apply Heavy Drop-Shadow Bloom to the wrapper based on current color
+    morphWrapper.style.filter = `drop-shadow(0 0 30px rgba(${r}, ${g}, ${b}, 0.6)) drop-shadow(0 0 80px rgba(${r}, ${g}, ${b}, 0.3))`;
+
+    // Sync edge light stroke and bloom
     edgeLights.style.stroke = interpolatedColor;
-    edgeLights.style.filter = `drop-shadow(0 0 10px rgba(${r}, ${g}, ${b}, 0.8))`;
-    
-    ticking = false;
+    edgeLights.style.filter = `drop-shadow(0 0 8px rgba(${r}, ${g}, ${b}, 0.9)) drop-shadow(0 0 20px rgba(${r}, ${g}, ${b}, 0.5))`;
+
+    // --- 4. Loop Logic ---
+    // If current is close enough to target, stop animating to save CPU
+    if (Math.abs(targetScroll - currentScroll) > 0.5) {
+        window.requestAnimationFrame(renderLoop);
+    } else {
+        isAnimating = false;
+    }
 };
 
-// Event listener optimized for render frames
-document.addEventListener('scroll', () => {
-    if (!ticking) {
-        window.requestAnimationFrame(updateScrollVisuals);
-        ticking = true;
-    }
+// Initialize the first frame
+window.requestAnimationFrame(() => {
+    targetScroll = window.scrollY;
+    currentScroll = window.scrollY;
+    isAnimating = true;
+    renderLoop();
 });
-
-// Run once on load to establish the initial visual state
-window.requestAnimationFrame(updateScrollVisuals);
