@@ -1,208 +1,283 @@
-const shapes = [
-    { p: [[50,0], [50,0], [100,100], [100,100], [50,100], [0,100], [0,100], [50,0]], c: [0, 229, 255] },
-    { p: [[0,0], [50,0], [100,0], [100,50], [100,100], [50,100], [0,100], [0,50]], c: [181, 0, 255] },
-    { p: [[50,0], [50,0], [100,38], [100,38], [82,100], [18,100], [0,38], [0,38]], c: [255, 122, 0] },
-    { p: [[50,0], [100,25], [100,25], [100,75], [50,100], [50,100], [0,75], [0,25]], c: [0, 255, 87] },
-    { p: [[30,0], [70,0], [100,30], [100,70], [70,100], [30,100], [0,70], [0,30]], c: [255, 0, 85] }
-];
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap');
 
-const xPositions = [-25, 25, -25, 25, -25];
+:root {
+    --bg-dark: #020204;
+    --text-main: #ffffff;
+    --text-muted: #a3a3a3;
+    --default-cyan: #00e5ff;
+    --glass-bg-start: rgba(20, 20, 25, 0.75);
+    --glass-bg-end: rgba(5, 5, 8, 0.85);
+}
 
-let targetScroll = 0;
-let currentScroll = 0;
-let isAnimating = false;
-let winWidth = window.innerWidth;
-let winHeight = window.innerHeight;
+html {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+}
 
-const shapeEl = document.getElementById('geometry-morph');
-const glowEl = document.getElementById('geometry-glow');
-const ambientBloom = document.getElementById('ambient-bloom');
-const edgeLights = document.getElementById('edge-glow');
-const originSpot = document.querySelector('.origin-spot');
-const destSpot = document.getElementById('dest-spot');
-const lightLines = document.querySelectorAll('.light-line');
-const subheadings = document.querySelectorAll('.subheading');
-const primaryButtons = document.querySelectorAll('.primary-btn');
-const parallaxWrapper = document.getElementById('parallax-wrapper');
-const liquidContainer = document.querySelector('.liquid-container');
-const navDots = document.querySelectorAll('.nav-dot');
-const fluidBlurEl = document.getElementById('fluid-blur');
-const droplets = document.querySelectorAll('.droplet');
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Outfit', system-ui, sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    overflow-x: hidden;
+    overscroll-behavior: none;
+}
 
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-dark); }
+::-webkit-scrollbar-thumb { background: #1a1a24; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #2a2a3a; }
 
-const getMaxScroll = () => {
-    const lastSection = document.getElementById('contact');
-    const computedScroll = lastSection ? lastSection.offsetTop : (document.documentElement.scrollHeight - winHeight);
-    return Math.max(1, computedScroll); 
-};
+.side-nav {
+    position: fixed;
+    right: 3vw;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    z-index: 100;
+}
 
-let targetX = 0, targetY = 0;
-let mouseX = 0, mouseY = 0;
+.nav-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
 
-window.addEventListener('resize', () => {
-    winWidth = window.innerWidth;
-    winHeight = window.innerHeight;
-});
+.nav-dot.active {
+    background-color: transparent;
+    border-color: var(--default-cyan);
+    transform: scale(1.4);
+    box-shadow: 0 0 10px var(--default-cyan);
+}
 
-window.addEventListener('mousemove', (e) => {
-    if (prefersReducedMotion.matches) return;
-    targetX = (e.clientX / winWidth) * 2 - 1;
-    targetY = (e.clientY / winHeight) * 2 - 1;
-});
+.tech-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100dvh;
+    background-image: 
+        linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    z-index: -1;
+    pointer-events: none;
+    -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+    mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+}
 
-const setupObserver = () => {
-    const observerOptions = { root: null, rootMargin: '0px', threshold: 0.5 };
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('is-visible');
-                const id = entry.target.parentElement.id;
-                navDots.forEach(dot => {
-                    dot.classList.remove('active');
-                    if (dot.getAttribute('data-target') === id) {
-                        dot.classList.add('active');
-                    }
-                });
-            }
-        });
-    }, observerOptions);
+.edge-lights {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100dvh;
+    z-index: 999;
+    pointer-events: none;
+    fill: none;
+    stroke: var(--default-cyan);
+    stroke-width: 5px; 
+    filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.8));
+    will-change: stroke-dashoffset;
+}
 
-    document.querySelectorAll('.fade-in-section').forEach(section => {
-        observer.observe(section);
-    });
-};
+.origin-spot { fill: var(--default-cyan); stroke: none; }
+.destination-spot { opacity: 0; stroke: none; transition: opacity 0.3s ease; }
 
-window.addEventListener('scroll', () => {
-    targetScroll = window.scrollY;
-    if (!isAnimating) {
-        isAnimating = true;
-        window.requestAnimationFrame(renderLoop);
-    }
-}, { passive: true });
+.light-line {
+    stroke-linecap: round;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+}
 
-const renderLoop = () => {
-    currentScroll += (targetScroll - currentScroll) * 0.2;
-    const maxScroll = getMaxScroll();
-    
-    let scrollProgress = currentScroll / maxScroll;
-    
-    if (scrollProgress > 0.985) scrollProgress = 1;
-    scrollProgress = Math.max(0, Math.min(1, scrollProgress)); 
-    if (isNaN(scrollProgress)) scrollProgress = 0;
+.atrunix-morph-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 0;
+    contain: strict;
+}
 
-    const numShapes = shapes.length;
-    const scaledProgress = scrollProgress * (numShapes - 1);
-    const currentIndex = Math.floor(scaledProgress);
-    const nextIndex = Math.min(currentIndex + 1, numShapes - 1);
-    const localProgress = scaledProgress - currentIndex; 
+.floating-wrapper {
+    position: relative;
+    width: min(35vw, 240px);
+    height: min(35vw, 240px);
+    will-change: transform;
+}
 
-    const currentShape = shapes[currentIndex];
-    const nextShape = shapes[nextIndex];
+.liquid-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    will-change: transform, filter;
+}
 
-    const shapeX = xPositions[currentIndex] + (xPositions[nextIndex] - xPositions[currentIndex]) * localProgress;
-    const fluidIntensity = prefersReducedMotion.matches ? 0 : Math.sin(localProgress * Math.PI);
-    
-    const gravitySag = prefersReducedMotion.matches ? 0 : Math.pow(fluidIntensity, 1.5) * 150;
-    
-    mouseX += (targetX - mouseX) * 0.1;
-    mouseY += (targetY - mouseY) * 0.1;
-    
-    const floatY = prefersReducedMotion.matches ? 0 : Math.sin(Date.now() * 0.002) * -15; 
-    const viewportX = (shapeX * winWidth) / 100;
-    
-    parallaxWrapper.style.transform = `translate3d(${viewportX + (mouseX * 15)}px, ${mouseY * 15 + floatY + gravitySag}px, 0)`;
+.droplet {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin-top: -20px;
+    margin-left: -20px;
+    border-radius: 50%;
+    background-color: var(--default-cyan);
+    will-change: transform, background-color;
+    z-index: 2;
+}
 
-    if (fluidBlurEl) {
-        fluidBlurEl.setAttribute('stdDeviation', fluidIntensity * 25);
-    }
-    
-    const movementDelta = xPositions[nextIndex] - xPositions[currentIndex];
-    const directionSign = movementDelta < 0 ? 1 : -1;
-    
-    const scaleX = 1 + (fluidIntensity * 0.3);
-    const scaleY = 1 - (fluidIntensity * 0.1);
-    const skewAmount = movementDelta * fluidIntensity * -0.2;
-    liquidContainer.style.transform = `scale(${scaleX}, ${scaleY}) skewX(${skewAmount}deg) translateZ(0)`;
+.drop-2 { width: 25px; height: 25px; margin-top: -12.5px; margin-left: -12.5px; }
+.drop-3 { width: 55px; height: 55px; margin-top: -27.5px; margin-left: -27.5px; }
 
-    const spread = fluidIntensity * 160;
-    droplets[0].style.transform = `translate3d(${directionSign * spread}px, ${-spread * 0.7}px, 0) scale(${0.2 + fluidIntensity * 0.8})`;
-    droplets[1].style.transform = `translate3d(${directionSign * spread * 1.4}px, 0px, 0) scale(${0.1 + fluidIntensity * 0.9})`;
-    droplets[2].style.transform = `translate3d(${directionSign * spread * 0.4}px, ${spread * 1.1}px, 0) scale(${0.3 + fluidIntensity * 0.7})`;
+.shape, .shape-glow, .ambient-bloom {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--default-cyan);
+    will-change: clip-path, background-color;
+}
 
-    let offset = 100 - (scrollProgress * 100);
-    if (scrollProgress > 0.99) offset = 0;
-    lightLines.forEach(line => line.style.strokeDashoffset = offset);
+.shape {
+    clip-path: polygon(50% 0%, 50% 0%, 100% 100%, 100% 100%, 50% 100%, 0% 100%, 0% 100%, 50% 0%);
+    z-index: 2;
+}
 
-    let polygonString = 'polygon(';
-    for (let i = 0; i < 8; i++) {
-        const cx = currentShape.p[i][0];
-        const cy = currentShape.p[i][1];
-        const nx = nextShape.p[i][0];
-        const ny = nextShape.p[i][1];
-        
-        const x = cx + (nx - cx) * localProgress;
-        const y = cy + (ny - cy) * localProgress;
-        
-        polygonString += `${x}% ${y}%${i < 7 ? ', ' : ''}`;
-    }
-    polygonString += ')';
+/* Removed heavy blend modes to ensure 60fps rendering */
+.shape-glow {
+    filter: blur(25px);
+    opacity: 0.9;
+    z-index: 1;
+}
 
-    const r = Math.round(currentShape.c[0] + (nextShape.c[0] - currentShape.c[0]) * localProgress);
-    const g = Math.round(currentShape.c[1] + (nextShape.c[1] - currentShape.c[1]) * localProgress);
-    const b = Math.round(currentShape.c[2] + (nextShape.c[2] - currentShape.c[2]) * localProgress);
-    const interpolatedColor = `rgb(${r}, ${g}, ${b})`;
+.ambient-bloom {
+    filter: blur(60px);
+    opacity: 0.5;
+    z-index: 0;
+    transform: scale(1.3);
+}
 
-    shapeEl.style.clipPath = polygonString;
-    shapeEl.style.backgroundColor = interpolatedColor;
-    glowEl.style.clipPath = polygonString;
-    glowEl.style.backgroundColor = interpolatedColor;
-    ambientBloom.style.clipPath = polygonString;
-    ambientBloom.style.backgroundColor = interpolatedColor;
-    
-    droplets.forEach(drop => drop.style.backgroundColor = interpolatedColor);
+.content { position: relative; z-index: 10; contain: content; }
 
-    edgeLights.style.stroke = interpolatedColor;
-    originSpot.style.fill = interpolatedColor;
-    edgeLights.style.filter = `drop-shadow(0 0 20px ${interpolatedColor}) drop-shadow(0 0 10px ${interpolatedColor})`;
+.scroll-zone {
+    height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10vw;
+    scroll-snap-align: start; 
+    scroll-snap-stop: always;
+}
 
-    if (scrollProgress >= 0.99) {
-        destSpot.style.opacity = '1';
-        destSpot.style.fill = interpolatedColor;
-        destSpot.style.filter = `drop-shadow(0 0 20px ${interpolatedColor})`;
-    } else {
-        destSpot.style.opacity = '0';
-    }
+.text-block {
+    background: linear-gradient(135deg, var(--glass-bg-start) 0%, var(--glass-bg-end) 100%);
+    padding: 55px;
+    border-radius: 20px;
+    max-width: 650px;
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 2px 15px rgba(255, 255, 255, 0.05);
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease;
+    will-change: transform;
+}
 
-    subheadings.forEach(sub => {
-        sub.style.color = interpolatedColor;
-        sub.style.textShadow = `0 0 10px ${interpolatedColor}`;
-    });
-    primaryButtons.forEach(btn => {
-        btn.style.backgroundColor = interpolatedColor;
-        btn.style.boxShadow = `0 0 25px ${interpolatedColor}, inset 0 0 10px rgba(255,255,255,0.3)`;
-    });
-    navDots.forEach(dot => {
-        if (dot.classList.contains('active')) {
-            dot.style.borderColor = interpolatedColor;
-            dot.style.boxShadow = `0 0 12px ${interpolatedColor}`;
-        } else {
-            dot.style.borderColor = 'transparent';
-            dot.style.boxShadow = 'none';
-        }
-    });
+.text-block:hover {
+    transform: translateY(-8px) translateZ(0);
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9), inset 0 2px 20px rgba(255, 255, 255, 0.08);
+}
 
-    if (Math.abs(targetScroll - currentScroll) > 0.5 || Math.abs(targetX - mouseX) > 0.01 || fluidIntensity > 0.01) {
-        window.requestAnimationFrame(renderLoop);
-    } else {
-        isAnimating = false;
-    }
-};
+.fade-in-section {
+    opacity: 0;
+    transform: translateY(30px) translateZ(0) scale(0.98);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
 
-window.requestAnimationFrame(() => {
-    targetScroll = window.scrollY;
-    currentScroll = window.scrollY;
-    setupObserver();
-    isAnimating = true;
-    renderLoop();
-});
+.fade-in-section.is-visible { opacity: 1; transform: translateZ(0) scale(1); }
+
+.subheading {
+    display: inline-block;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-bottom: 20px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    text-shadow: 0 0 10px currentColor;
+}
+
+.text-block h1, .text-block h2 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    background: linear-gradient(to right, var(--text-main), #b3b3b3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.text-block h1 { font-size: 3.5rem; }
+.text-block h2 { font-size: 2.8rem; }
+.text-block p { font-size: 1.15rem; line-height: 1.7; color: var(--text-muted); margin-bottom: 0; }
+
+.button-container { display: flex; gap: 20px; margin-top: 40px; flex-wrap: wrap; }
+
+.cta-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 32px;
+    text-decoration: none;
+    font-weight: 700;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    flex-grow: 1;
+    transition: all 0.3s ease;
+    will-change: transform;
+}
+
+.btn-text { position: relative; z-index: 2; }
+.primary-btn { color: var(--bg-dark); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+.primary-btn:hover { transform: translateY(-3px) translateZ(0); filter: brightness(1.2); }
+
+.whatsapp-btn {
+    background-color: rgba(37, 211, 102, 0.05);
+    color: #25D366;
+    border: 1px solid rgba(37, 211, 102, 0.4);
+    box-shadow: 0 0 15px rgba(37, 211, 102, 0.1);
+}
+
+.whatsapp-btn:hover {
+    background-color: #25D366;
+    color: var(--text-main);
+    box-shadow: 0 0 25px rgba(37, 211, 102, 0.6);
+    transform: translateY(-3px) translateZ(0);
+}
+
+@media (max-width: 768px) {
+    .text-block { padding: 35px; border-radius: 16px; }
+    .text-block h1 { font-size: 2.5rem; }
+    .text-block h2 { font-size: 2rem; }
+    .side-nav { display: none; } 
+}
