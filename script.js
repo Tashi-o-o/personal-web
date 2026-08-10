@@ -6,7 +6,9 @@ const shapes = [
     { p: [[30,0], [70,0], [100,30], [100,70], [70,100], [30,100], [0,70], [0,30]], c: [255, 0, 85] }
 ];
 
-const xPositions = [-35, 35, -35, 35, -35];
+// Corner-to-corner perimeter coordinates (X and Y in percentage/vw/vh equivalents) keeping clear of center text box
+const xPositions = [-40, 40, 40, -40, 0];
+const yPositions = [-38, -38, 38, 38, -38];
 
 let targetScroll = 0;
 let currentScroll = 0;
@@ -81,7 +83,7 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 
 const renderLoop = () => {
-    currentScroll += (targetScroll - currentScroll) * 0.15;
+    currentScroll += (targetScroll - currentScroll) * 0.18;
     const maxScroll = getMaxScroll();
     
     let scrollProgress = currentScroll / maxScroll;
@@ -99,40 +101,37 @@ const renderLoop = () => {
     const currentShape = shapes[currentIndex];
     const nextShape = shapes[nextIndex];
 
+    // 2D X and Y coordinate interpolation along the outer perimeter
     const shapeX = xPositions[currentIndex] + (xPositions[nextIndex] - xPositions[currentIndex]) * localProgress;
+    const shapeY = yPositions[currentIndex] + (yPositions[nextIndex] - yPositions[currentIndex]) * localProgress;
+    
     const fluidIntensity = prefersReducedMotion.matches ? 0 : Math.sin(localProgress * Math.PI);
     
     if (fluidIntensity > 0.05 && !prefersReducedMotion.matches) {
         liquidContainer.style.filter = "url('#gooey-fluid')";
-        fluidBlurEl.setAttribute('stdDeviation', fluidIntensity * 12);
+        fluidBlurEl.setAttribute('stdDeviation', fluidIntensity * 10);
     } else {
         liquidContainer.style.filter = "none";
     }
 
-    const gravitySag = prefersReducedMotion.matches ? 0 : Math.pow(fluidIntensity, 1.5) * 120;
-    
     mouseX += (targetX - mouseX) * 0.15;
     mouseY += (targetY - mouseY) * 0.15;
     
-    const floatY = prefersReducedMotion.matches ? 0 : Math.sin(Date.now() * 0.003) * -12; 
     const viewportX = (shapeX * winWidth) / 100;
+    const viewportY = (shapeY * winHeight) / 100;
     
-    parallaxWrapper.style.transform = `translate3d(${viewportX + (mouseX * 15)}px, ${mouseY * 15 + floatY + gravitySag}px, 0)`;
+    parallaxWrapper.style.transform = `translate3d(${viewportX + (mouseX * 12)}px, ${viewportY + (mouseY * 12)}px, 0)`;
 
-    const basePopScale = 1 + ((1 - fluidIntensity) * 0.45); 
-    const movementDelta = xPositions[nextIndex] - xPositions[currentIndex];
-    const directionSign = movementDelta < 0 ? 1 : -1;
+    const basePopScale = 1 + ((1 - fluidIntensity) * 0.4); 
+    const scaleX = basePopScale + (fluidIntensity * 0.3);
+    const scaleY = basePopScale - (fluidIntensity * 0.15);
     
-    const scaleX = basePopScale + (fluidIntensity * 0.4);
-    const scaleY = basePopScale - (fluidIntensity * 0.2);
-    const skewAmount = movementDelta * fluidIntensity * -0.25;
-    
-    liquidContainer.style.transform = `scale(${scaleX}, ${scaleY}) skewX(${skewAmount}deg) translateZ(0)`;
+    liquidContainer.style.transform = `scale(${scaleX}, ${scaleY}) translateZ(0)`;
 
-    const spread = fluidIntensity * 120;
-    droplets[0].style.transform = `translate3d(${directionSign * spread}px, ${-spread * 0.8}px, 0) scale(${0.2 + fluidIntensity * 0.8})`;
-    droplets[1].style.transform = `translate3d(${directionSign * spread * 1.5}px, 0px, 0) scale(${0.1 + fluidIntensity * 0.9})`;
-    droplets[2].style.transform = `translate3d(${directionSign * spread * 0.5}px, ${spread * 1.3}px, 0) scale(${0.3 + fluidIntensity * 0.7})`;
+    const spread = fluidIntensity * 90;
+    droplets[0].style.transform = `translate3d(${-spread}px, ${-spread}px, 0) scale(${0.2 + fluidIntensity * 0.8})`;
+    droplets[1].style.transform = `translate3d(${spread}px, ${spread}px, 0) scale(${0.1 + fluidIntensity * 0.9})`;
+    droplets[2].style.transform = `translate3d(${-spread * 0.5}px, ${spread * 0.5}px, 0) scale(${0.3 + fluidIntensity * 0.7})`;
 
     let offset = 100 - (scrollProgress * 100);
     if (scrollProgress > 0.99) offset = 0;
