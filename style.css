@@ -1,12 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap');
 
 :root {
-    --bg-dark: #030305;
+    --bg-dark: #020204;
     --text-main: #ffffff;
     --text-muted: #a3a3a3;
     --default-cyan: #00e5ff;
-    --glass-bg-start: rgba(20, 20, 25, 0.8);
-    --glass-bg-end: rgba(5, 5, 8, 0.9);
+    --glass-bg-start: rgba(20, 20, 25, 0.75);
+    --glass-bg-end: rgba(5, 5, 8, 0.85);
 }
 
 html {
@@ -21,6 +21,7 @@ body, html {
     background-color: var(--bg-dark);
     color: var(--text-main);
     overflow-x: hidden;
+    overscroll-behavior: none;
 }
 
 ::-webkit-scrollbar { width: 8px; }
@@ -53,6 +54,7 @@ body, html {
     background-color: transparent;
     border-color: var(--default-cyan);
     transform: scale(1.4);
+    box-shadow: 0 0 10px var(--default-cyan);
 }
 
 .tech-grid {
@@ -82,7 +84,8 @@ body, html {
     fill: none;
     stroke: var(--default-cyan);
     stroke-width: 5px; 
-    filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.9));
+    filter: drop-shadow(0 0 20px rgba(0, 229, 255, 1)) drop-shadow(0 0 10px rgba(0, 229, 255, 0.8));
+    will-change: stroke-dashoffset;
 }
 
 .origin-spot { fill: var(--default-cyan); stroke: none; }
@@ -92,7 +95,6 @@ body, html {
     stroke-linecap: round;
     stroke-dasharray: 100;
     stroke-dashoffset: 100;
-    transition: stroke-dashoffset 0.1s ease-out; 
 }
 
 .atrunix-morph-container {
@@ -105,13 +107,14 @@ body, html {
     align-items: center;
     justify-content: center;
     z-index: 0;
+    contain: strict;
 }
 
-/* Float animation removed to prevent JS transform override conflicts */
 .floating-wrapper {
     position: relative;
-    width: min(60vw, 350px);
-    height: min(60vw, 350px);
+    width: min(35vw, 240px);
+    height: min(35vw, 240px);
+    will-change: transform;
 }
 
 .liquid-container {
@@ -119,28 +122,57 @@ body, html {
     width: 100%;
     height: 100%;
     filter: url('#gooey-fluid'); 
+    will-change: transform;
 }
 
-.shape, .shape-glow {
+.droplet {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin-top: -20px;
+    margin-left: -20px;
+    border-radius: 50%;
+    background-color: var(--default-cyan);
+    will-change: transform, background-color;
+    z-index: 2;
+}
+
+.drop-2 { width: 25px; height: 25px; margin-top: -12.5px; margin-left: -12.5px; }
+.drop-3 { width: 55px; height: 55px; margin-top: -27.5px; margin-left: -27.5px; }
+
+.shape, .shape-glow, .ambient-bloom {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background-color: var(--default-cyan);
-    clip-path: polygon(50% 0%, 50% 0%, 100% 100%, 100% 100%, 50% 100%, 0% 100%, 0% 100%, 50% 0%);
     will-change: clip-path, background-color;
 }
 
-.shape { z-index: 2; }
-
-.shape-glow {
-    filter: blur(40px);
-    opacity: 0.9;
-    z-index: 1;
+.shape {
+    clip-path: polygon(50% 0%, 50% 0%, 100% 100%, 100% 100%, 50% 100%, 0% 100%, 0% 100%, 50% 0%);
+    z-index: 2;
 }
 
-.content { position: relative; z-index: 10; }
+.shape-glow {
+    filter: blur(25px);
+    opacity: 1;
+    z-index: 1;
+    mix-blend-mode: screen;
+}
+
+.ambient-bloom {
+    filter: blur(80px);
+    opacity: 0.6;
+    z-index: 0;
+    transform: scale(1.5);
+    mix-blend-mode: color-dodge;
+}
+
+.content { position: relative; z-index: 10; contain: content; }
 
 .scroll-zone {
     height: 100dvh;
@@ -157,28 +189,29 @@ body, html {
     padding: 55px;
     border-radius: 20px;
     max-width: 650px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-top: 1px solid rgba(255, 255, 255, 0.25);
     border-left: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 2px 15px rgba(255, 255, 255, 0.05);
-    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.5s ease;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 2px 15px rgba(255, 255, 255, 0.05);
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease;
+    will-change: transform;
 }
 
 .text-block:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), inset 0 2px 20px rgba(255, 255, 255, 0.08);
+    transform: translateY(-8px) translateZ(0);
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9), inset 0 2px 20px rgba(255, 255, 255, 0.08);
 }
 
 .fade-in-section {
     opacity: 0;
-    transform: translateY(30px) scale(0.98);
-    transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(30px) translateZ(0) scale(0.98);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     will-change: opacity, transform;
 }
 
-.fade-in-section.is-visible { opacity: 1; transform: none; }
+.fade-in-section.is-visible { opacity: 1; transform: translateZ(0) scale(1); }
 
 .subheading {
     display: inline-block;
@@ -191,6 +224,7 @@ body, html {
     border-radius: 4px;
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.05);
+    text-shadow: 0 0 10px currentColor;
 }
 
 .text-block h1, .text-block h2 {
@@ -222,11 +256,12 @@ body, html {
     font-size: 1.1rem;
     flex-grow: 1;
     transition: all 0.3s ease;
+    will-change: transform;
 }
 
 .btn-text { position: relative; z-index: 2; }
-.primary-btn { color: var(--bg-dark); }
-.primary-btn:hover { transform: translateY(-3px); filter: brightness(1.2); }
+.primary-btn { color: var(--bg-dark); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+.primary-btn:hover { transform: translateY(-3px) translateZ(0); filter: brightness(1.2); }
 
 .whatsapp-btn {
     background-color: rgba(37, 211, 102, 0.05);
@@ -238,8 +273,8 @@ body, html {
 .whatsapp-btn:hover {
     background-color: #25D366;
     color: var(--text-main);
-    box-shadow: 0 0 25px rgba(37, 211, 102, 0.4);
-    transform: translateY(-3px);
+    box-shadow: 0 0 25px rgba(37, 211, 102, 0.6);
+    transform: translateY(-3px) translateZ(0);
 }
 
 @media (max-width: 768px) {
