@@ -1,0 +1,153 @@
+/* Base Reset and Typography */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: system-ui, -apple-system, sans-serif;
+    background-color: #08080c;
+    color: #ffffff;
+    overflow-x: hidden;
+}
+
+/* Background Architecture */
+.atrunix-morph-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: -1;
+    background-color: #08080c;
+}
+
+/* Base Shape Properties */
+.shape {
+    width: min(80vw, 400px);
+    height: min(80vw, 400px);
+    transition: clip-path 0.8s cubic-bezier(0.25, 1, 0.5, 1), background 0.8s ease;
+}
+
+/* 8-Point Coordinate Mapping */
+.stage-triangle {
+    clip-path: polygon(50% 0%, 50% 0%, 100% 100%, 100% 100%, 50% 100%, 0% 100%, 0% 100%, 50% 0%);
+    background: #00e5ff;
+}
+
+.stage-square {
+    clip-path: polygon(0% 0%, 50% 0%, 100% 0%, 100% 50%, 100% 100%, 50% 100%, 0% 100%, 0% 50%);
+    background: #b500ff;
+}
+
+.stage-pentagon {
+    clip-path: polygon(50% 0%, 50% 0%, 100% 38%, 100% 38%, 82% 100%, 18% 100%, 0% 38%, 0% 38%);
+    background: #ff7a00;
+}
+
+.stage-hexagon {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 25%, 100% 75%, 50% 100%, 50% 100%, 0% 75%, 0% 25%);
+    background: #00ff57;
+}
+
+.stage-circle {
+    clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+    background: #ff0055;
+}
+
+/* Foreground Content */
+.content {
+    position: relative;
+    z-index: 1;
+}
+
+.scroll-zone {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10vw;
+}
+
+/* Text Containers */
+.text-block {
+    background: rgba(8, 8, 12, 0.7);
+    padding: 40px;
+    border-radius: 12px;
+    max-width: 600px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.text-block:hover {
+    transform: scale(1.02);
+}
+
+.text-block h1 {
+    margin-top: 0;
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.text-block h2 {
+    margin-top: 0;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+.text-block p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: #d1d1d1;
+}
+
+/* Button Layout */
+.button-container {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+/* Standard Button */
+.cta-button {
+    display: inline-block;
+    padding: 15px 30px;
+    background-color: #00e5ff;
+    color: #050505;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    text-align: center;
+    flex-grow: 1;
+}
+
+.cta-button:active {
+    transform: scale(0.98);
+}
+
+/* WhatsApp Override */
+.whatsapp-button {
+    background-color: #25D366;
+    color: #ffffff;
+}
+
+.whatsapp-button:hover {
+    background-color: #128C7E;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 600px) {
+    .text-block h1 {
+        font-size: 2.2rem;
+    }
+    .text-block h2 {
+        font-size: 1.8rem;
+    }
+    .text-block {
+        padding: 25px;
+    }
+}
