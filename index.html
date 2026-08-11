@@ -28,6 +28,17 @@
     </noscript>
 </head>
 <body>
+    <!-- SVG Gooey Filter for Lava Lamp Effect -->
+    <svg style="display: none;" aria-hidden="true">
+        <defs>
+            <filter id="goo">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 25 -10" result="goo" />
+                <feBlend in="SourceGraphic" in2="goo" />
+            </filter>
+        </defs>
+    </svg>
+
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
     <div class="noise-overlay" aria-hidden="true"></div>
@@ -97,7 +108,7 @@
             <article class="text-block wide-block fade-in-section">
                 <span class="subheading">Component Showcase</span>
                 <h2>Interactive Architecture</h2>
-                <p>Swipe horizontally to explore custom DOM manipulation, CSS physics, and dynamic data workflows engineered for modern interfaces.</p>
+                <p>Swipe horizontally to explore custom DOM manipulation, fluid CSS physics, and advanced 3D transforms engineered for modern interfaces.</p>
                 
                 <div class="portfolio-carousel">
                     
@@ -150,117 +161,38 @@
                         </div>
                     </div>
 
-                    <!-- 2. Hardware Diagnostic & Intake Tracker -->
+                    <!-- 2. Interactive Gooey Lava Lamp -->
                     <div class="demo-window">
                         <div class="demo-header">
                             <div class="demo-dots"><span></span><span></span><span></span></div>
-                            <div class="demo-url">diagnostic-tracker.atrunix.internal</div>
+                            <div class="demo-url">fluid-dynamics.atrunix.internal</div>
                         </div>
-                        <div class="demo-viewport component-viewport">
-                            <div class="diag-ui">
-                                <h3 class="tech-font">Service Status Portal</h3>
-                                <div class="diag-input-group">
-                                    <input type="text" id="track-input" class="tech-font" placeholder="Enter Token (e.g. ATRX-882)">
-                                    <button id="track-btn" class="tech-font">QUERY</button>
-                                </div>
-                                <div class="diag-timeline-container hidden" id="diag-timeline">
-                                    <ul class="diag-timeline tech-font">
-                                        <li class="done"><strong>Intake Logged:</strong> Device received at facility.</li>
-                                        <li class="done"><strong>PCB Analysis:</strong> Hardware diagnostic completed.</li>
-                                        <li class="active"><strong>Defect Resolution:</strong> Component replacement in progress.</li>
-                                        <li><strong>Deployment:</strong> Pending final QA testing.</li>
-                                    </ul>
-                                </div>
-                            </div>
+                        <div class="demo-viewport lava-viewport" id="lava-viewport">
+                            <div class="lava-text tech-font">Move cursor to interact with fluid dynamics</div>
+                            <div class="lava-blob blob-1"></div>
+                            <div class="lava-blob blob-2"></div>
+                            <div class="lava-blob blob-3"></div>
+                            <div class="lava-blob blob-4"></div>
+                            <div class="lava-cursor" id="lava-cursor"></div>
                         </div>
                     </div>
 
-                    <!-- 3. Algorithmic Valuation Matrix -->
+                    <!-- 3. 3D Holographic Parallax Card -->
                     <div class="demo-window">
                         <div class="demo-header">
                             <div class="demo-dots"><span></span><span></span><span></span></div>
-                            <div class="demo-url">valuation-matrix.atrunix.internal</div>
+                            <div class="demo-url">holo-matrix.atrunix.internal</div>
                         </div>
-                        <div class="demo-viewport component-viewport">
-                            <div class="val-ui">
-                                <h3 class="tech-font">Hardware Appraisal Engine</h3>
-                                <div class="val-output-container">
-                                    <span class="val-currency">₹</span>
-                                    <span class="val-total tech-font" id="val-total">2,850</span>
-                                </div>
-                                <div class="val-sliders">
-                                    <div class="slider-group">
-                                        <div class="slider-labels"><span class="tech-font">Memory Capacity</span><span class="tech-font" id="ram-label">16 GB</span></div>
-                                        <input type="range" id="val-ram" min="4" max="64" value="16" step="4">
+                        <div class="demo-viewport holo-viewport" id="holo-viewport">
+                            <div class="holo-card" id="holo-card">
+                                <div class="holo-glare" id="holo-glare"></div>
+                                <div class="holo-content">
+                                    <div class="holo-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                                     </div>
-                                    <div class="slider-group">
-                                        <div class="slider-labels"><span class="tech-font">Processing Cores</span><span class="tech-font" id="cpu-label">8 Cores</span></div>
-                                        <input type="range" id="val-cpu" min="4" max="24" value="8" step="2">
-                                    </div>
-                                    <div class="slider-group">
-                                        <div class="slider-labels"><span class="tech-font">Condition Tier</span><span class="tech-font" id="cond-label">Grade B (Used)</span></div>
-                                        <input type="range" id="val-cond" min="1" max="3" value="2" step="1">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 4. Asynchronous Scheduling Engine -->
-                    <div class="demo-window">
-                        <div class="demo-header">
-                            <div class="demo-dots"><span></span><span></span><span></span></div>
-                            <div class="demo-url">booking-engine.atrunix.internal</div>
-                        </div>
-                        <div class="demo-viewport component-viewport">
-                            <div class="sched-ui">
-                                <h3 class="tech-font">Select Appointment</h3>
-                                <div class="sched-days tech-font">
-                                    <button class="day-btn">MON</button>
-                                    <button class="day-btn active">TUE</button>
-                                    <button class="day-btn">WED</button>
-                                    <button class="day-btn">THU</button>
-                                    <button class="day-btn">FRI</button>
-                                </div>
-                                <div class="sched-slots tech-font">
-                                    <button class="time-slot">09:00 AM</button>
-                                    <button class="time-slot">10:30 AM</button>
-                                    <button class="time-slot booked" disabled>11:00 AM</button>
-                                    <button class="time-slot">01:15 PM</button>
-                                    <button class="time-slot">03:00 PM</button>
-                                    <button class="time-slot">04:45 PM</button>
-                                </div>
-                                <div class="sched-toast hidden tech-font" id="sched-toast">Slot reserved. Syncing to database...</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 5. Network Topology Visualizer -->
-                    <div class="demo-window">
-                        <div class="demo-header">
-                            <div class="demo-dots"><span></span><span></span><span></span></div>
-                            <div class="demo-url">topology-map.atrunix.internal</div>
-                        </div>
-                        <div class="demo-viewport component-viewport">
-                            <div class="topo-ui">
-                                <svg class="topo-svg" preserveAspectRatio="xMidYMid meet" viewBox="0 0 400 300">
-                                    <path class="topo-line" d="M 100 150 L 200 80" />
-                                    <path class="topo-line" d="M 100 150 L 200 220" />
-                                    <path class="topo-line" d="M 200 80 L 300 150" />
-                                    <path class="topo-line" d="M 200 220 L 300 150" />
-                                    
-                                    <circle class="topo-pulse" cx="100" cy="150" r="15" />
-                                    <circle class="topo-pulse" cx="200" cy="80" r="15" />
-                                    <circle class="topo-pulse" cx="200" cy="220" r="15" />
-                                    <circle class="topo-pulse" cx="300" cy="150" r="15" />
-                                </svg>
-                                <div class="topo-node tech-font" style="top: 150px; left: 100px;" data-node="ENTRY_NODE">ENTRY</div>
-                                <div class="topo-node tech-font" style="top: 80px; left: 200px;" data-node="AUTH_GATEWAY">AUTH</div>
-                                <div class="topo-node tech-font" style="top: 220px; left: 200px;" data-node="DATA_SHARD">DATA</div>
-                                <div class="topo-node tech-font" style="top: 150px; left: 300px;" data-node="CORE_PROCESSOR">CORE</div>
-                                
-                                <div class="topo-readout tech-font" id="topo-readout">
-                                    STATUS: NOMINAL<br>Hover node to inspect telemetry.
+                                    <h3 class="tech-font">Atrunix Security</h3>
+                                    <p>Hover to engage 3D parallax transformation and dynamic light reflection matrix.</p>
+                                    <div class="holo-chip tech-font">AUTH: VALID</div>
                                 </div>
                             </div>
                         </div>
