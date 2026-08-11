@@ -28,17 +28,31 @@
     </noscript>
 </head>
 <body>
-    <!-- Hardware-Accelerated SVG 3D Fluid Filter -->
-    <svg style="position: absolute; width: 0; height: 0; pointer-events: none;" aria-hidden="true">
+    <!-- Hardware-Accelerated SVG Cellular Membrane Filter -->
+    <svg style="position: absolute; width: 0; height: 0;" aria-hidden="true">
         <defs>
-            <filter id="fluid-spheres" x="-20%" y="-20%" width="140%" height="140%">
+            <filter id="sick-goo">
                 <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur" />
+                
+                <!-- The Outer Membrane Outline (White) -->
+                <feColorMatrix in="blur" mode="matrix" values="
+                    0 0 0 0 1  
+                    0 0 0 0 1  
+                    0 0 0 0 1  
+                    0 0 0 22 -9" result="membrane" />
+                
+                <!-- The Inner Fluid Core (Preserves Dynamic Color) -->
                 <feColorMatrix in="blur" mode="matrix" values="
                     1 0 0 0 0  
                     0 1 0 0 0  
                     0 0 1 0 0  
-                    0 0 0 25 -10" result="goo" />
-                <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+                    0 0 0 45 -22" result="core" />
+                
+                <!-- Composite layer stacking -->
+                <feMerge>
+                    <feMergeNode in="membrane" />
+                    <feMergeNode in="core" />
+                </feMerge>
             </filter>
         </defs>
     </svg>
@@ -165,7 +179,7 @@
                         </div>
                     </div>
 
-                    <!-- 2. Interactive Gooey Lava Lamp (3D Spheres) -->
+                    <!-- 2. Interactive Gooey Lava Lamp -->
                     <div class="demo-window">
                         <div class="demo-header">
                             <div class="demo-dots"><span></span><span></span><span></span></div>
@@ -173,7 +187,6 @@
                         </div>
                         <div class="demo-viewport lava-viewport" id="lava-viewport">
                             <div class="lava-text tech-font">ENGAGE FLUID DISRUPTION</div>
-                            <!-- GPU Promoted Container for Filter Matrix -->
                             <div class="lava-fluid-layer">
                                 <div class="lava-blob blob-1"></div>
                                 <div class="lava-blob blob-2"></div>
