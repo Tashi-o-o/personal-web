@@ -53,7 +53,8 @@ const DOM = {
     closeModalBtn: document.querySelector('.close-modal'),
     form: document.getElementById('intake-form'),
     feedback: document.getElementById('form-feedback'),
-    tokenDisplay: document.getElementById('tracking-token')
+    tokenDisplay: document.getElementById('tracking-token'),
+    dyeSpread: document.getElementById('dye-spread')
 };
 
 const debounce = (func, wait) => {
@@ -204,11 +205,9 @@ window.addEventListener('resize', debounce(() => {
 window.addEventListener('mousemove', (e) => {
     if (PREFERS_REDUCED_MOTION.matches || state.modalOpen) return;
     
-    // Normalized coordinates for shape parallax
     state.targetX = (e.clientX / state.winWidth) * 2 - 1;
     state.targetY = (e.clientY / state.winHeight) * 2 - 1;
     
-    // Direct pixel coordinates for cursor dye spread
     state.targetCursorX = e.clientX;
     state.targetCursorY = e.clientY;
 }, { passive: true });
@@ -267,11 +266,9 @@ const renderLoop = () => {
     const ambientY = Math.sin(time) * 10;
     const fluidIntensity = Math.sin(localProgress * Math.PI);
 
-    // Update normalized parallax coordinates
     state.mouseX += (state.targetX - state.mouseX) * 0.15;
     state.mouseY += (state.targetY - state.mouseY) * 0.15;
     
-    // Update direct pixel coordinates for the CSS variable
     state.cursorX += (state.targetCursorX - state.cursorX) * 0.15;
     state.cursorY += (state.targetCursorY - state.cursorY) * 0.15;
     document.documentElement.style.setProperty('--mouse-x', `${state.cursorX}px`);
