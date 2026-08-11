@@ -2,64 +2,67 @@
     --bg-dark: #020204;
     --text-main: #ffffff;
     --text-muted: #b8b8c2;
-    --dyn-color: #00e5ff; /* Dynamically controlled by JS for 60fps performance */
+    --dyn-color: #00e5ff;
     --glass-bg-start: rgba(18, 18, 24, 0.85);
     --glass-bg-end: rgba(6, 6, 10, 0.95);
+    --focus-ring: rgba(255, 255, 255, 0.8);
 }
 
 html {
-    scroll-snap-type: y mandatory;
+    scroll-snap-type: y proximity; /* Relaxed anchoring */
     font-size: 16px;
+    scroll-behavior: auto; /* Handled by JS for wheel, native for anchors */
 }
 
 body, html {
     margin: 0;
     padding: 0;
-    font-family: 'Outfit', system-ui, sans-serif;
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
     background-color: var(--bg-dark);
     color: var(--text-main);
     overflow-x: hidden;
+    line-height: 1.6;
 }
 
-::-webkit-scrollbar { width: 8px; }
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 10px; }
 ::-webkit-scrollbar-track { background: var(--bg-dark); }
-::-webkit-scrollbar-thumb { background: #1a1a24; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #2a2a3a; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 5px; border: 2px solid var(--bg-dark); }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
 
-.side-nav {
+/* A11y Focus States */
+*:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+/* Skip Link */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--dyn-color);
+    color: var(--bg-dark);
+    padding: 8px;
+    z-index: 10000;
+    transition: top 0.2s ease;
+}
+.skip-link:focus { top: 0; }
+
+/* Visual Dithering */
+.noise-overlay {
     position: fixed;
-    right: 3vw;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    z-index: 100;
-}
-
-.nav-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.2);
-    border: 2px solid transparent;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.nav-dot.active {
-    background-color: transparent;
-    border-color: var(--dyn-color);
-    transform: scale(1.4);
-    box-shadow: 0 0 10px var(--dyn-color);
+    inset: 0;
+    background-image: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+    opacity: 0.04;
+    z-index: 999;
+    pointer-events: none;
 }
 
 .tech-grid {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100dvh;
+    inset: 0;
     background-image: 
         linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
@@ -70,23 +73,16 @@ body, html {
     mask-image: radial-gradient(circle at center, black 30%, transparent 85%);
 }
 
-/* Redesigned Clean HUD Progress Frame */
 .hud-progress-frame {
     position: fixed;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100vw;
     height: 100dvh;
     z-index: 1;
     pointer-events: none;
 }
 
-.hud-track {
-    fill: none;
-    stroke: rgba(255, 255, 255, 0.05);
-    stroke-width: 2px;
-}
-
+.hud-track { fill: none; stroke: rgba(255, 255, 255, 0.04); stroke-width: 2px; }
 .hud-bar {
     fill: none;
     stroke: var(--dyn-color);
@@ -94,16 +90,13 @@ body, html {
     stroke-linecap: round;
     stroke-dasharray: 100;
     stroke-dashoffset: 100;
-    filter: drop-shadow(0 0 12px var(--dyn-color));
+    filter: drop-shadow(0 0 10px var(--dyn-color));
     will-change: stroke-dashoffset;
 }
 
 .atrunix-morph-container {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100dvh;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -112,7 +105,6 @@ body, html {
     pointer-events: none;
 }
 
-/* Shrunk significantly to fit safely in the left/right gutters */
 .floating-wrapper {
     position: relative;
     width: clamp(50px, 6vw, 80px);
@@ -122,17 +114,13 @@ body, html {
 
 .liquid-container {
     position: absolute;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     will-change: transform;
 }
 
 .shape, .shape-glow {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     background-color: var(--dyn-color);
     will-change: clip-path;
 }
@@ -141,46 +129,62 @@ body, html {
     clip-path: polygon(50% 0%, 50% 0%, 100% 100%, 100% 100%, 50% 100%, 0% 100%, 0% 100%, 50% 0%);
     z-index: 2;
 }
-
-.shape-glow {
-    filter: blur(15px);
-    opacity: 0.7;
-    z-index: 1;
-    transform: scale(1.2);
-}
+.shape-glow { filter: blur(15px); opacity: 0.7; z-index: 1; transform: scale(1.2); }
 
 .droplet {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 12px;
-    height: 12px;
-    margin-top: -6px;
-    margin-left: -6px;
+    top: 50%; left: 50%;
+    width: 12px; height: 12px;
+    margin-block-start: -6px; margin-inline-start: -6px;
     border-radius: 50%;
     background-color: var(--dyn-color);
     will-change: transform;
     z-index: 2;
 }
 
-.drop-2 { width: 8px; height: 8px; margin-top: -4px; margin-left: -4px; }
-.drop-3 { width: 16px; height: 16px; margin-top: -8px; margin-left: -8px; }
+.drop-2 { width: 8px; height: 8px; margin-block-start: -4px; margin-inline-start: -4px; }
+.drop-3 { width: 16px; height: 16px; margin-block-start: -8px; margin-inline-start: -8px; }
 
-.content { 
-    position: relative; 
-    z-index: 10; 
-    width: 100%;
+.side-nav {
+    position: fixed;
+    right: clamp(1rem, 3vw, 2rem);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    z-index: 100;
 }
 
+.nav-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 2px solid transparent;
+    transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+    cursor: pointer;
+}
+
+.nav-dot.active {
+    background-color: transparent;
+    border-color: var(--dyn-color);
+    transform: scale(1.3);
+    box-shadow: 0 0 10px var(--dyn-color);
+}
+
+.content { position: relative; z-index: 10; width: 100%; }
+
 .scroll-zone {
-    height: 100dvh;
+    min-height: 100dvh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 5vw;
+    padding-inline: clamp(1rem, 5vw, 4rem);
     box-sizing: border-box;
     scroll-snap-align: start; 
-    scroll-snap-stop: always;
+    scroll-padding-top: 2rem;
+    content-visibility: auto;
+    contain-intrinsic-size: 100dvh;
 }
 
 .text-block {
@@ -188,35 +192,35 @@ body, html {
     padding: clamp(30px, 5vw, 60px);
     border-radius: 20px;
     width: 100%;
-    max-width: min(700px, 85vw);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
+    max-width: min(720px, 85vw);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: 1px solid rgba(255, 255, 255, 0.25);
-    border-left: 1px solid rgba(255, 255, 255, 0.15);
+    border-block-start: 1px solid rgba(255, 255, 255, 0.25);
+    border-inline-start: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 2px 15px rgba(255, 255, 255, 0.05);
-    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     box-sizing: border-box;
 }
 
-.text-block:hover {
-    transform: translateY(-5px);
-}
-
-.fade-in-section {
+/* Staggered Cascade Entrance */
+.fade-in-section > * {
     opacity: 0;
-    transform: translateY(30px) scale(0.98);
+    transform: translateY(20px);
     transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
+.fade-in-section > *:nth-child(1) { transition-delay: 0.1s; }
+.fade-in-section > *:nth-child(2) { transition-delay: 0.2s; }
+.fade-in-section > *:nth-child(3) { transition-delay: 0.3s; }
+.fade-in-section > *:nth-child(4) { transition-delay: 0.4s; }
 
-.fade-in-section.is-visible { opacity: 1; transform: scale(1); }
+.fade-in-section.is-visible > * { opacity: 1; transform: translateY(0); }
 
 .subheading {
     display: inline-block;
     font-size: clamp(0.75rem, 1.5vw, 0.85rem);
     text-transform: uppercase;
-    letter-spacing: 4px;
-    margin-bottom: 15px;
+    letter-spacing: 0.2em;
+    margin-block-end: 1rem;
     font-weight: 700;
     padding: 6px 12px;
     border-radius: 4px;
@@ -227,11 +231,11 @@ body, html {
 }
 
 .text-block h1, .text-block h2 {
-    margin-top: 0;
-    margin-bottom: 20px;
+    margin-block-start: 0;
+    margin-block-end: 1.25rem;
     font-weight: 700;
     line-height: 1.15;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.02em;
     background: linear-gradient(to right, #ffffff, #cfcff0);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -243,13 +247,12 @@ body, html {
 
 .text-block p {
     font-size: clamp(1rem, 1.8vw, 1.15rem);
-    line-height: 1.7;
     color: var(--text-muted);
-    margin-bottom: 0;
+    margin-block-end: 0;
 }
 
-.button-container { display: flex; gap: 15px; margin-top: 35px; flex-wrap: wrap; }
-.full-width { width: 100%; margin-top: 20px; }
+.button-container { display: flex; gap: 15px; margin-block-start: 2rem; flex-wrap: wrap; }
+.full-width { width: 100%; margin-block-start: 1.5rem; }
 
 .cta-button {
     position: relative;
@@ -262,9 +265,11 @@ body, html {
     border-radius: 10px;
     font-size: 1.1rem;
     flex-grow: 1;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, filter 0.3s ease, box-shadow 0.3s ease;
     border: none;
     cursor: pointer;
+    font-family: inherit;
+    min-height: 44px; /* A11y Touch Target */
 }
 
 .btn-text { position: relative; z-index: 2; }
@@ -275,26 +280,15 @@ body, html {
     box-shadow: 0 0 20px var(--dyn-color), inset 0 0 10px rgba(255,255,255,0.3);
 }
 .primary-btn:hover:not(:disabled) { transform: translateY(-3px); filter: brightness(1.2); }
-.primary-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+.primary-btn:disabled { opacity: 0.7; cursor: not-allowed; filter: grayscale(50%); }
 
-.outline-btn {
-    background-color: transparent;
-    color: var(--text-main);
-    border: 1px solid var(--dyn-color);
-}
-.outline-btn:hover {
-    background-color: rgba(255,255,255,0.05);
-    box-shadow: 0 0 15px var(--dyn-color);
-    transform: translateY(-3px);
-}
+.outline-btn { background-color: transparent; color: var(--text-main); border: 1px solid var(--dyn-color); }
+.outline-btn:hover { background-color: rgba(255,255,255,0.05); box-shadow: 0 0 15px var(--dyn-color); transform: translateY(-3px); }
 
 /* Modal Architecture */
 .modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100dvh;
+    inset: 0;
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -313,8 +307,7 @@ body, html {
 
 .close-modal {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 15px; right: 15px;
     background: transparent;
     border: none;
     color: var(--text-main);
@@ -322,14 +315,20 @@ body, html {
     line-height: 1;
     cursor: pointer;
     transition: color 0.2s ease;
+    min-width: 44px; min-height: 44px; /* A11y Touch Target */
 }
 .close-modal:hover { color: var(--dyn-color); }
 
-.input-group { display: flex; flex-direction: column; margin-top: 15px; text-align: left; }
-.input-group label { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; font-weight: 500; }
+.input-group { display: flex; flex-direction: column; margin-block-start: 1rem; text-align: left; }
+.input-group label { font-size: 0.95rem; color: var(--text-muted); margin-block-end: 0.25rem; font-weight: 500; }
+.input-hint { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-block-end: 0.5rem; }
+.error-message { font-size: 0.85rem; color: #ff4d4d; margin-block-start: 0.25rem; min-height: 1.2em; display: none; }
+.input-group.invalid .error-message { display: block; }
+.input-group.invalid input, .input-group.invalid textarea { border-color: #ff4d4d; }
+
 .input-group input, .input-group textarea {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 8px;
     padding: 12px;
     color: var(--text-main);
@@ -337,25 +336,49 @@ body, html {
     font-size: 1rem;
     transition: border-color 0.3s ease;
 }
-.input-group input:focus, .input-group textarea:focus {
-    outline: none;
-    border-color: var(--dyn-color);
-}
+.input-group input:focus, .input-group textarea:focus { outline: none; border-color: var(--dyn-color); }
 
 .hidden { display: none !important; }
-.feedback-container { text-align: center; padding: 20px 0; }
+.feedback-container { text-align: center; padding-block: 1.5rem; }
+
 .token-display {
-    font-size: 2.5rem;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-family: monospace;
     font-weight: 700;
-    letter-spacing: 5px;
+    letter-spacing: 0.1em;
     color: var(--dyn-color);
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--dyn-color);
-    padding: 15px;
+    padding: 1rem;
     border-radius: 12px;
-    margin: 20px 0;
+    margin-block: 1.25rem;
     text-shadow: 0 0 15px var(--dyn-color);
-    user-select: all;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.2s;
+}
+.token-display:hover { background: rgba(255,255,255,0.1); }
+.token-display.copied { background: var(--dyn-color); color: var(--bg-dark); text-shadow: none; }
+.copy-hint { display: block; font-size: 0.85rem; opacity: 0.7; margin-top: 0.5rem; }
+
+/* Skeleton Loading State for Form Submit */
+.skeleton-loader {
+    width: 100%; height: 44px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s infinite;
+    border-radius: 10px;
+    border: none;
+}
+@keyframes skeletonShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
 
 @media (max-width: 768px) {
