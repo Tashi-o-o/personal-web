@@ -13,16 +13,6 @@
     <meta name="description" content="High-performance web development, custom digital infrastructure, and scalable frontend architectures for modern businesses.">
     <meta name="theme-color" content="#030305">
     
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "ProfessionalService",
-      "name": "Atrunix Web Development",
-      "description": "Engineered web architecture, custom websites, and digital infrastructure.",
-      "url": "https://www.atrunix.com/"
-    }
-    </script>
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -31,7 +21,7 @@
     
     <noscript>
         <style>
-            .atrunix-morph-container, .hud-progress-frame, .cyber-floor, .cyber-ceiling, .particles, .noise-overlay, .ambient-aurora, .interactive-dye-spread { display: none; }
+            .atrunix-morph-container, .hud-progress-frame, .interactive-dye-spread, .deep-space-bg { display: none; }
             .content { background-color: #030305; }
             .fade-in-section { opacity: 1; transform: none; }
         </style>
@@ -40,16 +30,13 @@
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
-    <!-- Deep Background Layers -->
+    <!-- Refined, Premium Background Architecture -->
     <div class="noise-overlay" aria-hidden="true"></div>
-    <div class="ambient-aurora aurora-1" aria-hidden="true"></div>
-    <div class="ambient-aurora aurora-2" aria-hidden="true"></div>
+    <div class="deep-space-bg" aria-hidden="true"></div>
+    <div class="starfield" aria-hidden="true" id="starfield"></div>
+    
+    <!-- Active Cursor Dye Spread -->
     <div class="interactive-dye-spread" id="dye-spread" aria-hidden="true"></div>
-
-    <!-- Architectural Background: 3D Perspective Grid & Floating Data Nodes -->
-    <div class="cyber-ceiling" aria-hidden="true"></div>
-    <div class="cyber-floor" aria-hidden="true"></div>
-    <div class="particles" aria-hidden="true"></div>
 
     <svg class="hud-progress-frame" preserveAspectRatio="none" aria-hidden="true" focusable="false">
         <rect class="hud-track" x="1.5%" y="1.5%" width="97%" height="97%" rx="15" />
@@ -85,8 +72,8 @@
     <nav class="side-nav" aria-label="Page Sections">
         <a href="#home" class="nav-dot active" aria-label="Navigate to Home section" data-target="home"></a>
         <a href="#foundation" class="nav-dot" aria-label="Navigate to Architecture section" data-target="foundation"></a>
+        <a href="#portfolio" class="nav-dot" aria-label="Navigate to Portfolio section" data-target="portfolio"></a>
         <a href="#capabilities" class="nav-dot" aria-label="Navigate to Services section" data-target="capabilities"></a>
-        <a href="#growth" class="nav-dot" aria-label="Navigate to Scaling section" data-target="growth"></a>
         <a href="#contact" class="nav-dot" aria-label="Navigate to Contact section" data-target="contact"></a>
     </nav>
 
@@ -107,20 +94,82 @@
                 <p>Standard drag-and-drop builders are slow, unoriginal, and fail to capture your unique brand identity. Modern businesses require technical precision, optimized load times, and custom UI/UX design to stand out.</p>
             </article>
         </section>
+
+        <!-- New Interactive Portfolio Section -->
+        <section class="scroll-zone" id="portfolio">
+            <article class="text-block wide-block fade-in-section">
+                <span class="subheading">Component Showcase</span>
+                <h2>Interactive Data Visualization</h2>
+                <p>Example of custom DOM manipulation, CSS physics, and dynamic data fetching. Select a celestial body below to query the dataset.</p>
+                
+                <!-- Mock Browser Window for Demo -->
+                <div class="demo-window">
+                    <div class="demo-header">
+                        <div class="demo-dots"><span></span><span></span><span></span></div>
+                        <div class="demo-url">solar-system-api.atrunix.internal</div>
+                    </div>
+                    
+                    <div class="demo-viewport" id="solar-system-viewport">
+                        <!-- Base Solar System View -->
+                        <div class="solar-system-map" id="solar-map">
+                            <div class="celestial-body sun"></div>
+                            
+                            <!-- Earth Orbit -->
+                            <div class="orbit orbit-earth">
+                                <div class="celestial-body earth" data-planet="earth" title="Earth"></div>
+                            </div>
+                            
+                            <!-- Mars Orbit -->
+                            <div class="orbit orbit-mars">
+                                <div class="celestial-body mars" data-planet="mars" title="Mars"></div>
+                            </div>
+                            
+                            <!-- Jupiter Orbit -->
+                            <div class="orbit orbit-jupiter">
+                                <div class="celestial-body jupiter" data-planet="jupiter" title="Jupiter"></div>
+                            </div>
+                            
+                            <!-- Saturn Orbit -->
+                            <div class="orbit orbit-saturn">
+                                <div class="celestial-body saturn" data-planet="saturn" title="Saturn">
+                                    <div class="saturn-rings"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Planet Detail Overlay -->
+                        <div class="planet-detail-overlay hidden" id="planet-modal">
+                            <button class="back-btn" id="close-planet-btn">← Return to System</button>
+                            <div class="planet-detail-content">
+                                <div class="planet-display-stage">
+                                    <div class="planet-large" id="detail-planet-visual"></div>
+                                </div>
+                                <div class="planet-data">
+                                    <h3 id="detail-name">Planet Name</h3>
+                                    <div class="data-grid">
+                                        <div class="data-point">
+                                            <span class="data-label">Type</span>
+                                            <span class="data-value" id="detail-type">Terrestrial</span>
+                                        </div>
+                                        <div class="data-point">
+                                            <span class="data-label">Radius</span>
+                                            <span class="data-value" id="detail-radius">6,371 km</span>
+                                        </div>
+                                    </div>
+                                    <p class="planet-facts" id="detail-facts">Loading telemetry data...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
         
         <section class="scroll-zone" id="capabilities">
             <article class="text-block fade-in-section">
                 <span class="subheading">Our Capabilities</span>
                 <h2>Development Services</h2>
                 <p>From highly interactive frontend architectures and portfolio sites to complex e-commerce integrations and web applications, we develop tailored solutions that align perfectly with your business goals.</p>
-            </article>
-        </section>
-        
-        <section class="scroll-zone" id="growth">
-            <article class="text-block fade-in-section">
-                <span class="subheading">Optimization</span>
-                <h2>Built to Scale</h2>
-                <p>Every website we develop is engineered for maximum performance, mobile responsiveness, and technical SEO, ensuring your digital presence grows seamlessly alongside your customer base.</p>
             </article>
         </section>
         
