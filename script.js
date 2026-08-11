@@ -1,51 +1,14 @@
-window.addEventListener('error', function(event) {
-    console.error("Atrunix Telemetry - Script Error:", event.message, "at", event.filename, ":", event.lineno);
+'use strict';
+
+// --- Telemetry & Error Boundary ---
+window.addEventListener('error', (event) => {
+    console.error("Atrunix Error Handler:", event.message, "at", event.filename, ":", event.lineno);
 });
 
-// Modal UI Logic
-const modal = document.getElementById('intake-modal');
-const openModalBtn = document.getElementById('open-intake');
-const closeModalBtn = document.querySelector('.close-modal');
-const intakeForm = document.getElementById('intake-form');
-const formFeedback = document.getElementById('form-feedback');
-const tokenDisplay = document.getElementById('tracking-token');
+// --- Constants & Config ---
+const PREFERS_REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-if(openModalBtn) {
-    openModalBtn.addEventListener('click', () => modal.classList.add('active'));
-}
-
-if(closeModalBtn) {
-    closeModalBtn.addEventListener('click', () => {
-        modal.classList.remove('active');
-        setTimeout(() => {
-            intakeForm.style.display = 'block';
-            formFeedback.classList.add('hidden');
-            intakeForm.reset();
-        }, 400);
-    });
-}
-
-if(intakeForm) {
-    intakeForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const submitBtn = intakeForm.querySelector('button[type="submit"]');
-        submitBtn.innerHTML = '<span class="btn-text">Syncing Database...</span>';
-        submitBtn.disabled = true;
-
-        const token = 'ATRX-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-
-        setTimeout(() => {
-            intakeForm.style.display = 'none';
-            tokenDisplay.textContent = token;
-            formFeedback.classList.remove('hidden');
-            submitBtn.innerHTML = '<span class="btn-text">Process & Generate Token</span>';
-            submitBtn.disabled = false;
-        }, 1200);
-    });
-}
-
-// Coordinate arrays for deeply technical abstract polygons
-const shapes = [
+const SHAPES = [
     { p: [[10,0], [90,10], [100,50], [80,100], [20,90], [0,60], [5,30], [5,10]], c: [0, 229, 255] },
     { p: [[20,0], [80,0], [100,50], [100,50], [80,100], [20,100], [40,50], [40,50]], c: [181, 0, 255] },
     { p: [[50,0], [75,25], [100,50], [75,75], [50,100], [25,75], [0,50], [25,25]], c: [255, 122, 0] },
@@ -53,188 +16,343 @@ const shapes = [
     { p: [[40,0], [60,0], [100,40], [100,60], [60,100], [40,100], [0,60], [0,40]], c: [255, 0, 85] }
 ];
 
-// Left Margin constraints: Never crosses X=0
-const xPositions = [-42, -40, -42, -38, -42];
-const yPositions = [-30, 0, 30, 0, -30];
+const X_POS_L = [-42, -40, -42, -38, -42];
+const Y_POS_L = [-30, 0, 30, 0, -30];
+const X_POS_R = [42, 40, 42, 38, 42];
+const Y_POS_R = [30, 0, -30, 0, 30];
 
-// Right Margin constraints: Never crosses X=0
-const xPositions2 = [42, 40, 42, 38, 42];
-const yPositions2 = [30, 0, -30, 0, 30];
-
-let targetScroll = 0;
-let currentScroll = 0;
-let isAnimating = false;
-let winWidth = window.innerWidth;
-let winHeight = window.innerHeight;
-
-const shapeEl = document.getElementById('geometry-morph');
-const shapeEl2 = document.getElementById('geometry-morph-2');
-const hudBar = document.getElementById('progress-bar');
-const parallaxWrapper = document.getElementById('parallax-wrapper');
-const parallaxWrapper2 = document.getElementById('parallax-wrapper-2');
-const liquidContainer = document.querySelector('.liquid-container');
-const liquidContainer2 = document.querySelector('.secondary-container .liquid-container');
-const navDots = document.querySelectorAll('.nav-dot');
-
-// Query both sets of droplets
-const droplets1 = document.querySelectorAll('#parallax-wrapper .droplet');
-const droplets2 = document.querySelectorAll('#parallax-wrapper-2 .droplet');
-
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-// Robust height calculation
-const updateMaxScroll = () => {
-    return Math.max(1, document.documentElement.scrollHeight - winHeight);
+// --- State Management ---
+const state = {
+    targetScroll: 0,
+    currentScroll: 0,
+    isAnimating: false,
+    winWidth: window.innerWidth,
+    winHeight: window.innerHeight,
+    mouseX: 0,
+    mouseY: 0,
+    targetX: 0,
+    targetY: 0,
+    maxScroll: 1,
+    modalOpen: false
 };
 
-window.addEventListener('resize', () => {
-    winWidth = window.innerWidth;
-    winHeight = window.innerHeight;
+// --- DOM Elements ---
+const DOM = {
+    shapeL: document.getElementById('geometry-morph'),
+    shapeR: document.getElementById('geometry-morph-2'),
+    hudBar: document.getElementById('progress-bar'),
+    wrapperL: document.getElementById('parallax-wrapper'),
+    wrapperR: document.getElementById('parallax-wrapper-2'),
+    containerL: document.querySelector('.liquid-container'),
+    containerR: document.querySelector('.secondary-container .liquid-container'),
+    navDots: document.querySelectorAll('.nav-dot'),
+    dropletsL: document.querySelectorAll('#parallax-wrapper .droplet'),
+    dropletsR: document.querySelectorAll('#parallax-wrapper-2 .droplet'),
+    modal: document.getElementById('intake-modal'),
+    openModalBtn: document.getElementById('open-intake'),
+    closeModalBtn: document.querySelector('.close-modal'),
+    form: document.getElementById('intake-form'),
+    feedback: document.getElementById('form-feedback'),
+    tokenDisplay: document.getElementById('tracking-token')
+};
+
+// --- Utility Functions ---
+const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+};
+
+const calculateMaxScroll = () => {
+    state.maxScroll = Math.max(1, document.documentElement.scrollHeight - state.winHeight);
+};
+
+// --- Modal & Form Focus Trap Logic ---
+const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+let firstFocusableElement, lastFocusableElement;
+
+const updateFocusTrap = () => {
+    const focusableContent = DOM.modal.querySelectorAll(focusableElements);
+    firstFocusableElement = focusableContent[0];
+    lastFocusableElement = focusableContent[focusableContent.length - 1];
+};
+
+const toggleModal = (isOpen) => {
+    state.modalOpen = isOpen;
+    DOM.modal.setAttribute('aria-hidden', !isOpen);
+    DOM.openModalBtn.setAttribute('aria-expanded', isOpen);
+    
+    if (isOpen) {
+        DOM.modal.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        updateFocusTrap();
+        setTimeout(() => firstFocusableElement?.focus(), 100);
+    } else {
+        DOM.modal.classList.remove('active');
+        document.body.style.overflow = '';
+        setTimeout(() => {
+            DOM.form.style.display = 'block';
+            DOM.feedback.classList.add('hidden');
+            DOM.form.reset();
+            DOM.form.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+            DOM.openModalBtn.focus();
+        }, 400);
+    }
+};
+
+// Modal Event Listeners
+if (DOM.openModalBtn && DOM.closeModalBtn) {
+    DOM.openModalBtn.addEventListener('click', () => toggleModal(true));
+    DOM.closeModalBtn.addEventListener('click', () => toggleModal(false));
+    
+    DOM.modal.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') toggleModal(false);
+        if (e.key === 'Tab') {
+            if (e.shiftKey) {
+                if (document.activeElement === firstFocusableElement) {
+                    lastFocusableElement.focus();
+                    e.preventDefault();
+                }
+            } else {
+                if (document.activeElement === lastFocusableElement) {
+                    firstFocusableElement.focus();
+                    e.preventDefault();
+                }
+            }
+        }
+    });
+}
+
+// Form Submission & Validation (Mock API Request)
+if (DOM.form) {
+    DOM.form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        let isValid = true;
+        
+        // Basic Client-Side Validation
+        const requiredInputs = DOM.form.querySelectorAll('input[required], textarea[required]');
+        requiredInputs.forEach(input => {
+            if (!input.value.trim()) {
+                input.parentElement.classList.add('invalid');
+                document.getElementById(`error-${input.id.split('-')[0]}`).textContent = 'This field is required.';
+                isValid = false;
+            } else {
+                input.parentElement.classList.remove('invalid');
+            }
+        });
+
+        if (!isValid) return;
+
+        const submitBtn = DOM.form.querySelector('button[type="submit"]');
+        submitBtn.classList.add('skeleton-loader');
+        submitBtn.innerHTML = '';
+        submitBtn.disabled = true;
+
+        try {
+            // Simulate async network request
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Generate secure-looking token
+            const cryptoArr = new Uint32Array(1);
+            window.crypto.getRandomValues(cryptoArr);
+            const token = 'ATRX-' + cryptoArr[0].toString(36).toUpperCase().padStart(6, '0');
+
+            DOM.form.style.display = 'none';
+            DOM.tokenDisplay.textContent = token;
+            DOM.feedback.classList.remove('hidden');
+            updateFocusTrap();
+            DOM.tokenDisplay.focus();
+
+        } catch (error) {
+            console.error('Submission failed:', error);
+            alert('A network error occurred. Please try again.');
+        } finally {
+            submitBtn.classList.remove('skeleton-loader');
+            submitBtn.innerHTML = '<span class="btn-text">Process & Generate Token</span>';
+            submitBtn.disabled = false;
+        }
+    });
+}
+
+// Token Copy to Clipboard
+if (DOM.tokenDisplay) {
+    DOM.tokenDisplay.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(DOM.tokenDisplay.textContent);
+            DOM.tokenDisplay.classList.add('copied');
+            const hint = document.querySelector('.copy-hint');
+            if(hint) hint.textContent = 'Copied to clipboard!';
+            setTimeout(() => {
+                DOM.tokenDisplay.classList.remove('copied');
+                if(hint) hint.textContent = 'Click token to copy.';
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy!', err);
+        }
+    });
+}
+
+// --- Graphical Rendering Engine ---
+
+// Event Delegation for Nav Dots
+document.querySelector('.side-nav')?.addEventListener('click', (e) => {
+    if (e.target.classList.contains('nav-dot')) {
+        e.preventDefault();
+        const targetId = e.target.getAttribute('data-target');
+        document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' });
+    }
 });
 
-let targetX = 0, targetY = 0;
-let mouseX = 0, mouseY = 0;
+// Resizing
+window.addEventListener('resize', debounce(() => {
+    state.winWidth = window.innerWidth;
+    state.winHeight = window.innerHeight;
+    calculateMaxScroll();
+}, 250));
 
+// Mouse Tracking (Throttled via RequestAnimationFrame logic)
 window.addEventListener('mousemove', (e) => {
-    if (prefersReducedMotion.matches) return;
-    targetX = (e.clientX / winWidth) * 2 - 1;
-    targetY = (e.clientY / winHeight) * 2 - 1;
-});
+    if (PREFERS_REDUCED_MOTION.matches || state.modalOpen) return;
+    state.targetX = (e.clientX / state.winWidth) * 2 - 1;
+    state.targetY = (e.clientY / state.winHeight) * 2 - 1;
+}, { passive: true });
 
+// Scroll Tracking
+window.addEventListener('scroll', () => {
+    state.targetScroll = window.scrollY;
+    if (!state.isAnimating) {
+        state.isAnimating = true;
+        window.requestAnimationFrame(renderLoop);
+    }
+}, { passive: true });
+
+// Intersection Observer for Sections
 const setupObserver = () => {
-    const observerOptions = { root: null, rootMargin: '0px', threshold: 0.5 };
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('is-visible');
                 const id = entry.target.parentElement.id;
-                navDots.forEach(dot => {
-                    dot.classList.remove('active');
-                    if (dot.getAttribute('data-target') === id) {
-                        dot.classList.add('active');
-                    }
+                DOM.navDots.forEach(dot => {
+                    dot.classList.toggle('active', dot.getAttribute('data-target') === id);
+                    dot.setAttribute('aria-current', dot.getAttribute('data-target') === id ? 'true' : 'false');
                 });
             }
         });
-    }, observerOptions);
+    }, { root: null, rootMargin: '0px', threshold: 0.5 });
+
     document.querySelectorAll('.fade-in-section').forEach(section => observer.observe(section));
 };
 
-window.addEventListener('scroll', () => {
-    targetScroll = window.scrollY;
-    if (!isAnimating) {
-        isAnimating = true;
-        window.requestAnimationFrame(renderLoop);
-    }
-}, { passive: true });
-
+// Main Rendering Loop
 const renderLoop = () => {
-    currentScroll += (targetScroll - currentScroll) * 0.18;
-    const maxScroll = updateMaxScroll();
-    
-    let scrollProgress = currentScroll / maxScroll;
-    if (scrollProgress > 0.985) scrollProgress = 1;
-    scrollProgress = Math.max(0, Math.min(1, scrollProgress)); 
-    if (isNaN(scrollProgress)) scrollProgress = 0;
+    if (PREFERS_REDUCED_MOTION.matches) {
+        state.isAnimating = false;
+        return; 
+    }
 
-    const numShapes = shapes.length;
+    // Kinematic smoothing
+    state.currentScroll += (state.targetScroll - state.currentScroll) * 0.18;
+    let scrollProgress = Math.max(0, Math.min(1, state.currentScroll / state.maxScroll)) || 0;
+
+    const numShapes = SHAPES.length;
     const scaledProgress = scrollProgress * (numShapes - 1);
     const currentIndex = Math.floor(scaledProgress);
     const nextIndex = Math.min(currentIndex + 1, numShapes - 1);
     const localProgress = scaledProgress - currentIndex; 
 
-    const currentShape = shapes[currentIndex];
-    const nextShape = shapes[nextIndex];
-    const nextShape2 = shapes[(nextIndex + 1) % numShapes];
+    const currentShape = SHAPES[currentIndex];
+    const nextShape = SHAPES[nextIndex];
+    const nextShape2 = SHAPES[(nextIndex + 1) % numShapes];
 
-    const shapeX = xPositions[currentIndex] + (xPositions[nextIndex] - xPositions[currentIndex]) * localProgress;
-    const shapeY = yPositions[currentIndex] + (yPositions[nextIndex] - yPositions[currentIndex]) * localProgress;
+    const shapeX = X_POS_L[currentIndex] + (X_POS_L[nextIndex] - X_POS_L[currentIndex]) * localProgress;
+    const shapeY = Y_POS_L[currentIndex] + (Y_POS_L[nextIndex] - Y_POS_L[currentIndex]) * localProgress;
     
-    const shapeX2 = xPositions2[currentIndex] + (xPositions2[nextIndex] - xPositions2[currentIndex]) * localProgress;
-    const shapeY2 = yPositions2[currentIndex] + (yPositions2[nextIndex] - yPositions2[currentIndex]) * localProgress;
+    const shapeX2 = X_POS_R[currentIndex] + (X_POS_R[nextIndex] - X_POS_R[currentIndex]) * localProgress;
+    const shapeY2 = Y_POS_R[currentIndex] + (Y_POS_R[nextIndex] - Y_POS_R[currentIndex]) * localProgress;
 
-    const fluidIntensity = prefersReducedMotion.matches ? 0 : Math.sin(localProgress * Math.PI);
+    // Ambient floating based on time
+    const time = Date.now() * 0.001;
+    const ambientY = Math.sin(time) * 10;
+    const fluidIntensity = Math.sin(localProgress * Math.PI);
 
-    mouseX += (targetX - mouseX) * 0.15;
-    mouseY += (targetY - mouseY) * 0.15;
+    state.mouseX += (state.targetX - state.mouseX) * 0.15;
+    state.mouseY += (state.targetY - state.mouseY) * 0.15;
     
-    const viewportX = (shapeX * winWidth) / 100;
-    const viewportY = (shapeY * winHeight) / 100;
-    const viewportX2 = (shapeX2 * winWidth) / 100;
-    const viewportY2 = (shapeY2 * winHeight) / 100;
+    const viewportX = (shapeX * state.winWidth) / 100;
+    const viewportY = ((shapeY * state.winHeight) / 100) + ambientY;
+    const viewportX2 = (shapeX2 * state.winWidth) / 100;
+    const viewportY2 = ((shapeY2 * state.winHeight) / 100) - ambientY;
 
-    // Apply native smooth translates
-    parallaxWrapper.style.transform = `translate3d(${viewportX + (mouseX * 15)}px, ${viewportY + (mouseY * 15)}px, 0)`;
-    parallaxWrapper2.style.transform = `translate3d(${viewportX2 + (mouseX * 10)}px, ${viewportY2 + (mouseY * 10)}px, 0)`;
+    // Transforms
+    DOM.wrapperL.style.transform = `translate3d(${viewportX + (state.mouseX * 15)}px, ${viewportY + (state.mouseY * 15)}px, 0)`;
+    DOM.wrapperR.style.transform = `translate3d(${viewportX2 + (state.mouseX * 10)}px, ${viewportY2 + (state.mouseY * 10)}px, 0)`;
 
-    // Liquid Deformation Simulation (Scale and Skew instead of SVG Filters)
     const stretchY = 1 + (fluidIntensity * 0.4);
     const squishX = 1 - (fluidIntensity * 0.2);
-    const skewAmount = (yPositions[nextIndex] - yPositions[currentIndex]) * fluidIntensity * -0.15;
+    const skewAmount = (Y_POS_L[nextIndex] - Y_POS_L[currentIndex]) * fluidIntensity * -0.15;
     
-    liquidContainer.style.transform = `scale(${squishX}, ${stretchY}) skewY(${skewAmount}deg) translateZ(0)`;
-    liquidContainer2.style.transform = `scale(${squishX}, ${stretchY}) skewY(${-skewAmount}deg) translateZ(0)`;
+    DOM.containerL.style.transform = `scale(${squishX}, ${stretchY}) skewY(${skewAmount}deg) translateZ(0)`;
+    DOM.containerR.style.transform = `scale(${squishX}, ${stretchY}) skewY(${-skewAmount}deg) translateZ(0)`;
 
-    // Droplet Splash Simulation
+    // Droplets
     const spread = fluidIntensity * 100;
-    const directionY = yPositions[nextIndex] > yPositions[currentIndex] ? 1 : -1;
+    const dirY = Y_POS_L[nextIndex] > Y_POS_L[currentIndex] ? 1 : -1;
     
-    droplets1[0].style.transform = `translate3d(${-spread * 0.5}px, ${directionY * -spread}px, 0) scale(${0.2 + fluidIntensity * 0.8})`;
-    droplets1[1].style.transform = `translate3d(${spread * 0.8}px, ${directionY * spread * 0.5}px, 0) scale(${0.1 + fluidIntensity * 0.9})`;
-    droplets1[2].style.transform = `translate3d(0px, ${directionY * spread * 1.5}px, 0) scale(${0.3 + fluidIntensity * 0.7})`;
+    DOM.dropletsL[0].style.transform = `translate3d(${-spread * 0.5}px, ${dirY * -spread}px, 0) scale(${0.2 + fluidIntensity * 0.8})`;
+    DOM.dropletsL[1].style.transform = `translate3d(${spread * 0.8}px, ${dirY * spread * 0.5}px, 0) scale(${0.1 + fluidIntensity * 0.9})`;
+    DOM.dropletsL[2].style.transform = `translate3d(0px, ${dirY * spread * 1.5}px, 0) scale(${0.3 + fluidIntensity * 0.7})`;
 
-    droplets2[0].style.transform = `translate3d(${spread * 0.5}px, ${-directionY * -spread}px, 0) scale(${0.2 + fluidIntensity * 0.8})`;
-    droplets2[1].style.transform = `translate3d(${-spread * 0.8}px, ${-directionY * spread * 0.5}px, 0) scale(${0.1 + fluidIntensity * 0.9})`;
-    droplets2[2].style.transform = `translate3d(0px, ${-directionY * spread * 1.5}px, 0) scale(${0.3 + fluidIntensity * 0.7})`;
+    DOM.dropletsR[0].style.transform = `translate3d(${spread * 0.5}px, ${-dirY * -spread}px, 0) scale(${0.2 + fluidIntensity * 0.8})`;
+    DOM.dropletsR[1].style.transform = `translate3d(${-spread * 0.8}px, ${-dirY * spread * 0.5}px, 0) scale(${0.1 + fluidIntensity * 0.9})`;
+    DOM.dropletsR[2].style.transform = `translate3d(0px, ${-dirY * spread * 1.5}px, 0) scale(${0.3 + fluidIntensity * 0.7})`;
 
-    // Update HUD Progress Perimeter Frame
-    let offset = 100 - (scrollProgress * 100);
-    if (scrollProgress > 0.99) offset = 0;
-    hudBar.style.strokeDashoffset = offset;
+    // HUD Update
+    DOM.hudBar.style.strokeDashoffset = (scrollProgress > 0.99) ? 0 : 100 - (scrollProgress * 100);
 
-    // Polygon Morphing Calculation
-    let polygonString = 'polygon(';
-    let polygonString2 = 'polygon(';
+    // Polygons
+    let poly1 = 'polygon(', poly2 = 'polygon(';
     for (let i = 0; i < 8; i++) {
-        const cx = currentShape.p[i][0];
-        const cy = currentShape.p[i][1];
-        const nx = nextShape.p[i][0];
-        const ny = nextShape.p[i][1];
-        const nx2 = nextShape2.p[i][0];
-        const ny2 = nextShape2.p[i][1];
-        
-        const x = cx + (nx - cx) * localProgress;
-        const y = cy + (ny - cy) * localProgress;
-        const x2 = nx + (nx2 - nx) * localProgress;
-        const y2 = ny + (ny2 - ny) * localProgress;
+        const x = currentShape.p[i][0] + (nextShape.p[i][0] - currentShape.p[i][0]) * localProgress;
+        const y = currentShape.p[i][1] + (nextShape.p[i][1] - currentShape.p[i][1]) * localProgress;
+        const x2 = nextShape.p[i][0] + (nextShape2.p[i][0] - nextShape.p[i][0]) * localProgress;
+        const y2 = nextShape.p[i][1] + (nextShape2.p[i][1] - nextShape.p[i][1]) * localProgress;
 
-        polygonString += `${x}% ${y}%${i < 7 ? ', ' : ''}`;
-        polygonString2 += `${x2}% ${y2}%${i < 7 ? ', ' : ''}`;
+        poly1 += `${x}% ${y}%${i < 7 ? ', ' : ''}`;
+        poly2 += `${x2}% ${y2}%${i < 7 ? ', ' : ''}`;
     }
-    polygonString += ')';
-    polygonString2 += ')';
+    DOM.shapeL.style.clipPath = poly1 + ')';
+    DOM.shapeR.style.clipPath = poly2 + ')';
 
-    shapeEl.style.clipPath = polygonString;
-    shapeEl2.style.clipPath = polygonString2;
-
-    // Single Frame Global Color Update (Drives ALL shadows, borders, text, and SVG styles simultaneously)
+    // Color Logic via CSS Var
     const r = Math.round(currentShape.c[0] + (nextShape.c[0] - currentShape.c[0]) * localProgress);
     const g = Math.round(currentShape.c[1] + (nextShape.c[1] - currentShape.c[1]) * localProgress);
     const b = Math.round(currentShape.c[2] + (nextShape.c[2] - currentShape.c[2]) * localProgress);
-    
     document.documentElement.style.setProperty('--dyn-color', `rgb(${r}, ${g}, ${b})`);
 
-    if (Math.abs(targetScroll - currentScroll) > 0.5 || Math.abs(targetX - mouseX) > 0.01 || fluidIntensity > 0.01) {
+    // Loop continuation constraint
+    if (Math.abs(state.targetScroll - state.currentScroll) > 0.5 || Math.abs(state.targetX - state.mouseX) > 0.01 || fluidIntensity > 0.01) {
         window.requestAnimationFrame(renderLoop);
     } else {
-        isAnimating = false;
+        // Keep loop alive purely for ambient continuous motion if active
+        window.requestAnimationFrame(renderLoop); 
     }
 };
 
-window.requestAnimationFrame(() => {
-    targetScroll = window.scrollY;
-    currentScroll = window.scrollY;
+// Initialize
+const init = () => {
+    calculateMaxScroll();
     setupObserver();
-    isAnimating = true;
-    renderLoop();
-});
+    state.targetScroll = window.scrollY;
+    state.currentScroll = window.scrollY;
+    state.isAnimating = true;
+    window.requestAnimationFrame(renderLoop);
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
