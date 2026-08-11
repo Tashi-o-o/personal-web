@@ -120,10 +120,7 @@ const setupSolarSystem = () => {
                 visual.innerHTML = '';
                 if(p.getAttribute('data-planet') === 'saturn') {
                     const ring = document.createElement('div');
-                    ring.className = 'saturn-rings';
-                    ring.style.width = '160px'; ring.style.height = '35px';
-                    ring.style.borderWidth = '10px';
-                    ring.style.left = '-25px'; ring.style.top = '32px';
+                    ring.className = 'saturn-rings-detail';
                     visual.appendChild(ring);
                 }
                 modal.classList.remove('hidden');
@@ -243,15 +240,20 @@ if (DOM.tokenDisplay) {
     });
 }
 
-// --- Smooth Tracking for PC (Mouse) & Mobile (Touch) ---
+// --- Interaction Events ---
+document.querySelector('.side-nav')?.addEventListener('click', (e) => {
+    if (e.target.classList.contains('nav-dot')) {
+        e.preventDefault();
+        document.getElementById(e.target.getAttribute('data-target'))?.scrollIntoView({ behavior: 'smooth' });
+    }
+});
+
 const handlePointerMove = (clientX, clientY) => {
     if (PREFERS_REDUCED_MOTION.matches || state.modalOpen) return;
     
-    // Normalized coordinates for 3D parallax elements
     state.targetX = (clientX / state.winWidth) * 2 - 1;
     state.targetY = (clientY / state.winHeight) * 2 - 1;
     
-    // Direct coordinates for the dye tracking
     state.targetCursorX = clientX;
     state.targetCursorY = clientY;
     
@@ -319,11 +321,9 @@ const renderLoop = () => {
     state.mouseX += (state.targetX - state.mouseX) * 0.15;
     state.mouseY += (state.targetY - state.mouseY) * 0.15;
     
-    // Main Dye Spread Tracker
     state.cursorX += (state.targetCursorX - state.cursorX) * 0.15;
     state.cursorY += (state.targetCursorY - state.cursorY) * 0.15;
     
-    // Dimmed smooth trailing particle logic
     let prevTx = state.cursorX;
     let prevTy = state.cursorY;
     state.trailData.forEach((pt, i) => {
@@ -331,7 +331,7 @@ const renderLoop = () => {
         pt.y += (prevTy - pt.y) * 0.45;
         
         const scale = 1 - (i / TRAIL_PARTICLES) * 0.6;
-        const alpha = 0.15 - (i / TRAIL_PARTICLES) * 0.15; // Lowered opacity for cleaner UI
+        const alpha = 0.15 - (i / TRAIL_PARTICLES) * 0.15;
         
         pt.el.style.transform = `translate3d(${pt.x}px, ${pt.y}px, 0) translate(-50%, -50%) scale(${scale})`;
         pt.el.style.opacity = alpha;
@@ -407,7 +407,6 @@ const renderLoop = () => {
 };
 
 const initApp = () => {
-    // Generate Trail DOM elements dynamically
     if (DOM.trailContainer) {
         for (let i = 0; i < TRAIL_PARTICLES; i++) {
             const p = document.createElement('div');
@@ -418,7 +417,6 @@ const initApp = () => {
     }
     
     setupSolarSystem();
-    // Allow DOM to paint before calculating max height
     setTimeout(() => {
         calculateMaxScroll();
         setupObserver();
