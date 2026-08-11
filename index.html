@@ -28,12 +28,31 @@
     </noscript>
 </head>
 <body>
-    <!-- Hardware-Accelerated SVG Filter for Fluid Dynamics -->
+    <!-- Hardware-Accelerated SVG Cellular Membrane Filter -->
     <svg style="position: absolute; width: 0; height: 0;" aria-hidden="true">
         <defs>
-            <filter id="goo">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
-                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+            <filter id="sick-goo">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur" />
+                
+                <!-- The Outer Membrane Outline (White) -->
+                <feColorMatrix in="blur" mode="matrix" values="
+                    0 0 0 0 1  
+                    0 0 0 0 1  
+                    0 0 0 0 1  
+                    0 0 0 22 -9" result="membrane" />
+                
+                <!-- The Inner Fluid Core (Preserves Dynamic Color) -->
+                <feColorMatrix in="blur" mode="matrix" values="
+                    1 0 0 0 0  
+                    0 1 0 0 0  
+                    0 0 1 0 0  
+                    0 0 0 45 -22" result="core" />
+                
+                <!-- Composite layer stacking -->
+                <feMerge>
+                    <feMergeNode in="membrane" />
+                    <feMergeNode in="core" />
+                </feMerge>
             </filter>
         </defs>
     </svg>
@@ -167,8 +186,8 @@
                             <div class="demo-url">fluid-dynamics.atrunix.internal</div>
                         </div>
                         <div class="demo-viewport lava-viewport" id="lava-viewport">
-                            <div class="lava-text tech-font">Move cursor over window to disrupt fluid</div>
-                            <!-- Transparent wrapper strictly for the SVG filter computation -->
+                            <div class="lava-text tech-font">ENGAGE FLUID DISRUPTION</div>
+                            <!-- Transparent wrapper computing dual-layer SVGs -->
                             <div class="lava-fluid-layer">
                                 <div class="lava-blob blob-1"></div>
                                 <div class="lava-blob blob-2"></div>
