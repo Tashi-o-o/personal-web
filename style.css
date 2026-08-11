@@ -134,33 +134,33 @@ body, html { margin: 0; padding: 0; font-family: 'Outfit', system-ui, sans-serif
 .fact-box { background: rgba(0,229,255,0.05); border-left: 3px solid #00e5ff; padding: 10px 15px;}
 .planet-facts { font-size: 0.85rem; color: #ddd; line-height: 1.6; margin-top: 5px; margin-bottom: 0;}
 
-/* 2. Interactive Neon Gooey Lava Lamp (Deforming 3D Spheres) */
+/* 2. Interactive Gooey Lava Lamp Demo (Fixed 3D Matrix & Outline) */
 .lava-viewport { background: #000000; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
 
-/* The container applies the SVG filter and adds a drop-shadow for the glowing outline */
+/* The container applies the SVG filter to children. Hardware acceleration strictly enforced to prevent browser filter-drop */
 .lava-fluid-layer { 
     position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; 
     filter: url(#sick-goo) drop-shadow(0 0 12px var(--dyn-color)); 
-    transform: translateZ(0); /* Crucial for fixing Chrome dropping the SVG filter */
+    transform: translateZ(0); 
     z-index: 5;
 }
 
-.lava-text { position: absolute; z-index: 10; color: #fff; font-size: 1.25rem; font-weight: 700; opacity: 0.9; pointer-events: none; text-align: center; letter-spacing: 2px; mix-blend-mode: difference;}
+.lava-text { position: absolute; z-index: 10; color: #fff; font-size: 1.25rem; font-weight: 700; opacity: 0.9; pointer-events: none; text-align: center; letter-spacing: 2px; }
 
-/* 3D Sphere Styling with Deformation Keyframes */
+/* The blobs use transparent outer boundaries instead of black, allowing the SVG alpha matrix to perfectly calculate the melt */
 .lava-blob, .lava-cursor { 
     position: absolute; 
-    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; /* Initial blobby state */
-    background: radial-gradient(circle at 35% 35%, #ffffff 0%, var(--dyn-color) 35%, #000000 90%);
-    will-change: transform, border-radius;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #ffffff 0%, var(--dyn-color) 45%, transparent 90%);
+    will-change: transform;
 }
 
-.blob-1 { width: 120px; height: 120px; left: 20%; top: 30%; animation: lava-float1 12s ease-in-out infinite alternate, blob-morph 8s ease-in-out infinite alternate; }
-.blob-2 { width: 80px; height: 80px; right: 30%; bottom: 20%; animation: lava-float2 15s ease-in-out infinite alternate-reverse, blob-morph 11s ease-in-out infinite alternate-reverse; }
-.blob-3 { width: 150px; height: 150px; right: 10%; top: 10%; animation: lava-float3 18s ease-in-out infinite alternate, blob-morph 14s ease-in-out infinite alternate; }
-.blob-4 { width: 90px; height: 90px; left: 40%; bottom: 10%; animation: lava-float4 10s ease-in-out infinite alternate-reverse, blob-morph 9s ease-in-out infinite alternate-reverse; }
+.blob-1 { width: 120px; height: 120px; left: 20%; top: 30%; animation: lava-float1 12s ease-in-out infinite alternate; }
+.blob-2 { width: 80px; height: 80px; right: 30%; bottom: 20%; animation: lava-float2 15s ease-in-out infinite alternate-reverse; }
+.blob-3 { width: 150px; height: 150px; right: 10%; top: 10%; animation: lava-float3 18s ease-in-out infinite alternate; }
+.blob-4 { width: 90px; height: 90px; left: 40%; bottom: 10%; animation: lava-float4 10s ease-in-out infinite alternate-reverse; }
 
-.lava-cursor { width: 100px; height: 100px; top: 0; left: 0; pointer-events: none; animation: blob-morph 7s ease-in-out infinite alternate; }
+.lava-cursor { width: 100px; height: 100px; top: 0; left: 0; pointer-events: none; transform: translate(-50%, -50%); will-change: transform;}
 
 /* Structural floating movement */
 @keyframes lava-float1 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(100px, 80px) scale(1.2); } }
@@ -168,13 +168,6 @@ body, html { margin: 0; padding: 0; font-family: 'Outfit', system-ui, sans-serif
 @keyframes lava-float3 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-120px, 50px) scale(0.9); } }
 @keyframes lava-float4 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(90px, -90px) scale(1.1); } }
 
-/* Cellular Membrane Deformation */
-@keyframes blob-morph {
-    0% { border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; }
-    33% { border-radius: 70% 30% 46% 54% / 30% 29% 71% 70%; }
-    66% { border-radius: 30% 70% 30% 70% / 60% 40% 60% 40%; }
-    100% { border-radius: 50% 50% 30% 70% / 30% 60% 40% 70%; }
-}
 
 /* 3. 3D Holographic Parallax Card Demo */
 .holo-viewport { background: radial-gradient(circle at center, #111 0%, #000 100%); perspective: 1000px; display: flex; align-items: center; justify-content: center;}
@@ -223,8 +216,6 @@ body, html { margin: 0; padding: 0; font-family: 'Outfit', system-ui, sans-serif
 
 .skeleton-loader { width: 100%; height: 44px; background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); background-size: 200% 100%; animation: skeletonShimmer 1.5s infinite; border-radius: 10px; border: none; }
 @keyframes skeletonShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
-@media (prefers-reduced-motion: reduce) { *, ::before, ::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } }
 
 /* Mobile Viewport Fixes */
 @media (max-width: 768px) {
