@@ -31,7 +31,7 @@
     
     <noscript>
         <style>
-            .atrunix-morph-container, .hud-progress-frame, .tech-grid, .noise-overlay, .ambient-aurora, .interactive-dye-spread { display: none; }
+            .atrunix-morph-container, .hud-progress-frame, .cyber-floor, .cyber-ceiling, .particles, .noise-overlay, .ambient-aurora, .interactive-dye-spread { display: none; }
             .content { background-color: #030305; }
             .fade-in-section { opacity: 1; transform: none; }
         </style>
@@ -40,14 +40,16 @@
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
+    <!-- Deep Background Layers -->
     <div class="noise-overlay" aria-hidden="true"></div>
-    
     <div class="ambient-aurora aurora-1" aria-hidden="true"></div>
     <div class="ambient-aurora aurora-2" aria-hidden="true"></div>
-
     <div class="interactive-dye-spread" id="dye-spread" aria-hidden="true"></div>
 
-    <div class="tech-grid" aria-hidden="true"></div>
+    <!-- Architectural Background: 3D Perspective Grid & Floating Data Nodes -->
+    <div class="cyber-ceiling" aria-hidden="true"></div>
+    <div class="cyber-floor" aria-hidden="true"></div>
+    <div class="particles" aria-hidden="true"></div>
 
     <svg class="hud-progress-frame" preserveAspectRatio="none" aria-hidden="true" focusable="false">
         <rect class="hud-track" x="1.5%" y="1.5%" width="97%" height="97%" rx="15" />
@@ -166,7 +168,7 @@
                 </div>
                 <div class="input-group">
                     <label for="budget">Estimated Budget (Optional)</label>
-                    <input type="text" id="budget" name="budget" placeholder="e.g., $1,000 - $3,000">
+                    <input type="text" id="budget" name="budget" placeholder="e.g., ₹50,000 - ₹1,50,000">
                 </div>
                 <button type="submit" class="cta-button primary-btn full-width">
                     <span class="btn-text">Submit Project Brief</span>
