@@ -83,13 +83,10 @@ body, html { margin: 0; padding: 0; font-family: 'Outfit', system-ui, sans-serif
 .tier-card .deliverables li { position: relative; padding-left: 1.2rem; margin-bottom: 0.6rem; line-height: 1.35;}
 .tier-card .deliverables li::before { content: '→'; position: absolute; left: 0; color: var(--dyn-color); font-family: monospace;}
 
-/* Interactive Portfolio Carousel */
-.portfolio-carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 2rem; padding-bottom: 1.5rem; margin-top: 2rem; scrollbar-width: thin; scrollbar-color: var(--dyn-color) rgba(255,255,255,0.1); }
-.portfolio-carousel::-webkit-scrollbar { height: 8px; }
-.portfolio-carousel::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; }
-.portfolio-carousel::-webkit-scrollbar-thumb { background: var(--dyn-color); border-radius: 4px; }
+/* Interactive Portfolio Grid Stack */
+.portfolio-grid { display: flex; flex-direction: column; gap: 4rem; padding-bottom: 1.5rem; margin-top: 2rem; }
 
-.demo-window { flex: 0 0 100%; scroll-snap-align: center; background: #09090e; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
+.demo-window { width: 100%; background: #09090e; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
 .demo-header { background: #12121a; padding: 10px 15px; display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .demo-dots span { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ff5f56; margin-right: 6px; }
 .demo-dots span:nth-child(2) { background: #ffbd2e; } .demo-dots span:nth-child(3) { background: #27c93f; }
