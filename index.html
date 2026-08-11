@@ -1,38 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self' https://script.google.com;">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <title>Atrunix | Engineered Web Architecture</title>
+    <!-- Security: Content Security Policy (CSP) & Formats -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self' https://script.google.com;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    
+    <!-- SEO & Metadata -->
+    <title>Atrunix | Engineered Web Architecture & IT Services</title>
     <meta name="title" content="Atrunix | Engineered Web Architecture">
     <meta name="description" content="Custom digital infrastructure, automated database workflows, and technical web architectures built for operational efficiency.">
     <meta name="theme-color" content="#030305">
+    <link rel="canonical" href="https://www.atrunix.com/">
     
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.atrunix.com/">
+    <meta property="og:title" content="Atrunix | Engineered Web Architecture">
+    <meta property="og:description" content="Custom digital infrastructure and technical web architectures built for operational efficiency.">
+    <meta property="og:image" content="https://www.atrunix.com/og-image.jpg">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://www.atrunix.com/">
+    <meta property="twitter:title" content="Atrunix | Engineered Web Architecture">
+    <meta property="twitter:description" content="Custom digital infrastructure and technical web architectures built for operational efficiency.">
+    
+    <!-- JSON-LD Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Atrunix",
+      "image": "https://www.atrunix.com/logo.png",
+      "description": "Engineered web architecture, custom digital infrastructure, and automated database workflows.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Jaipur",
+        "addressRegion": "Rajasthan",
+        "addressCountry": "IN"
+      },
+      "telephone": "+916350062238",
+      "url": "https://www.atrunix.com/"
+    }
+    </script>
+    
+    <!-- Resource Hints -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     
     <link rel="stylesheet" href="style.css">
+    
     <noscript>
         <style>
-            .atrunix-morph-container, .hud-progress-frame, .tech-grid { display: none; }
+            .atrunix-morph-container, .hud-progress-frame, .tech-grid, .noise-overlay { display: none; }
             .content { background-color: #030305; }
             .fade-in-section { opacity: 1; transform: none; }
         </style>
     </noscript>
 </head>
 <body>
+    <!-- Accessability: Skip to main content -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Visual Dithering Overlay -->
+    <div class="noise-overlay" aria-hidden="true"></div>
     <div class="tech-grid" aria-hidden="true"></div>
 
-    <!-- High-Performance Technical HUD Progress Frame -->
-    <svg class="hud-progress-frame" preserveAspectRatio="none" aria-hidden="true">
+    <svg class="hud-progress-frame" preserveAspectRatio="none" aria-hidden="true" focusable="false">
         <rect class="hud-track" x="1.5%" y="1.5%" width="97%" height="97%" rx="15" />
         <rect class="hud-bar" id="progress-bar" x="1.5%" y="1.5%" width="97%" height="97%" rx="15" pathLength="100" />
     </svg>
 
-    <!-- Left Margin Shape -->
+    <!-- Structural Animations -->
     <div class="atrunix-morph-container" aria-hidden="true">
         <div class="floating-wrapper" id="parallax-wrapper">
             <div class="liquid-container">
@@ -45,7 +89,6 @@
         </div>
     </div>
 
-    <!-- Right Margin Shape -->
     <div class="atrunix-morph-container secondary-container" aria-hidden="true">
         <div class="floating-wrapper" id="parallax-wrapper-2">
             <div class="liquid-container">
@@ -58,15 +101,17 @@
         </div>
     </div>
 
+    <!-- Navigation -->
     <nav class="side-nav" aria-label="Page Sections">
-        <a href="#home" class="nav-dot active" data-target="home"></a>
-        <a href="#foundation" class="nav-dot" data-target="foundation"></a>
-        <a href="#capabilities" class="nav-dot" data-target="capabilities"></a>
-        <a href="#growth" class="nav-dot" data-target="growth"></a>
-        <a href="#contact" class="nav-dot" data-target="contact"></a>
+        <a href="#home" class="nav-dot active" aria-label="Navigate to Home section" data-target="home"></a>
+        <a href="#foundation" class="nav-dot" aria-label="Navigate to Foundation section" data-target="foundation"></a>
+        <a href="#capabilities" class="nav-dot" aria-label="Navigate to Capabilities section" data-target="capabilities"></a>
+        <a href="#growth" class="nav-dot" aria-label="Navigate to Growth section" data-target="growth"></a>
+        <a href="#contact" class="nav-dot" aria-label="Navigate to Contact section" data-target="contact"></a>
     </nav>
 
-    <main class="content">
+    <!-- Main Content -->
+    <main class="content" id="main-content">
         <section class="scroll-zone" id="home">
             <article class="text-block fade-in-section">
                 <span class="subheading">Atrunix Operations</span>
@@ -106,10 +151,10 @@
                 <p>Establish direct communication to map your technical requirements, discuss operational scoping, and architect your digital foundation.</p>
                 
                 <div class="button-container">
-                    <button id="open-intake" class="cta-button primary-btn">
+                    <button id="open-intake" class="cta-button primary-btn" aria-haspopup="dialog" aria-expanded="false">
                         <span class="btn-text">Device Intake Form</span>
                     </button>
-                    <a href="https://wa.me/916350062238?text=Hi" class="cta-button outline-btn" target="_blank" rel="noopener noreferrer">
+                    <a href="https://wa.me/916350062238?text=Hi" class="cta-button outline-btn" target="_blank" rel="noopener noreferrer" aria-label="Contact via WhatsApp">
                         <span class="btn-text">WhatsApp Direct</span>
                     </a>
                 </div>
@@ -118,43 +163,47 @@
     </main>
 
     <!-- Automated Database Intake Modal -->
-    <div class="modal-overlay" id="intake-modal" aria-hidden="true">
+    <div class="modal-overlay" id="intake-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
         <div class="text-block modal-content">
-            <button class="close-modal" aria-label="Close modal">&times;</button>
-            <h2>Service Intake Log</h2>
+            <button class="close-modal" aria-label="Close modal window">&times;</button>
+            <h2 id="modal-title">Service Intake Log</h2>
             <p>Generate tracking receipts and sync operational data.</p>
             
-            <form id="intake-form">
+            <form id="intake-form" novalidate>
                 <div class="input-group">
-                    <label for="customer-name">Customer Name</label>
-                    <input type="text" id="customer-name" required>
+                    <label for="customer-name">Customer Name <span aria-hidden="true">*</span></label>
+                    <input type="text" id="customer-name" name="customerName" required autocomplete="name">
+                    <span class="error-message" id="error-name" aria-live="polite"></span>
                 </div>
                 <div class="input-group">
-                    <label for="model-number">Device Model Number</label>
-                    <input type="text" id="model-number" required>
+                    <label for="model-number">Device Model Number <span aria-hidden="true">*</span></label>
+                    <input type="text" id="model-number" name="modelNumber" required autocomplete="off">
+                    <span class="error-message" id="error-model" aria-live="polite"></span>
                 </div>
                 <div class="input-group">
-                    <label for="defect-reported">Defect Reported</label>
-                    <textarea id="defect-reported" rows="3" required></textarea>
+                    <label for="defect-reported">Defect Reported <span aria-hidden="true">*</span></label>
+                    <textarea id="defect-reported" name="defectReported" rows="3" required aria-describedby="defect-hint"></textarea>
+                    <span class="input-hint" id="defect-hint">Describe the issue in detail.</span>
+                    <span class="error-message" id="error-defect" aria-live="polite"></span>
                 </div>
                 <div class="input-group">
                     <label for="estimate">Initial Estimate (₹)</label>
-                    <input type="number" id="estimate">
+                    <input type="number" id="estimate" name="estimate" inputmode="numeric" min="0" step="50">
                 </div>
                 <button type="submit" class="cta-button primary-btn full-width">
                     <span class="btn-text">Process & Generate Token</span>
                 </button>
             </form>
 
-            <div id="form-feedback" class="hidden feedback-container">
+            <div id="form-feedback" class="hidden feedback-container" aria-live="polite">
                 <span class="subheading" style="color: var(--dyn-color);">Sync Successful</span>
                 <h3>Digital Tracking Token</h3>
-                <div class="token-display" id="tracking-token"></div>
-                <p>Database updated. Retain this token for repair status verification and billing receipts.</p>
+                <button class="token-display" id="tracking-token" aria-label="Click to copy tracking token" title="Copy to clipboard"></button>
+                <p>Database updated. Retain this token for repair status verification. <span class="copy-hint">Click token to copy.</span></p>
             </div>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
 </body>
 </html>
