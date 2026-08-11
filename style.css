@@ -59,7 +59,7 @@ body, html { margin: 0; padding: 0; font-family: 'Outfit', system-ui, sans-serif
 .scroll-zone { min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding-inline: clamp(1rem, 5vw, 4rem); padding-block: 4rem; box-sizing: border-box; scroll-snap-align: center; content-visibility: auto; contain-intrinsic-size: 100dvh; }
 
 .text-block { background: linear-gradient(135deg, var(--glass-bg-start) 0%, var(--glass-bg-end) 100%); padding: clamp(25px, 5vw, 60px); border-radius: 20px; width: 100%; max-width: min(720px, 90vw); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); border-block-start: 1px solid rgba(255, 255, 255, 0.15); border-inline-start: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 10px rgba(255, 255, 255, 0.03); box-sizing: border-box; }
-.text-block.wide-block { max-width: min(1100px, 95vw); }
+.text-block.wide-block { max-width: min(1000px, 95vw); }
 
 .fade-in-section > * { opacity: 0; transform: translateY(20px); transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); animation: force-visibility 0.5s forwards; animation-delay: 1.5s;  }
 .fade-in-section > *:nth-child(1) { transition-delay: 0.1s; } .fade-in-section > *:nth-child(2) { transition-delay: 0.2s; } .fade-in-section > *:nth-child(3) { transition-delay: 0.3s; } .fade-in-section > *:nth-child(4) { transition-delay: 0.4s; }
@@ -96,7 +96,7 @@ body, html { margin: 0; padding: 0; font-family: 'Outfit', system-ui, sans-serif
 .demo-url { flex-grow: 1; text-align: center; font-size: 0.8rem; color: rgba(255,255,255,0.3); font-family: monospace; }
 .demo-viewport { position: relative; height: clamp(380px, 55vh, 520px); background: radial-gradient(circle at center, #1a1a24 0%, #000 100%); overflow: hidden; display: flex; align-items: center; justify-content: center; }
 
-/* 1. Solar System Layout */
+/* 1. Solar System Demo */
 .solar-system-map { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
 .orbit { position: absolute; border-radius: 50%; border: 1px solid rgba(0, 229, 255, 0.12); box-shadow: inset 0 0 10px rgba(0,229,255,0.02); animation: spin linear infinite; display: flex; align-items: center; transition: border-color 0.3s; pointer-events: none; }
 .orbit:hover { border-color: rgba(0, 229, 255, 0.4); box-shadow: inset 0 0 15px rgba(0,229,255,0.1); }
@@ -114,25 +114,21 @@ body, html { margin: 0; padding: 0; font-family: 'Outfit', system-ui, sans-serif
 .saturn-rings { position: absolute; width: 36px; height: 8px; border-radius: 50%; border: 2px solid rgba(227, 213, 153, 0.7); transform: rotate(25deg); pointer-events: none; }
 .orbit-uranus { width: 385px; height: 385px; animation-duration: 62s; } .uranus { width: 16px; height: 16px; background: radial-gradient(circle at 30% 30%, #68d8d6, #2b8a88, #000); left: -8px; }
 .orbit-neptune { width: 440px; height: 440px; animation-duration: 78s; } .neptune { width: 15px; height: 15px; background: radial-gradient(circle at 30% 30%, #4169e1, #192a78, #000); left: -7.5px; }
-
 @keyframes spin { 100% { transform: rotate(360deg); } }
 
-/* Holographic HUD Overlay */
+/* Solar System HUD */
 .planet-detail-overlay { position: absolute; inset: 0; background: rgba(0,10,20,0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; flex-direction: column; padding: 2rem; color: #00e5ff; transition: opacity 0.3s ease; z-index: 10; border: 1px solid rgba(0,229,255,0.2); overflow-x: hidden; overflow-y: auto;}
 .planet-detail-overlay.hidden { opacity: 0; pointer-events: none; }
 .hud-scanline { position: absolute; top: 0; left: 0; width: 100%; height: 10px; background: rgba(0,229,255,0.2); opacity: 0.5; animation: scanline 4s linear infinite; pointer-events: none; z-index: 20;}
 @keyframes scanline { 0% { transform: translateY(-10px); } 100% { transform: translateY(500px); } }
-
 .back-btn { align-self: flex-start; background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.4); color: #00e5ff; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; cursor: pointer; padding: 6px 12px; margin-bottom: 1.5rem; transition: all 0.2s; text-transform: uppercase;}
 .back-btn:hover { background: #00e5ff; color: #000; box-shadow: 0 0 15px #00e5ff; }
-
 .planet-detail-content { display: flex; align-items: center; gap: 3rem; height: auto; position: relative; z-index: 2;}
 .planet-display-stage { flex: 0 0 140px; height: 140px; display: flex; align-items: center; justify-content: center; position: relative;}
 .hud-target-ring { position: absolute; width: 150px; height: 150px; border: 1px dashed rgba(0,229,255,0.4); border-radius: 50%; animation: spin 10s linear infinite reverse;}
 .planet-large { width: 110px; height: 110px; border-radius: 50%; animation: slow-spin 20s linear infinite; box-shadow: inset -15px -15px 30px rgba(0,0,0,0.9), 0 0 20px rgba(0,229,255,0.2); }
 .saturn-rings-detail { position: absolute; width: 160px; height: 35px; border-radius: 50%; border: 10px solid rgba(227, 213, 153, 0.7); transform: rotate(25deg); pointer-events: none; left: -25px; top: 32px; }
 @keyframes slow-spin { 100% { transform: rotate(360deg); } }
-
 .planet-data h3 { margin: 0 0 1.5rem 0; font-size: 2.2rem; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.5); font-family: 'JetBrains Mono', monospace; letter-spacing: 2px;}
 .data-grid { display: flex; gap: 2rem; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(0,229,255,0.2); padding-bottom: 1rem; flex-wrap: wrap;}
 .data-point { display: flex; flex-direction: column; }
@@ -141,67 +137,31 @@ body, html { margin: 0; padding: 0; font-family: 'Outfit', system-ui, sans-serif
 .fact-box { background: rgba(0,229,255,0.05); border-left: 3px solid #00e5ff; padding: 10px 15px;}
 .planet-facts { font-size: 0.85rem; color: #ddd; line-height: 1.6; margin-top: 5px; margin-bottom: 0;}
 
-/* 2. Diagnostic Tracker UI */
-.component-viewport { background: #0b0c10; padding: 2rem; align-items: flex-start; overflow-y: auto; }
-.diag-ui { width: 100%; max-width: 400px; margin: 0 auto; }
-.diag-ui h3 { color: #fff; font-size: 1.2rem; margin-top: 0; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
-.diag-input-group { display: flex; gap: 10px; margin-bottom: 2rem; }
-.diag-input-group input { flex-grow: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,229,255,0.3); color: #fff; padding: 10px; border-radius: 4px; outline: none; transition: border-color 0.3s; }
-.diag-input-group input:focus { border-color: #00e5ff; }
-.diag-input-group button { background: rgba(0,229,255,0.1); border: 1px solid #00e5ff; color: #00e5ff; padding: 0 15px; border-radius: 4px; cursor: pointer; transition: all 0.3s; }
-.diag-input-group button:hover { background: #00e5ff; color: #000; }
-.diag-timeline { list-style: none; padding: 0; margin: 0; position: relative; }
-.diag-timeline::before { content: ''; position: absolute; left: 11px; top: 5px; bottom: 5px; width: 2px; background: rgba(255,255,255,0.1); }
-.diag-timeline li { position: relative; padding-left: 35px; margin-bottom: 1.5rem; color: #888; font-size: 0.85rem; line-height: 1.4; transition: color 0.3s; }
-.diag-timeline li::before { content: ''; position: absolute; left: 0; top: 2px; width: 20px; height: 20px; border-radius: 50%; background: #1a1a24; border: 2px solid rgba(255,255,255,0.2); box-sizing: border-box; transition: all 0.3s; z-index: 2;}
-.diag-timeline li strong { display: block; color: #ccc; font-size: 0.95rem; margin-bottom: 3px; }
-.diag-timeline li.done::before { background: #00e5ff; border-color: #00e5ff; box-shadow: 0 0 10px #00e5ff; }
-.diag-timeline li.done strong { color: #fff; }
-.diag-timeline li.active::before { background: #1a1a24; border-color: #00e5ff; box-shadow: inset 0 0 5px #00e5ff, 0 0 10px #00e5ff; animation: pulse-ring 2s infinite; }
-.diag-timeline li.active strong { color: #00e5ff; }
-@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(0,229,255,0.4); } 70% { box-shadow: 0 0 0 10px rgba(0,229,255,0); } 100% { box-shadow: 0 0 0 0 rgba(0,229,255,0); } }
+/* 2. Interactive Gooey Lava Lamp Demo */
+.lava-viewport { background: #000000; filter: url(#goo); display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;}
+.lava-text { position: absolute; z-index: 10; color: #fff; text-shadow: 0 0 10px #000; font-size: 0.9rem; opacity: 0.6; pointer-events: none; text-align: center; filter: none;}
+.lava-blob { position: absolute; background: var(--dyn-color); border-radius: 50%; will-change: transform; transition: background 0.3s;}
+.blob-1 { width: 120px; height: 120px; left: 20%; top: 30%; animation: lava-float1 12s ease-in-out infinite alternate; }
+.blob-2 { width: 80px; height: 80px; right: 30%; bottom: 20%; animation: lava-float2 15s ease-in-out infinite alternate-reverse; }
+.blob-3 { width: 150px; height: 150px; right: 10%; top: 10%; animation: lava-float3 18s ease-in-out infinite alternate; }
+.blob-4 { width: 90px; height: 90px; left: 40%; bottom: 10%; animation: lava-float4 10s ease-in-out infinite alternate-reverse; }
+.lava-cursor { position: absolute; width: 100px; height: 100px; background: var(--dyn-color); border-radius: 50%; top: 50%; left: 50%; pointer-events: none; transform: translate(-50%, -50%); will-change: transform; transition: background 0.3s;}
+@keyframes lava-float1 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(100px, 80px) scale(1.2); } }
+@keyframes lava-float2 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-80px, -60px) scale(1.3); } }
+@keyframes lava-float3 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-120px, 50px) scale(0.9); } }
+@keyframes lava-float4 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(90px, -90px) scale(1.1); } }
 
-/* 3. Valuation Matrix UI */
-.val-ui { width: 100%; max-width: 400px; margin: 0 auto; }
-.val-ui h3 { color: #fff; font-size: 1.2rem; margin-top: 0; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; text-align: center;}
-.val-output-container { text-align: center; margin-bottom: 2rem; background: rgba(0,229,255,0.05); border: 1px solid rgba(0,229,255,0.2); padding: 1.5rem; border-radius: 8px; }
-.val-currency { font-size: 1.5rem; color: #888; vertical-align: super; }
-.val-total { font-size: 3rem; color: #00e5ff; font-weight: 700; text-shadow: 0 0 15px rgba(0,229,255,0.4); }
-.val-sliders { display: flex; flex-direction: column; gap: 1.5rem; }
-.slider-group { display: flex; flex-direction: column; gap: 8px; }
-.slider-labels { display: flex; justify-content: space-between; font-size: 0.85rem; color: #ccc; }
-.slider-labels span:last-child { color: #00e5ff; }
-input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #00e5ff; cursor: pointer; margin-top: -6px; box-shadow: 0 0 10px #00e5ff; }
-input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: rgba(255,255,255,0.1); border-radius: 2px; }
-input[type=range]:focus { outline: none; }
+/* 3. 3D Holographic Parallax Card Demo */
+.holo-viewport { background: radial-gradient(circle at center, #111 0%, #000 100%); perspective: 1000px; display: flex; align-items: center; justify-content: center;}
+.holo-card { width: 300px; height: 420px; background: rgba(20, 20, 30, 0.4); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px rgba(0,0,0,0.8); position: relative; overflow: hidden; transform-style: preserve-3d; transition: transform 0.1s ease-out; }
+.holo-glare { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 60%); top: 0; left: 0; pointer-events: none; opacity: 0; transition: opacity 0.3s ease; mix-blend-mode: overlay; z-index: 5;}
+.holo-content { position: absolute; inset: 0; padding: 2rem; display: flex; flex-direction: column; justify-content: space-between; transform: translateZ(30px); pointer-events: none;}
+.holo-icon { width: 60px; height: 60px; background: rgba(0,229,255,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #00e5ff; border: 1px solid rgba(0,229,255,0.3); box-shadow: 0 0 20px rgba(0,229,255,0.2);}
+.holo-content h3 { color: #fff; font-size: 1.5rem; margin: 1rem 0 0.5rem 0; }
+.holo-content p { color: #888; font-size: 0.9rem; line-height: 1.5; margin: 0;}
+.holo-chip { align-self: flex-start; background: rgba(0,229,255,0.1); color: #00e5ff; padding: 5px 10px; font-size: 0.75rem; border-radius: 4px; border: 1px solid rgba(0,229,255,0.3); letter-spacing: 1px;}
 
-/* 4. Scheduling Engine UI */
-.sched-ui { width: 100%; max-width: 400px; margin: 0 auto; display: flex; flex-direction: column; height: 100%;}
-.sched-ui h3 { color: #fff; font-size: 1.2rem; margin-top: 0; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; text-align: center;}
-.sched-days { display: flex; gap: 5px; margin-bottom: 1.5rem; justify-content: space-between; }
-.day-btn { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #888; padding: 10px 0; border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; }
-.day-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-.day-btn.active { background: rgba(0,229,255,0.15); border-color: #00e5ff; color: #00e5ff; box-shadow: 0 0 10px rgba(0,229,255,0.2); }
-.sched-slots { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.5rem; }
-.time-slot { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
-.time-slot:hover:not(:disabled) { border-color: #00e5ff; box-shadow: inset 0 0 10px rgba(0,229,255,0.2); }
-.time-slot.booked { background: rgba(255,0,0,0.1); border-color: rgba(255,0,0,0.3); color: #888; text-decoration: line-through; cursor: not-allowed; }
-.sched-toast { background: #00e5ff; color: #000; text-align: center; padding: 10px; border-radius: 4px; font-size: 0.85rem; font-weight: 700; animation: slideUp 0.3s ease forwards; }
-@keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-/* 5. Topology Visualizer UI */
-.topo-ui { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-.topo-svg { position: absolute; width: 400px; height: 300px; }
-.topo-line { fill: none; stroke: rgba(0,229,255,0.3); stroke-width: 2; stroke-dasharray: 5 10; animation: dash-flow 20s linear infinite; }
-@keyframes dash-flow { to { stroke-dashoffset: -1000; } }
-.topo-pulse { fill: #00e5ff; opacity: 0.2; animation: topo-beat 2s infinite alternate; }
-@keyframes topo-beat { to { r: 20; opacity: 0.05; } }
-.topo-node { position: absolute; transform: translate(-50%, -50%); background: #0a0a12; border: 2px solid #00e5ff; color: #fff; padding: 8px 12px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 10px rgba(0,229,255,0.2); z-index: 2; }
-.topo-node:hover { background: #00e5ff; color: #000; box-shadow: 0 0 20px #00e5ff; transform: translate(-50%, -50%) scale(1.1); }
-.topo-readout { position: absolute; bottom: 20px; left: 20px; right: 20px; background: rgba(0,0,0,0.8); border-left: 3px solid #00e5ff; padding: 10px; font-size: 0.75rem; color: #00e5ff; line-height: 1.5; pointer-events: none; }
-
-/* Global Buttons & Inputs */
+/* Buttons & Inputs */
 .button-container { display: flex; gap: 15px; margin-block-start: 2rem; flex-wrap: wrap; }
 .full-width { width: 100%; margin-block-start: 1.5rem; }
 .cta-button { position: relative; display: inline-flex; align-items: center; justify-content: center; padding: 16px 32px; text-decoration: none; font-weight: 700; border-radius: 10px; font-size: 1.1rem; flex-grow: 1; transition: transform 0.3s ease, filter 0.3s ease, box-shadow 0.3s ease; border: none; cursor: pointer; font-family: inherit; min-height: 44px; }
@@ -250,6 +210,7 @@ input[type=range]:focus { outline: none; }
     .text-block { padding: 1.5rem; }
     
     .solar-system-map { transform: scale(0.65); }
+    .holo-card { transform: scale(0.85); }
     
     .planet-detail-overlay { padding: 1.5rem 1rem; }
     .planet-detail-content { flex-direction: column; text-align: center; justify-content: flex-start; gap: 1rem; }
@@ -265,6 +226,4 @@ input[type=range]:focus { outline: none; }
     .fact-box { padding: 10px; }
     .planet-facts { font-size: 0.8rem; }
     .back-btn { margin-bottom: 1rem; font-size: 0.75rem; padding: 6px 10px; align-self: center;}
-    
-    .topo-ui { transform: scale(0.7); }
 }
