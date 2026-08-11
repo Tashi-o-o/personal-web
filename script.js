@@ -144,7 +144,6 @@ const setupLavaLamp = () => {
         const rect = lavaBox.getBoundingClientRect();
         const x = clientX - rect.left;
         const y = clientY - rect.top;
-        // Check if cursor is roughly inside the component to prevent wild flying
         if(x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
             lavaCursor.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
         }
@@ -168,7 +167,6 @@ const setupHoloCard = () => {
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
         
-        // Calculate tilt (max 15 degrees)
         const rotateX = ((y - centerY) / centerY) * -15; 
         const rotateY = ((x - centerX) / centerX) * 15;
         
@@ -196,7 +194,6 @@ const setupHoloCard = () => {
     }, {passive: true});
     cardBox.addEventListener('touchend', resetCardTilt);
 };
-
 
 // --- Form & Accessibility Logic ---
 const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -304,7 +301,7 @@ if (DOM.tokenDisplay) {
     });
 }
 
-// --- Interaction Events ---
+// --- Global Interaction Events ---
 document.querySelector('.side-nav')?.addEventListener('click', (e) => {
     if (e.target.classList.contains('nav-dot')) {
         e.preventDefault();
