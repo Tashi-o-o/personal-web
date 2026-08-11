@@ -28,8 +28,8 @@
     </noscript>
 </head>
 <body>
-    <!-- SVG Gooey Filter for Lava Lamp Effect -->
-    <svg style="display: none;" aria-hidden="true">
+    <!-- Hardware-Accelerated SVG Filter (Positioned out of flow instead of display: none) -->
+    <svg style="position: absolute; width: 0; height: 0;" aria-hidden="true">
         <defs>
             <filter id="goo">
                 <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur" />
@@ -108,9 +108,9 @@
             <article class="text-block wide-block fade-in-section">
                 <span class="subheading">Component Showcase</span>
                 <h2>Interactive Architecture</h2>
-                <p>Swipe horizontally to explore custom DOM manipulation, fluid CSS physics, and advanced 3D transforms engineered for modern interfaces.</p>
+                <p>Scroll down to explore distinct samples of custom DOM manipulation, fluid CSS physics, and advanced 3D transforms engineered for modern interfaces.</p>
                 
-                <div class="portfolio-carousel">
+                <div class="portfolio-grid">
                     
                     <!-- 1. Solar System Data Visualization -->
                     <div class="demo-window">
@@ -168,7 +168,7 @@
                             <div class="demo-url">fluid-dynamics.atrunix.internal</div>
                         </div>
                         <div class="demo-viewport lava-viewport" id="lava-viewport">
-                            <div class="lava-text tech-font">Move cursor to interact with fluid dynamics</div>
+                            <div class="lava-text tech-font">Move cursor over window to disrupt fluid</div>
                             <div class="lava-blob blob-1"></div>
                             <div class="lava-blob blob-2"></div>
                             <div class="lava-blob blob-3"></div>
@@ -191,7 +191,7 @@
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                                     </div>
                                     <h3 class="tech-font">Atrunix Security</h3>
-                                    <p>Hover to engage 3D parallax transformation and dynamic light reflection matrix.</p>
+                                    <p>Hover or touch to engage 3D parallax transformation and dynamic light reflection matrix.</p>
                                     <div class="holo-chip tech-font">AUTH: VALID</div>
                                 </div>
                             </div>
