@@ -78,7 +78,7 @@ const resizeObserver = new ResizeObserver(debounce(() => {
 
 resizeObserver.observe(document.body);
 
-// --- Full Solar System  Telemetry Database ---
+// --- Component 1: Solar System ---
 const planetDatabase = {
     mercury: { name: "Mercury_Node", type: "Terrestrial", radius: "2,439 km", gravity: "3.7 m/s²", facts: "Innermost planetary node. Highly cratered surface with zero atmosphere, experiencing extreme thermal swings from -180°C to 430°C.", visual: "radial-gradient(circle at 30% 30%, #a6a6a6, #595959, #000)" },
     venus: { name: "Venus_Node", type: "Terrestrial", radius: "6,051 km", gravity: "8.8 m/s²", facts: "Enveloped in dense sulfuric acid clouds. Exhibits an extreme runaway greenhouse effect making it the hottest surface in the system.", visual: "radial-gradient(circle at 30% 30%, #e3bb76, #a17838, #000)" },
@@ -131,6 +131,102 @@ const setupSolarSystem = () => {
     if(closeBtn) closeBtn.addEventListener('click', () => {
         modal.classList.add('hidden');
         clearInterval(typingInterval);
+    });
+};
+
+// --- Component 2: Diagnostic Tracker ---
+const setupDiagnosticTracker = () => {
+    const btn = document.getElementById('track-btn');
+    const input = document.getElementById('track-input');
+    const timeline = document.getElementById('diag-timeline');
+    
+    if(!btn) return;
+    btn.addEventListener('click', () => {
+        if(!input.value.trim()) return;
+        btn.classList.add('skeleton-loader');
+        btn.textContent = '';
+        btn.disabled = true;
+        timeline.classList.add('hidden');
+        
+        setTimeout(() => {
+            btn.classList.remove('skeleton-loader');
+            btn.textContent = 'QUERY';
+            btn.disabled = false;
+            timeline.classList.remove('hidden');
+        }, 800);
+    });
+};
+
+// --- Component 3: Valuation Matrix ---
+const setupValuationMatrix = () => {
+    const ram = document.getElementById('val-ram');
+    const cpu = document.getElementById('val-cpu');
+    const cond = document.getElementById('val-cond');
+    const total = document.getElementById('val-total');
+    
+    if(!ram) return;
+    const calculate = () => {
+        document.getElementById('ram-label').textContent = `${ram.value} GB`;
+        document.getElementById('cpu-label').textContent = `${cpu.value} Cores`;
+        
+        const cVal = parseInt(cond.value);
+        const cText = cVal === 1 ? 'Grade C (Poor)' : cVal === 2 ? 'Grade B (Used)' : 'Grade A (Mint)';
+        document.getElementById('cond-label').textContent = cText;
+        
+        const base = (parseInt(ram.value) * 50) + (parseInt(cpu.value) * 150);
+        const multiplier = cVal === 1 ? 0.6 : cVal === 2 ? 1.0 : 1.5;
+        const val = Math.floor(base * multiplier);
+        
+        total.textContent = val.toLocaleString('en-IN');
+    };
+    
+    ram.addEventListener('input', calculate);
+    cpu.addEventListener('input', calculate);
+    cond.addEventListener('input', calculate);
+    calculate();
+};
+
+// --- Component 4: Scheduling Engine ---
+const setupScheduler = () => {
+    const days = document.querySelectorAll('.day-btn');
+    const slots = document.querySelectorAll('.time-slot:not(.booked)');
+    const toast = document.getElementById('sched-toast');
+    
+    days.forEach(d => {
+        d.addEventListener('click', () => {
+            days.forEach(btn => btn.classList.remove('active'));
+            d.classList.add('active');
+        });
+    });
+    
+    let toastTimeout;
+    slots.forEach(s => {
+        s.addEventListener('click', () => {
+            if(toast) {
+                toast.classList.remove('hidden');
+                clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(() => toast.classList.add('hidden'), 2500);
+            }
+        });
+    });
+};
+
+// --- Component 5: Topology Visualizer ---
+const setupTopology = () => {
+    const nodes = document.querySelectorAll('.topo-node');
+    const readout = document.getElementById('topo-readout');
+    
+    if(!readout) return;
+    nodes.forEach(n => {
+        n.addEventListener('mouseenter', () => {
+            const name = n.getAttribute('data-node');
+            const ping = Math.floor(Math.random() * 40) + 10;
+            const loss = (Math.random() * 0.5).toFixed(2);
+            readout.innerHTML = `TARGET: ${name}<br>LATENCY: ${ping}ms | LOSS: ${loss}%<br>UPLINK SECURE`;
+        });
+        n.addEventListener('mouseleave', () => {
+            readout.innerHTML = `STATUS: NOMINAL<br>Hover node to inspect telemetry.`;
+        });
     });
 };
 
@@ -417,6 +513,11 @@ const initApp = () => {
     }
     
     setupSolarSystem();
+    setupDiagnosticTracker();
+    setupValuationMatrix();
+    setupScheduler();
+    setupTopology();
+    
     setTimeout(() => {
         calculateMaxScroll();
         setupObserver();
