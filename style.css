@@ -6,6 +6,8 @@
     --glass-bg-start: rgba(18, 18, 24, 0.85);
     --glass-bg-end: rgba(6, 6, 10, 0.95);
     --focus-ring: rgba(255, 255, 255, 0.8);
+    --mouse-x: 50vw;
+    --mouse-y: 50vh;
 }
 
 html {
@@ -24,20 +26,17 @@ body, html {
     line-height: 1.6;
 }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar { width: 10px; }
 ::-webkit-scrollbar-track { background: var(--bg-dark); }
 ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 5px; border: 2px solid var(--bg-dark); }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
 
-/* A11y Focus States */
 *:focus-visible {
     outline: 2px solid var(--focus-ring);
     outline-offset: 4px;
     border-radius: 4px;
 }
 
-/* Skip Link */
 .skip-link {
     position: absolute;
     top: -40px;
@@ -50,7 +49,6 @@ body, html {
 }
 .skip-link:focus { top: 0; }
 
-/* Visual Dithering */
 .noise-overlay {
     position: fixed;
     inset: 0;
@@ -60,7 +58,6 @@ body, html {
     pointer-events: none;
 }
 
-/* Volumetric Ambient Auroras */
 .ambient-aurora {
     position: fixed;
     width: 60vw;
@@ -74,40 +71,31 @@ body, html {
     will-change: transform, background-color;
 }
 
-.aurora-1 {
-    top: -20%; 
-    left: -10%;
-    animation: aurora-drift 15s infinite alternate ease-in-out;
-}
-
-.aurora-2 {
-    bottom: -20%; 
-    right: -10%;
-    animation: aurora-drift 18s infinite alternate-reverse ease-in-out;
-}
+.aurora-1 { top: -20%; left: -10%; animation: aurora-drift 15s infinite alternate ease-in-out; }
+.aurora-2 { bottom: -20%; right: -10%; animation: aurora-drift 18s infinite alternate-reverse ease-in-out; }
 
 @keyframes aurora-drift {
     0% { transform: translate(0, 0) scale(1); }
     100% { transform: translate(8vw, 6vh) scale(1.15); }
 }
 
-/* Interactive Cursor Dye Spread */
+/* Corrected Interactive Cursor Dye Spread */
 .interactive-dye-spread {
     position: fixed;
-    top: -20vw;
-    left: -20vw;
+    top: 0;
+    left: 0;
     width: 40vw;
     height: 40vw;
     border-radius: 50%;
     background: radial-gradient(circle, var(--dyn-color) 0%, transparent 60%);
-    opacity: 0.12;
-    filter: blur(60px);
+    opacity: 0.25; /* Increased visibility */
+    filter: blur(50px);
     z-index: -1;
     pointer-events: none;
+    transform: translate3d(var(--mouse-x), var(--mouse-y), 0) translate(-50%, -50%);
     will-change: transform;
 }
 
-/* Enhanced Dual-Layer Tech Grid */
 .tech-grid {
     position: fixed;
     inset: 0;
@@ -126,7 +114,6 @@ body, html {
     mask-image: radial-gradient(ellipse at center, black 30%, transparent 95%);
 }
 
-/* HUD Progress Frame */
 .hud-progress-frame {
     position: fixed;
     inset: 0;
@@ -147,7 +134,6 @@ body, html {
     will-change: stroke-dashoffset;
 }
 
-/* Structural Morph Containers */
 .atrunix-morph-container {
     position: fixed;
     inset: 0;
@@ -199,7 +185,6 @@ body, html {
 .drop-2 { width: 8px; height: 8px; margin-block-start: -4px; margin-inline-start: -4px; }
 .drop-3 { width: 16px; height: 16px; margin-block-start: -8px; margin-inline-start: -8px; }
 
-/* Navigation */
 .side-nav {
     position: fixed;
     right: clamp(1rem, 3vw, 2rem);
@@ -227,7 +212,6 @@ body, html {
     box-shadow: 0 0 10px var(--dyn-color);
 }
 
-/* Main Content & Scroll Zones */
 .content { position: relative; z-index: 10; width: 100%; }
 
 .scroll-zone {
@@ -258,7 +242,6 @@ body, html {
     box-sizing: border-box;
 }
 
-/* Staggered Cascade Entrance */
 .fade-in-section > * {
     opacity: 0;
     transform: translateY(20px);
@@ -417,7 +400,6 @@ body, html {
 .token-display.copied { background: var(--dyn-color); color: var(--bg-dark); text-shadow: none; }
 .copy-hint { display: block; font-size: 0.85rem; opacity: 0.7; margin-top: 0.5rem; }
 
-/* Skeleton Loading State for Form Submit */
 .skeleton-loader {
     width: 100%; height: 44px;
     background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
@@ -440,5 +422,5 @@ body, html {
 @media (max-width: 768px) {
     .side-nav { display: none; } 
     .floating-wrapper { width: 45px; height: 45px; }
-    .interactive-dye-spread { width: 80vw; height: 80vw; top: -40vw; left: -40vw; }
+    .interactive-dye-spread { width: 80vw; height: 80vw; }
 }
