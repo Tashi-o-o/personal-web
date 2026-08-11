@@ -35,7 +35,7 @@
     <div class="css-starfield" aria-hidden="true" id="starfield"></div>
     <div class="tech-grid" aria-hidden="true"></div>
     
-    <!-- Active Cursor Dye Spread & Trail -->
+    <!-- Active Pointer Dye Spread & Trail -->
     <div id="dye-trail-container" aria-hidden="true"></div>
     <div class="interactive-dye-spread" id="dye-spread" aria-hidden="true"></div>
 
@@ -94,11 +94,12 @@
             </article>
         </section>
 
+        <!-- Interactive Complete Solar System Demo -->
         <section class="scroll-zone" id="portfolio">
             <article class="text-block wide-block fade-in-section">
                 <span class="subheading">Component Showcase</span>
                 <h2>Interactive Data Visualization</h2>
-                <p>Example of custom DOM manipulation, CSS physics, and dynamic data fetching. Select a celestial body below to query the dataset.</p>
+                <p>Example of custom DOM manipulation, CSS physics, and dynamic data fetching. Select any planet below to query planetary telemetry.</p>
                 
                 <div class="demo-window">
                     <div class="demo-header">
@@ -108,29 +109,54 @@
                     
                     <div class="demo-viewport" id="solar-system-viewport">
                         <div class="solar-system-map" id="solar-map">
-                            <div class="celestial-body sun"></div>
+                            <div class="celestial-body sun" title="The Sun"></div>
                             
+                            <!-- Mercury -->
+                            <div class="orbit orbit-mercury">
+                                <div class="celestial-body mercury" data-planet="mercury" title="Mercury"></div>
+                            </div>
+
+                            <!-- Venus -->
+                            <div class="orbit orbit-venus">
+                                <div class="celestial-body venus" data-planet="venus" title="Venus"></div>
+                            </div>
+
+                            <!-- Earth -->
                             <div class="orbit orbit-earth">
                                 <div class="celestial-body earth" data-planet="earth" title="Earth">
                                     <div class="orbit-moon"><div class="luna"></div></div>
                                 </div>
                             </div>
                             
+                            <!-- Mars -->
                             <div class="orbit orbit-mars">
                                 <div class="celestial-body mars" data-planet="mars" title="Mars"></div>
                             </div>
                             
+                            <!-- Jupiter -->
                             <div class="orbit orbit-jupiter">
                                 <div class="celestial-body jupiter" data-planet="jupiter" title="Jupiter"></div>
                             </div>
                             
+                            <!-- Saturn -->
                             <div class="orbit orbit-saturn">
                                 <div class="celestial-body saturn" data-planet="saturn" title="Saturn">
                                     <div class="saturn-rings"></div>
                                 </div>
                             </div>
+
+                            <!-- Uranus -->
+                            <div class="orbit orbit-uranus">
+                                <div class="celestial-body uranus" data-planet="uranus" title="Uranus"></div>
+                            </div>
+
+                            <!-- Neptune -->
+                            <div class="orbit orbit-neptune">
+                                <div class="celestial-body neptune" data-planet="neptune" title="Neptune"></div>
+                            </div>
                         </div>
 
+                        <!-- Holographic HUD Modal -->
                         <div class="planet-detail-overlay hidden" id="planet-modal">
                             <div class="hud-scanline"></div>
                             <button class="back-btn" id="close-planet-btn">[ TERMINATE CONNECTION ]</button>
