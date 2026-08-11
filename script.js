@@ -6,9 +6,8 @@ const shapes = [
     { p: [[30,0], [70,0], [100,30], [100,70], [70,100], [30,100], [0,70], [0,30]], c: [255, 0, 85] }
 ];
 
-// Corner-to-corner perimeter coordinates (X and Y in percentage/vw/vh equivalents) keeping clear of center text box
-const xPositions = [-40, 40, 40, -40, 0];
-const yPositions = [-38, -38, 38, 38, -38];
+const xPositions = [-42, 42, 42, -42, 0];
+const yPositions = [-40, -40, 40, 40, -40];
 
 let targetScroll = 0;
 let currentScroll = 0;
@@ -101,7 +100,6 @@ const renderLoop = () => {
     const currentShape = shapes[currentIndex];
     const nextShape = shapes[nextIndex];
 
-    // 2D X and Y coordinate interpolation along the outer perimeter
     const shapeX = xPositions[currentIndex] + (xPositions[nextIndex] - xPositions[currentIndex]) * localProgress;
     const shapeY = yPositions[currentIndex] + (yPositions[nextIndex] - yPositions[currentIndex]) * localProgress;
     
@@ -109,7 +107,7 @@ const renderLoop = () => {
     
     if (fluidIntensity > 0.05 && !prefersReducedMotion.matches) {
         liquidContainer.style.filter = "url('#gooey-fluid')";
-        fluidBlurEl.setAttribute('stdDeviation', fluidIntensity * 10);
+        fluidBlurEl.setAttribute('stdDeviation', fluidIntensity * 8);
     } else {
         liquidContainer.style.filter = "none";
     }
@@ -120,15 +118,15 @@ const renderLoop = () => {
     const viewportX = (shapeX * winWidth) / 100;
     const viewportY = (shapeY * winHeight) / 100;
     
-    parallaxWrapper.style.transform = `translate3d(${viewportX + (mouseX * 12)}px, ${viewportY + (mouseY * 12)}px, 0)`;
+    parallaxWrapper.style.transform = `translate3d(${viewportX + (mouseX * 10)}px, ${viewportY + (mouseY * 10)}px, 0)`;
 
-    const basePopScale = 1 + ((1 - fluidIntensity) * 0.4); 
-    const scaleX = basePopScale + (fluidIntensity * 0.3);
-    const scaleY = basePopScale - (fluidIntensity * 0.15);
+    const basePopScale = 1 + ((1 - fluidIntensity) * 0.35); 
+    const scaleX = basePopScale + (fluidIntensity * 0.25);
+    const scaleY = basePopScale - (fluidIntensity * 0.1);
     
     liquidContainer.style.transform = `scale(${scaleX}, ${scaleY}) translateZ(0)`;
 
-    const spread = fluidIntensity * 90;
+    const spread = fluidIntensity * 80;
     droplets[0].style.transform = `translate3d(${-spread}px, ${-spread}px, 0) scale(${0.2 + fluidIntensity * 0.8})`;
     droplets[1].style.transform = `translate3d(${spread}px, ${spread}px, 0) scale(${0.1 + fluidIntensity * 0.9})`;
     droplets[2].style.transform = `translate3d(${-spread * 0.5}px, ${spread * 0.5}px, 0) scale(${0.3 + fluidIntensity * 0.7})`;
@@ -171,7 +169,7 @@ const renderLoop = () => {
 
     subheadings.forEach(sub => {
         sub.style.color = interpolatedColor;
-        sub.style.textShadow = `0 0 10px ${interpolatedColor}`;
+        sub.style.textShadow = `0 0 10px ${interpolatedColor}, 0 0 20px rgba(255,255,255,0.5)`;
     });
     primaryButtons.forEach(btn => {
         btn.style.backgroundColor = interpolatedColor;
