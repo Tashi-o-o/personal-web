@@ -6,8 +6,6 @@
     --glass-bg-start: rgba(18, 18, 24, 0.75);
     --glass-bg-end: rgba(6, 6, 10, 0.85);
     --focus-ring: rgba(255, 255, 255, 0.8);
-    --mouse-x: 50vw;
-    --mouse-y: 50vh;
 }
 
 html {
@@ -34,74 +32,54 @@ body, html {
 *:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 4px; border-radius: 4px; }
 
 .skip-link {
-    position: absolute;
-    top: -40px; left: 0;
+    position: absolute; top: -40px; left: 0;
     background: var(--dyn-color); color: var(--bg-dark);
     padding: 8px; z-index: 10000; transition: top 0.2s ease;
 }
 .skip-link:focus { top: 0; }
 
-/* Enhanced Background Architecture */
+/* Flat, Optimized Background Architecture (Fixes Duped Tiles & Lag) */
 .noise-overlay {
     position: fixed; inset: 0;
     background-image: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
     opacity: 0.05; z-index: 999; pointer-events: none;
 }
 
+.deep-space-bg {
+    position: fixed; inset: 0;
+    background: radial-gradient(circle at center, #0a0a12 0%, var(--bg-dark) 100%);
+    z-index: 0; pointer-events: none;
+}
+
 .css-starfield {
     position: fixed; inset: -50px; z-index: 0; pointer-events: none;
     background-image: 
-        radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 20px 30px, #eee, rgba(0,0,0,0)),
         radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
-        radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)),
-        radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
-        radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0)),
-        radial-gradient(2px 2px at 160px 120px, #ddd, rgba(0,0,0,0));
+        radial-gradient(1px 1px at 90px 40px, #fff, rgba(0,0,0,0));
     background-repeat: repeat;
-    background-size: 200px 200px;
-    opacity: 0.35;
-    will-change: transform;
+    background-size: 150px 150px;
+    opacity: 0.4; will-change: transform;
 }
 
-.ambient-aurora {
-    position: fixed; width: 60vw; height: 60vh; border-radius: 50%;
-    background-color: var(--dyn-color); filter: blur(120px); opacity: 0.05;
-    z-index: -1; pointer-events: none; will-change: transform, background-color;
-}
-.aurora-1 { top: -20%; left: -10%; animation: aurora-drift 15s infinite alternate ease-in-out; }
-.aurora-2 { bottom: -20%; right: -10%; animation: aurora-drift 18s infinite alternate-reverse ease-in-out; }
-@keyframes aurora-drift { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(8vw, 6vh) scale(1.15); } }
-
-.interactive-dye-spread {
-    position: fixed; top: 0; left: 0; width: 35vw; height: 35vw; border-radius: 50%;
-    background: radial-gradient(circle, var(--dyn-color) 0%, transparent 70%);
-    opacity: 0.25; filter: blur(80px); z-index: 0; pointer-events: none;
-    transform: translate3d(var(--mouse-x), var(--mouse-y), 0) translate(-50%, -50%);
-    will-change: transform; transition: opacity 0.3s ease;
-}
-
-.cyber-floor {
-    position: fixed; bottom: 0; left: -50vw; width: 200vw; height: 40vh;
-    background-image: 
-        linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px),
-        linear-gradient(to top, rgba(255,255,255,0.06) 1px, transparent 1px);
-    background-size: 60px 60px;
-    transform: perspective(600px) rotateX(70deg); transform-origin: bottom center;
-    z-index: 0; pointer-events: none;
-    mask-image: linear-gradient(to top, black 0%, transparent 80%);
-    -webkit-mask-image: linear-gradient(to top, black 0%, transparent 80%);
-}
-
-.cyber-ceiling {
-    position: fixed; top: 0; left: -50vw; width: 200vw; height: 40vh;
+.tech-grid {
+    position: fixed; inset: 0;
     background-image: 
         linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
-    background-size: 60px 60px;
-    transform: perspective(600px) rotateX(-70deg); transform-origin: top center;
-    z-index: 0; pointer-events: none;
-    mask-image: linear-gradient(to bottom, black 0%, transparent 80%);
-    -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 80%);
+    background-size: clamp(40px, 5vw, 80px) clamp(40px, 5vw, 80px);
+    background-position: center center; z-index: 0; pointer-events: none;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 95%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 95%);
+}
+
+/* Re-engineered Dye Spread (Zero Lag) */
+.interactive-dye-spread {
+    position: fixed; top: 0; left: 0; width: 45vw; height: 45vw; border-radius: 50%;
+    /* Removed heavy CSS blur, relying completely on a soft radial gradient */
+    background: radial-gradient(circle at center, var(--dyn-color) 0%, rgba(0,229,255,0.05) 40%, transparent 70%);
+    opacity: 0.35; z-index: 0; pointer-events: none;
+    will-change: transform;
 }
 
 /* Tracking GUI */
@@ -153,14 +131,10 @@ body, html {
 }
 .text-block.wide-block { max-width: min(900px, 90vw); }
 
-/* Safe Fallback Fade-in Structure */
 .fade-in-section > * {
-    opacity: 0;
-    transform: translateY(20px);
+    opacity: 0; transform: translateY(20px);
     transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    /* Failsafe to guarantee visibility if JS halts */
-    animation: force-visibility 0.5s forwards;
-    animation-delay: 1.5s; 
+    animation: force-visibility 0.5s forwards; animation-delay: 1.5s; 
 }
 .fade-in-section > *:nth-child(1) { transition-delay: 0.1s; }
 .fade-in-section > *:nth-child(2) { transition-delay: 0.2s; }
@@ -274,7 +248,6 @@ body, html {
 @media (max-width: 768px) {
     .side-nav { display: none; } 
     .floating-wrapper { width: 45px; height: 45px; }
-    .interactive-dye-spread { width: 80vw; height: 80vw; }
     .planet-detail-content { flex-direction: column; text-align: center; justify-content: center; gap: 1rem; }
     .data-grid { justify-content: center; }
 }
