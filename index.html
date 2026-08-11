@@ -57,7 +57,7 @@
     
     <noscript>
         <style>
-            .atrunix-morph-container, .hud-progress-frame, .tech-grid, .noise-overlay { display: none; }
+            .atrunix-morph-container, .hud-progress-frame, .tech-grid, .noise-overlay, .ambient-aurora, .interactive-dye-spread { display: none; }
             .content { background-color: #030305; }
             .fade-in-section { opacity: 1; transform: none; }
         </style>
@@ -69,6 +69,15 @@
 
     <!-- Visual Dithering Overlay -->
     <div class="noise-overlay" aria-hidden="true"></div>
+    
+    <!-- Volumetric Ambient Auroras -->
+    <div class="ambient-aurora aurora-1" aria-hidden="true"></div>
+    <div class="ambient-aurora aurora-2" aria-hidden="true"></div>
+
+    <!-- Interactive Cursor Dye Spread -->
+    <div class="interactive-dye-spread" id="dye-spread" aria-hidden="true"></div>
+
+    <!-- Enhanced Dual-Layer Tech Grid -->
     <div class="tech-grid" aria-hidden="true"></div>
 
     <svg class="hud-progress-frame" preserveAspectRatio="none" aria-hidden="true" focusable="false">
@@ -76,7 +85,7 @@
         <rect class="hud-bar" id="progress-bar" x="1.5%" y="1.5%" width="97%" height="97%" rx="15" pathLength="100" />
     </svg>
 
-    <!-- Structural Animations -->
+    <!-- Structural Animations (Left) -->
     <div class="atrunix-morph-container" aria-hidden="true">
         <div class="floating-wrapper" id="parallax-wrapper">
             <div class="liquid-container">
@@ -89,6 +98,7 @@
         </div>
     </div>
 
+    <!-- Structural Animations (Right) -->
     <div class="atrunix-morph-container secondary-container" aria-hidden="true">
         <div class="floating-wrapper" id="parallax-wrapper-2">
             <div class="liquid-container">
