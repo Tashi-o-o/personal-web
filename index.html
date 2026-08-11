@@ -93,93 +93,179 @@
             </article>
         </section>
 
-        <!-- Interactive Complete Solar System Demo -->
         <section class="scroll-zone" id="portfolio">
             <article class="text-block wide-block fade-in-section">
                 <span class="subheading">Component Showcase</span>
-                <h2>Interactive Data Visualization</h2>
-                <p>Example of custom DOM manipulation, CSS physics, and dynamic data fetching. Select any planet below to query planetary telemetry.</p>
+                <h2>Interactive Architecture</h2>
+                <p>Swipe horizontally to explore custom DOM manipulation, CSS physics, and dynamic data workflows engineered for modern interfaces.</p>
                 
-                <div class="demo-window">
-                    <div class="demo-header">
-                        <div class="demo-dots"><span></span><span></span><span></span></div>
-                        <div class="demo-url">sys-query.atrunix.internal</div>
-                    </div>
+                <div class="portfolio-carousel">
                     
-                    <div class="demo-viewport" id="solar-system-viewport">
-                        <div class="solar-system-map" id="solar-map">
-                            <div class="celestial-body sun" title="The Sun"></div>
-                            
-                            <div class="orbit orbit-mercury">
-                                <div class="celestial-body mercury" data-planet="mercury" title="Mercury"></div>
-                            </div>
-
-                            <div class="orbit orbit-venus">
-                                <div class="celestial-body venus" data-planet="venus" title="Venus"></div>
-                            </div>
-
-                            <div class="orbit orbit-earth">
-                                <div class="celestial-body earth" data-planet="earth" title="Earth">
-                                    <div class="orbit-moon"><div class="luna"></div></div>
-                                </div>
-                            </div>
-                            
-                            <div class="orbit orbit-mars">
-                                <div class="celestial-body mars" data-planet="mars" title="Mars"></div>
-                            </div>
-                            
-                            <div class="orbit orbit-jupiter">
-                                <div class="celestial-body jupiter" data-planet="jupiter" title="Jupiter"></div>
-                            </div>
-                            
-                            <div class="orbit orbit-saturn">
-                                <div class="celestial-body saturn" data-planet="saturn" title="Saturn">
-                                    <div class="saturn-rings"></div>
-                                </div>
-                            </div>
-
-                            <div class="orbit orbit-uranus">
-                                <div class="celestial-body uranus" data-planet="uranus" title="Uranus"></div>
-                            </div>
-
-                            <div class="orbit orbit-neptune">
-                                <div class="celestial-body neptune" data-planet="neptune" title="Neptune"></div>
-                            </div>
+                    <!-- 1. Solar System Data Visualization -->
+                    <div class="demo-window">
+                        <div class="demo-header">
+                            <div class="demo-dots"><span></span><span></span><span></span></div>
+                            <div class="demo-url">sys-query.atrunix.internal</div>
                         </div>
-
-                        <!-- Holographic HUD Modal -->
-                        <div class="planet-detail-overlay hidden" id="planet-modal">
-                            <div class="hud-scanline"></div>
-                            <button class="back-btn" id="close-planet-btn">[ TERMINATE CONNECTION ]</button>
-                            <div class="planet-detail-content">
-                                <div class="planet-display-stage">
-                                    <div class="planet-large" id="detail-planet-visual"></div>
-                                    <div class="hud-target-ring"></div>
-                                </div>
-                                <div class="planet-data">
-                                    <h3 id="detail-name">SYS_NODE</h3>
-                                    <div class="data-grid">
-                                        <div class="data-point">
-                                            <span class="data-label">Class</span>
-                                            <span class="data-value tech-font" id="detail-type">---</span>
-                                        </div>
-                                        <div class="data-point">
-                                            <span class="data-label">Radius</span>
-                                            <span class="data-value tech-font" id="detail-radius">---</span>
-                                        </div>
-                                        <div class="data-point">
-                                            <span class="data-label">Gravity</span>
-                                            <span class="data-value tech-font" id="detail-gravity">---</span>
-                                        </div>
+                        <div class="demo-viewport" id="solar-system-viewport">
+                            <div class="solar-system-map" id="solar-map">
+                                <div class="celestial-body sun" title="The Sun"></div>
+                                <div class="orbit orbit-mercury"><div class="celestial-body mercury" data-planet="mercury" title="Mercury"></div></div>
+                                <div class="orbit orbit-venus"><div class="celestial-body venus" data-planet="venus" title="Venus"></div></div>
+                                <div class="orbit orbit-earth">
+                                    <div class="celestial-body earth" data-planet="earth" title="Earth">
+                                        <div class="orbit-moon"><div class="luna"></div></div>
                                     </div>
-                                    <div class="fact-box">
-                                        <span class="data-label">Telemetry Report //</span>
-                                        <p class="planet-facts tech-font" id="detail-facts">Awaiting datastream...</p>
+                                </div>
+                                <div class="orbit orbit-mars"><div class="celestial-body mars" data-planet="mars" title="Mars"></div></div>
+                                <div class="orbit orbit-jupiter"><div class="celestial-body jupiter" data-planet="jupiter" title="Jupiter"></div></div>
+                                <div class="orbit orbit-saturn">
+                                    <div class="celestial-body saturn" data-planet="saturn" title="Saturn"><div class="saturn-rings"></div></div>
+                                </div>
+                                <div class="orbit orbit-uranus"><div class="celestial-body uranus" data-planet="uranus" title="Uranus"></div></div>
+                                <div class="orbit orbit-neptune"><div class="celestial-body neptune" data-planet="neptune" title="Neptune"></div></div>
+                            </div>
+                            <div class="planet-detail-overlay hidden" id="planet-modal">
+                                <div class="hud-scanline"></div>
+                                <button class="back-btn" id="close-planet-btn">[ TERMINATE CONNECTION ]</button>
+                                <div class="planet-detail-content">
+                                    <div class="planet-display-stage">
+                                        <div class="planet-large" id="detail-planet-visual"></div>
+                                        <div class="hud-target-ring"></div>
+                                    </div>
+                                    <div class="planet-data">
+                                        <h3 id="detail-name">SYS_NODE</h3>
+                                        <div class="data-grid">
+                                            <div class="data-point"><span class="data-label">Class</span><span class="data-value tech-font" id="detail-type">---</span></div>
+                                            <div class="data-point"><span class="data-label">Radius</span><span class="data-value tech-font" id="detail-radius">---</span></div>
+                                            <div class="data-point"><span class="data-label">Gravity</span><span class="data-value tech-font" id="detail-gravity">---</span></div>
+                                        </div>
+                                        <div class="fact-box">
+                                            <span class="data-label">Telemetry Report //</span>
+                                            <p class="planet-facts tech-font" id="detail-facts">Awaiting datastream...</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- 2. Hardware Diagnostic & Intake Tracker -->
+                    <div class="demo-window">
+                        <div class="demo-header">
+                            <div class="demo-dots"><span></span><span></span><span></span></div>
+                            <div class="demo-url">diagnostic-tracker.atrunix.internal</div>
+                        </div>
+                        <div class="demo-viewport component-viewport">
+                            <div class="diag-ui">
+                                <h3 class="tech-font">Service Status Portal</h3>
+                                <div class="diag-input-group">
+                                    <input type="text" id="track-input" class="tech-font" placeholder="Enter Token (e.g. ATRX-882)">
+                                    <button id="track-btn" class="tech-font">QUERY</button>
+                                </div>
+                                <div class="diag-timeline-container hidden" id="diag-timeline">
+                                    <ul class="diag-timeline tech-font">
+                                        <li class="done"><strong>Intake Logged:</strong> Device received at facility.</li>
+                                        <li class="done"><strong>PCB Analysis:</strong> Hardware diagnostic completed.</li>
+                                        <li class="active"><strong>Defect Resolution:</strong> Component replacement in progress.</li>
+                                        <li><strong>Deployment:</strong> Pending final QA testing.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Algorithmic Valuation Matrix -->
+                    <div class="demo-window">
+                        <div class="demo-header">
+                            <div class="demo-dots"><span></span><span></span><span></span></div>
+                            <div class="demo-url">valuation-matrix.atrunix.internal</div>
+                        </div>
+                        <div class="demo-viewport component-viewport">
+                            <div class="val-ui">
+                                <h3 class="tech-font">Hardware Appraisal Engine</h3>
+                                <div class="val-output-container">
+                                    <span class="val-currency">₹</span>
+                                    <span class="val-total tech-font" id="val-total">2,850</span>
+                                </div>
+                                <div class="val-sliders">
+                                    <div class="slider-group">
+                                        <div class="slider-labels"><span class="tech-font">Memory Capacity</span><span class="tech-font" id="ram-label">16 GB</span></div>
+                                        <input type="range" id="val-ram" min="4" max="64" value="16" step="4">
+                                    </div>
+                                    <div class="slider-group">
+                                        <div class="slider-labels"><span class="tech-font">Processing Cores</span><span class="tech-font" id="cpu-label">8 Cores</span></div>
+                                        <input type="range" id="val-cpu" min="4" max="24" value="8" step="2">
+                                    </div>
+                                    <div class="slider-group">
+                                        <div class="slider-labels"><span class="tech-font">Condition Tier</span><span class="tech-font" id="cond-label">Grade B (Used)</span></div>
+                                        <input type="range" id="val-cond" min="1" max="3" value="2" step="1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Asynchronous Scheduling Engine -->
+                    <div class="demo-window">
+                        <div class="demo-header">
+                            <div class="demo-dots"><span></span><span></span><span></span></div>
+                            <div class="demo-url">booking-engine.atrunix.internal</div>
+                        </div>
+                        <div class="demo-viewport component-viewport">
+                            <div class="sched-ui">
+                                <h3 class="tech-font">Select Appointment</h3>
+                                <div class="sched-days tech-font">
+                                    <button class="day-btn">MON</button>
+                                    <button class="day-btn active">TUE</button>
+                                    <button class="day-btn">WED</button>
+                                    <button class="day-btn">THU</button>
+                                    <button class="day-btn">FRI</button>
+                                </div>
+                                <div class="sched-slots tech-font">
+                                    <button class="time-slot">09:00 AM</button>
+                                    <button class="time-slot">10:30 AM</button>
+                                    <button class="time-slot booked" disabled>11:00 AM</button>
+                                    <button class="time-slot">01:15 PM</button>
+                                    <button class="time-slot">03:00 PM</button>
+                                    <button class="time-slot">04:45 PM</button>
+                                </div>
+                                <div class="sched-toast hidden tech-font" id="sched-toast">Slot reserved. Syncing to database...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Network Topology Visualizer -->
+                    <div class="demo-window">
+                        <div class="demo-header">
+                            <div class="demo-dots"><span></span><span></span><span></span></div>
+                            <div class="demo-url">topology-map.atrunix.internal</div>
+                        </div>
+                        <div class="demo-viewport component-viewport">
+                            <div class="topo-ui">
+                                <svg class="topo-svg" preserveAspectRatio="xMidYMid meet" viewBox="0 0 400 300">
+                                    <path class="topo-line" d="M 100 150 L 200 80" />
+                                    <path class="topo-line" d="M 100 150 L 200 220" />
+                                    <path class="topo-line" d="M 200 80 L 300 150" />
+                                    <path class="topo-line" d="M 200 220 L 300 150" />
+                                    
+                                    <circle class="topo-pulse" cx="100" cy="150" r="15" />
+                                    <circle class="topo-pulse" cx="200" cy="80" r="15" />
+                                    <circle class="topo-pulse" cx="200" cy="220" r="15" />
+                                    <circle class="topo-pulse" cx="300" cy="150" r="15" />
+                                </svg>
+                                <div class="topo-node tech-font" style="top: 150px; left: 100px;" data-node="ENTRY_NODE">ENTRY</div>
+                                <div class="topo-node tech-font" style="top: 80px; left: 200px;" data-node="AUTH_GATEWAY">AUTH</div>
+                                <div class="topo-node tech-font" style="top: 220px; left: 200px;" data-node="DATA_SHARD">DATA</div>
+                                <div class="topo-node tech-font" style="top: 150px; left: 300px;" data-node="CORE_PROCESSOR">CORE</div>
+                                
+                                <div class="topo-readout tech-font" id="topo-readout">
+                                    STATUS: NOMINAL<br>Hover node to inspect telemetry.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </article>
         </section>
@@ -192,7 +278,6 @@
             </article>
         </section>
 
-        <!-- Pricing Tiers Updated -->
         <section class="scroll-zone" id="pricing">
             <article class="text-block wide-block fade-in-section">
                 <span class="subheading">Architecture Tiers</span>
@@ -255,7 +340,6 @@
         </section>
     </main>
 
-    <!-- Web Project Intake Modal -->
     <div class="modal-overlay" id="intake-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
         <div class="text-block modal-content">
             <button class="close-modal" aria-label="Close modal window">&times;</button>
