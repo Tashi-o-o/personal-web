@@ -9,9 +9,9 @@
 }
 
 html {
-    scroll-snap-type: y proximity; /* Relaxed anchoring */
+    scroll-snap-type: y proximity;
     font-size: 16px;
-    scroll-behavior: auto; /* Handled by JS for wheel, native for anchors */
+    scroll-behavior: auto;
 }
 
 body, html {
@@ -60,19 +60,73 @@ body, html {
     pointer-events: none;
 }
 
+/* Volumetric Ambient Auroras */
+.ambient-aurora {
+    position: fixed;
+    width: 60vw;
+    height: 60vh;
+    border-radius: 50%;
+    background-color: var(--dyn-color);
+    filter: blur(120px);
+    opacity: 0.05;
+    z-index: -1;
+    pointer-events: none;
+    will-change: transform, background-color;
+}
+
+.aurora-1 {
+    top: -20%; 
+    left: -10%;
+    animation: aurora-drift 15s infinite alternate ease-in-out;
+}
+
+.aurora-2 {
+    bottom: -20%; 
+    right: -10%;
+    animation: aurora-drift 18s infinite alternate-reverse ease-in-out;
+}
+
+@keyframes aurora-drift {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(8vw, 6vh) scale(1.15); }
+}
+
+/* Interactive Cursor Dye Spread */
+.interactive-dye-spread {
+    position: fixed;
+    top: -20vw;
+    left: -20vw;
+    width: 40vw;
+    height: 40vw;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--dyn-color) 0%, transparent 60%);
+    opacity: 0.12;
+    filter: blur(60px);
+    z-index: -1;
+    pointer-events: none;
+    will-change: transform;
+}
+
+/* Enhanced Dual-Layer Tech Grid */
 .tech-grid {
     position: fixed;
     inset: 0;
     background-image: 
         linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
-    background-size: clamp(30px, 5vw, 60px) clamp(30px, 5vw, 60px);
+        linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px),
+        radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 
+        clamp(40px, 5vw, 80px) clamp(40px, 5vw, 80px),
+        clamp(40px, 5vw, 80px) clamp(40px, 5vw, 80px),
+        clamp(10px, 1.25vw, 20px) clamp(10px, 1.25vw, 20px);
+    background-position: center center;
     z-index: 0;
     pointer-events: none;
-    -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 85%);
-    mask-image: radial-gradient(circle at center, black 30%, transparent 85%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 95%);
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 95%);
 }
 
+/* HUD Progress Frame */
 .hud-progress-frame {
     position: fixed;
     inset: 0;
@@ -81,7 +135,6 @@ body, html {
     z-index: 1;
     pointer-events: none;
 }
-
 .hud-track { fill: none; stroke: rgba(255, 255, 255, 0.04); stroke-width: 2px; }
 .hud-bar {
     fill: none;
@@ -94,6 +147,7 @@ body, html {
     will-change: stroke-dashoffset;
 }
 
+/* Structural Morph Containers */
 .atrunix-morph-container {
     position: fixed;
     inset: 0;
@@ -145,6 +199,7 @@ body, html {
 .drop-2 { width: 8px; height: 8px; margin-block-start: -4px; margin-inline-start: -4px; }
 .drop-3 { width: 16px; height: 16px; margin-block-start: -8px; margin-inline-start: -8px; }
 
+/* Navigation */
 .side-nav {
     position: fixed;
     right: clamp(1rem, 3vw, 2rem);
@@ -172,6 +227,7 @@ body, html {
     box-shadow: 0 0 10px var(--dyn-color);
 }
 
+/* Main Content & Scroll Zones */
 .content { position: relative; z-index: 10; width: 100%; }
 
 .scroll-zone {
@@ -269,7 +325,7 @@ body, html {
     border: none;
     cursor: pointer;
     font-family: inherit;
-    min-height: 44px; /* A11y Touch Target */
+    min-height: 44px;
 }
 
 .btn-text { position: relative; z-index: 2; }
@@ -315,7 +371,7 @@ body, html {
     line-height: 1;
     cursor: pointer;
     transition: color 0.2s ease;
-    min-width: 44px; min-height: 44px; /* A11y Touch Target */
+    min-width: 44px; min-height: 44px;
 }
 .close-modal:hover { color: var(--dyn-color); }
 
@@ -384,4 +440,5 @@ body, html {
 @media (max-width: 768px) {
     .side-nav { display: none; } 
     .floating-wrapper { width: 45px; height: 45px; }
+    .interactive-dye-spread { width: 80vw; height: 80vw; top: -40vw; left: -40vw; }
 }
