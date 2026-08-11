@@ -28,13 +28,12 @@
     </noscript>
 </head>
 <body>
-    <!-- Hardware-Accelerated SVG Filter (Positioned out of flow instead of display: none) -->
+    <!-- Hardware-Accelerated SVG Filter for Fluid Dynamics -->
     <svg style="position: absolute; width: 0; height: 0;" aria-hidden="true">
         <defs>
             <filter id="goo">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur" />
-                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 25 -10" result="goo" />
-                <feBlend in="SourceGraphic" in2="goo" />
+                <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
             </filter>
         </defs>
     </svg>
@@ -169,11 +168,14 @@
                         </div>
                         <div class="demo-viewport lava-viewport" id="lava-viewport">
                             <div class="lava-text tech-font">Move cursor over window to disrupt fluid</div>
-                            <div class="lava-blob blob-1"></div>
-                            <div class="lava-blob blob-2"></div>
-                            <div class="lava-blob blob-3"></div>
-                            <div class="lava-blob blob-4"></div>
-                            <div class="lava-cursor" id="lava-cursor"></div>
+                            <!-- Transparent wrapper strictly for the SVG filter computation -->
+                            <div class="lava-fluid-layer">
+                                <div class="lava-blob blob-1"></div>
+                                <div class="lava-blob blob-2"></div>
+                                <div class="lava-blob blob-3"></div>
+                                <div class="lava-blob blob-4"></div>
+                                <div class="lava-cursor" id="lava-cursor"></div>
+                            </div>
                         </div>
                     </div>
 
