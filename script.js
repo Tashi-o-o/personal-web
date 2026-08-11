@@ -78,7 +78,7 @@ const resizeObserver = new ResizeObserver(debounce(() => {
 
 resizeObserver.observe(document.body);
 
-// --- Component 1: Solar System ---
+// --- Component 1: Solar System Logic ---
 const planetDatabase = {
     mercury: { name: "Mercury_Node", type: "Terrestrial", radius: "2,439 km", gravity: "3.7 m/s²", facts: "Innermost planetary node. Highly cratered surface with zero atmosphere, experiencing extreme thermal swings from -180°C to 430°C.", visual: "radial-gradient(circle at 30% 30%, #a6a6a6, #595959, #000)" },
     venus: { name: "Venus_Node", type: "Terrestrial", radius: "6,051 km", gravity: "8.8 m/s²", facts: "Enveloped in dense sulfuric acid clouds. Exhibits an extreme runaway greenhouse effect making it the hottest surface in the system.", visual: "radial-gradient(circle at 30% 30%, #e3bb76, #a17838, #000)" },
@@ -134,101 +134,69 @@ const setupSolarSystem = () => {
     });
 };
 
-// --- Component 2: Diagnostic Tracker ---
-const setupDiagnosticTracker = () => {
-    const btn = document.getElementById('track-btn');
-    const input = document.getElementById('track-input');
-    const timeline = document.getElementById('diag-timeline');
-    
-    if(!btn) return;
-    btn.addEventListener('click', () => {
-        if(!input.value.trim()) return;
-        btn.classList.add('skeleton-loader');
-        btn.textContent = '';
-        btn.disabled = true;
-        timeline.classList.add('hidden');
-        
-        setTimeout(() => {
-            btn.classList.remove('skeleton-loader');
-            btn.textContent = 'QUERY';
-            btn.disabled = false;
-            timeline.classList.remove('hidden');
-        }, 800);
-    });
-};
+// --- Component 2: Lava Lamp Fluid Dynamics ---
+const setupLavaLamp = () => {
+    const lavaBox = document.getElementById('lava-viewport');
+    const lavaCursor = document.getElementById('lava-cursor');
+    if (!lavaBox || !lavaCursor || PREFERS_REDUCED_MOTION.matches) return;
 
-// --- Component 3: Valuation Matrix ---
-const setupValuationMatrix = () => {
-    const ram = document.getElementById('val-ram');
-    const cpu = document.getElementById('val-cpu');
-    const cond = document.getElementById('val-cond');
-    const total = document.getElementById('val-total');
-    
-    if(!ram) return;
-    const calculate = () => {
-        document.getElementById('ram-label').textContent = `${ram.value} GB`;
-        document.getElementById('cpu-label').textContent = `${cpu.value} Cores`;
-        
-        const cVal = parseInt(cond.value);
-        const cText = cVal === 1 ? 'Grade C (Poor)' : cVal === 2 ? 'Grade B (Used)' : 'Grade A (Mint)';
-        document.getElementById('cond-label').textContent = cText;
-        
-        const base = (parseInt(ram.value) * 50) + (parseInt(cpu.value) * 150);
-        const multiplier = cVal === 1 ? 0.6 : cVal === 2 ? 1.0 : 1.5;
-        const val = Math.floor(base * multiplier);
-        
-        total.textContent = val.toLocaleString('en-IN');
+    const moveLavaCursor = (clientX, clientY) => {
+        const rect = lavaBox.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+        // Check if cursor is roughly inside the component to prevent wild flying
+        if(x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+            lavaCursor.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+        }
     };
-    
-    ram.addEventListener('input', calculate);
-    cpu.addEventListener('input', calculate);
-    cond.addEventListener('input', calculate);
-    calculate();
+
+    lavaBox.addEventListener('mousemove', (e) => moveLavaCursor(e.clientX, e.clientY));
+    lavaBox.addEventListener('touchmove', (e) => moveLavaCursor(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
 };
 
-// --- Component 4: Scheduling Engine ---
-const setupScheduler = () => {
-    const days = document.querySelectorAll('.day-btn');
-    const slots = document.querySelectorAll('.time-slot:not(.booked)');
-    const toast = document.getElementById('sched-toast');
+// --- Component 3: 3D Holographic Card ---
+const setupHoloCard = () => {
+    const cardBox = document.getElementById('holo-viewport');
+    const card = document.getElementById('holo-card');
+    const glare = document.getElementById('holo-glare');
+    if (!cardBox || !card || !glare || PREFERS_REDUCED_MOTION.matches) return;
+
+    const updateCardTilt = (clientX, clientY) => {
+        const rect = cardBox.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        // Calculate tilt (max 15 degrees)
+        const rotateX = ((y - centerY) / centerY) * -15; 
+        const rotateY = ((x - centerX) / centerX) * 15;
+        
+        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        glare.style.transform = `translate(${x - (rect.width*1.5)}px, ${y - (rect.height*1.5)}px)`;
+        glare.style.opacity = 1;
+    };
+
+    const resetCardTilt = () => {
+        card.style.transform = `rotateX(0deg) rotateY(0deg)`;
+        glare.style.opacity = 0;
+    };
+
+    cardBox.addEventListener('mousemove', (e) => updateCardTilt(e.clientX, e.clientY));
+    cardBox.addEventListener('mouseleave', resetCardTilt);
     
-    days.forEach(d => {
-        d.addEventListener('click', () => {
-            days.forEach(btn => btn.classList.remove('active'));
-            d.classList.add('active');
-        });
-    });
-    
-    let toastTimeout;
-    slots.forEach(s => {
-        s.addEventListener('click', () => {
-            if(toast) {
-                toast.classList.remove('hidden');
-                clearTimeout(toastTimeout);
-                toastTimeout = setTimeout(() => toast.classList.add('hidden'), 2500);
-            }
-        });
-    });
+    cardBox.addEventListener('touchmove', (e) => {
+        const touch = e.touches[0];
+        const rect = cardBox.getBoundingClientRect();
+        if(touch.clientX >= rect.left && touch.clientX <= rect.right && touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+            updateCardTilt(touch.clientX, touch.clientY);
+        } else {
+            resetCardTilt();
+        }
+    }, {passive: true});
+    cardBox.addEventListener('touchend', resetCardTilt);
 };
 
-// --- Component 5: Topology Visualizer ---
-const setupTopology = () => {
-    const nodes = document.querySelectorAll('.topo-node');
-    const readout = document.getElementById('topo-readout');
-    
-    if(!readout) return;
-    nodes.forEach(n => {
-        n.addEventListener('mouseenter', () => {
-            const name = n.getAttribute('data-node');
-            const ping = Math.floor(Math.random() * 40) + 10;
-            const loss = (Math.random() * 0.5).toFixed(2);
-            readout.innerHTML = `TARGET: ${name}<br>LATENCY: ${ping}ms | LOSS: ${loss}%<br>UPLINK SECURE`;
-        });
-        n.addEventListener('mouseleave', () => {
-            readout.innerHTML = `STATUS: NOMINAL<br>Hover node to inspect telemetry.`;
-        });
-    });
-};
 
 // --- Form & Accessibility Logic ---
 const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -513,10 +481,8 @@ const initApp = () => {
     }
     
     setupSolarSystem();
-    setupDiagnosticTracker();
-    setupValuationMatrix();
-    setupScheduler();
-    setupTopology();
+    setupLavaLamp();
+    setupHoloCard();
     
     setTimeout(() => {
         calculateMaxScroll();
