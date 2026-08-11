@@ -1,11 +1,9 @@
 'use strict';
 
-// --- Telemetry & Error Boundary ---
 window.addEventListener('error', (event) => {
     console.error("Atrunix Error Handler:", event.message, "at", event.filename, ":", event.lineno);
 });
 
-// --- Constants & Config ---
 const PREFERS_REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 const SHAPES = [
@@ -16,14 +14,11 @@ const SHAPES = [
     { p: [[40,0], [60,0], [100,40], [100,60], [60,100], [40,100], [0,60], [0,40]], c: [255, 0, 85] }
 ];
 
-// Left Margin constraints
 const X_POS_L = [-42, -40, -42, -38, -42];
 const Y_POS_L = [-30, 0, 30, 0, -30];
-// Right Margin constraints
 const X_POS_R = [42, 40, 42, 38, 42];
 const Y_POS_R = [30, 0, -30, 0, 30];
 
-// --- State Management ---
 const state = {
     targetScroll: 0,
     currentScroll: 0,
@@ -34,11 +29,14 @@ const state = {
     mouseY: 0,
     targetX: 0,
     targetY: 0,
+    cursorX: window.innerWidth / 2,
+    cursorY: window.innerHeight / 2,
+    targetCursorX: window.innerWidth / 2,
+    targetCursorY: window.innerHeight / 2,
     maxScroll: 1,
     modalOpen: false
 };
 
-// --- DOM Elements ---
 const DOM = {
     shapeL: document.getElementById('geometry-morph'),
     shapeR: document.getElementById('geometry-morph-2'),
@@ -55,11 +53,9 @@ const DOM = {
     closeModalBtn: document.querySelector('.close-modal'),
     form: document.getElementById('intake-form'),
     feedback: document.getElementById('form-feedback'),
-    tokenDisplay: document.getElementById('tracking-token'),
-    dyeSpread: document.getElementById('dye-spread')
+    tokenDisplay: document.getElementById('tracking-token')
 };
 
-// --- Utility Functions ---
 const debounce = (func, wait) => {
     let timeout;
     return (...args) => {
@@ -72,7 +68,6 @@ const calculateMaxScroll = () => {
     state.maxScroll = Math.max(1, document.documentElement.scrollHeight - state.winHeight);
 };
 
-// --- Modal & Form Focus Trap Logic ---
 const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 let firstFocusableElement, lastFocusableElement;
 
@@ -107,7 +102,6 @@ const toggleModal = (isOpen) => {
     }
 };
 
-// Modal Event Listeners
 if (DOM.openModalBtn && DOM.closeModalBtn) {
     DOM.openModalBtn.addEventListener('click', () => toggleModal(true));
     DOM.closeModalBtn.addEventListener('click', () => toggleModal(false));
@@ -130,7 +124,6 @@ if (DOM.openModalBtn && DOM.closeModalBtn) {
     });
 }
 
-// Form Submission & Validation (Mock API Request)
 if (DOM.form) {
     DOM.form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -156,7 +149,6 @@ if (DOM.form) {
 
         try {
             await new Promise(resolve => setTimeout(resolve, 1500));
-            
             const cryptoArr = new Uint32Array(1);
             window.crypto.getRandomValues(cryptoArr);
             const token = 'ATRX-' + cryptoArr[0].toString(36).toUpperCase().padStart(6, '0');
@@ -172,13 +164,12 @@ if (DOM.form) {
             alert('A network error occurred. Please try again.');
         } finally {
             submitBtn.classList.remove('skeleton-loader');
-            submitBtn.innerHTML = '<span class="btn-text">Process & Generate Token</span>';
+            submitBtn.innerHTML = '<span class="btn-text">Submit Project Brief</span>';
             submitBtn.disabled = false;
         }
     });
 }
 
-// Token Copy to Clipboard
 if (DOM.tokenDisplay) {
     DOM.tokenDisplay.addEventListener('click', async () => {
         try {
@@ -196,8 +187,6 @@ if (DOM.tokenDisplay) {
     });
 }
 
-// --- Graphical Rendering Engine ---
-
 document.querySelector('.side-nav')?.addEventListener('click', (e) => {
     if (e.target.classList.contains('nav-dot')) {
         e.preventDefault();
@@ -214,8 +203,14 @@ window.addEventListener('resize', debounce(() => {
 
 window.addEventListener('mousemove', (e) => {
     if (PREFERS_REDUCED_MOTION.matches || state.modalOpen) return;
+    
+    // Normalized coordinates for shape parallax
     state.targetX = (e.clientX / state.winWidth) * 2 - 1;
     state.targetY = (e.clientY / state.winHeight) * 2 - 1;
+    
+    // Direct pixel coordinates for cursor dye spread
+    state.targetCursorX = e.clientX;
+    state.targetCursorY = e.clientY;
 }, { passive: true });
 
 window.addEventListener('scroll', () => {
@@ -272,8 +267,15 @@ const renderLoop = () => {
     const ambientY = Math.sin(time) * 10;
     const fluidIntensity = Math.sin(localProgress * Math.PI);
 
+    // Update normalized parallax coordinates
     state.mouseX += (state.targetX - state.mouseX) * 0.15;
     state.mouseY += (state.targetY - state.mouseY) * 0.15;
+    
+    // Update direct pixel coordinates for the CSS variable
+    state.cursorX += (state.targetCursorX - state.cursorX) * 0.15;
+    state.cursorY += (state.targetCursorY - state.cursorY) * 0.15;
+    document.documentElement.style.setProperty('--mouse-x', `${state.cursorX}px`);
+    document.documentElement.style.setProperty('--mouse-y', `${state.cursorY}px`);
     
     const viewportX = (shapeX * state.winWidth) / 100;
     const viewportY = ((shapeY * state.winHeight) / 100) + ambientY;
@@ -282,13 +284,6 @@ const renderLoop = () => {
 
     DOM.wrapperL.style.transform = `translate3d(${viewportX + (state.mouseX * 15)}px, ${viewportY + (state.mouseY * 15)}px, 0)`;
     DOM.wrapperR.style.transform = `translate3d(${viewportX2 + (state.mouseX * 10)}px, ${viewportY2 + (state.mouseY * 10)}px, 0)`;
-
-    // Interactive Cursor Dye Spread Translation
-    const cursorPixelX = ((state.mouseX + 1) / 2) * state.winWidth;
-    const cursorPixelY = ((state.mouseY + 1) / 2) * state.winHeight;
-    if (DOM.dyeSpread) {
-        DOM.dyeSpread.style.transform = `translate3d(${cursorPixelX}px, ${cursorPixelY}px, 0)`;
-    }
 
     const stretchY = 1 + (fluidIntensity * 0.4);
     const squishX = 1 - (fluidIntensity * 0.2);
@@ -328,11 +323,7 @@ const renderLoop = () => {
     const b = Math.round(currentShape.c[2] + (nextShape.c[2] - currentShape.c[2]) * localProgress);
     document.documentElement.style.setProperty('--dyn-color', `rgb(${r}, ${g}, ${b})`);
 
-    if (Math.abs(state.targetScroll - state.currentScroll) > 0.5 || Math.abs(state.targetX - state.mouseX) > 0.01 || fluidIntensity > 0.01) {
-        window.requestAnimationFrame(renderLoop);
-    } else {
-        window.requestAnimationFrame(renderLoop); 
-    }
+    window.requestAnimationFrame(renderLoop);
 };
 
 const init = () => {
