@@ -18,6 +18,7 @@ const X_POS_L = [-42, -40, -42, -38, -42];
 const Y_POS_L = [-30, 0, 30, 0, -30];
 const X_POS_R = [42, 40, 42, 38, 42];
 const Y_POS_R = [30, 0, -30, 0, 30];
+const TRAIL_PARTICLES = 6;
 
 const state = {
     targetScroll: 0, currentScroll: 0,
@@ -27,7 +28,8 @@ const state = {
     targetX: 0, targetY: 0,
     cursorX: window.innerWidth / 2, cursorY: window.innerHeight / 2,
     targetCursorX: window.innerWidth / 2, targetCursorY: window.innerHeight / 2,
-    maxScroll: 1, modalOpen: false
+    maxScroll: 1, modalOpen: false,
+    trailData: []
 };
 
 const DOM = {
@@ -48,19 +50,40 @@ const DOM = {
     feedback: document.getElementById('form-feedback'),
     tokenDisplay: document.getElementById('tracking-token'),
     dyeSpread: document.getElementById('dye-spread'),
+    trailContainer: document.getElementById('dye-trail-container'),
     starfield: document.getElementById('starfield')
 };
 
-const calculateMaxScroll = () => {
-    state.maxScroll = Math.max(1, document.documentElement.scrollHeight - state.winHeight);
+const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
 };
 
-// --- Solar System Applet Logic ---
+const calculateMaxScroll = () => {
+    state.maxScroll = Math.max(1, document.body.scrollHeight - state.winHeight);
+};
+
+const resizeObserver = new ResizeObserver(debounce(() => {
+    state.winWidth = window.innerWidth;
+    state.winHeight = window.innerHeight;
+    calculateMaxScroll();
+    if(!state.isAnimating) {
+        state.isAnimating = true;
+        window.requestAnimationFrame(renderLoop);
+    }
+}, 100));
+
+resizeObserver.observe(document.body);
+
+// --- Solar System Logic ---
 const planetDatabase = {
-    earth: { name: "Earth", type: "Terrestrial", radius: "6,371 km", facts: "The only astronomical object known to harbor life. About 71% of Earth's surface is made up of the ocean.", visual: "radial-gradient(circle, #4b9fe3, #1e5c8f)" },
-    mars: { name: "Mars", type: "Terrestrial", radius: "3,389 km", facts: "Known as the Red Planet due to iron oxide prevalent on its surface. It hosts Olympus Mons, the largest volcano in the system.", visual: "radial-gradient(circle, #e27b58, #8c3b23)" },
-    jupiter: { name: "Jupiter", type: "Gas Giant", radius: "69,911 km", facts: "The largest planet in the solar system. Its Great Red Spot is a giant storm that is larger than Earth itself.", visual: "radial-gradient(circle, #c88b3a, #7a5223)" },
-    saturn: { name: "Saturn", type: "Gas Giant", radius: "58,232 km", facts: "Famous for its prominent ring system composed mostly of ice particles, rocky debris, and dust.", visual: "radial-gradient(circle, #e3d599, #9e9154)" }
+    earth: { name: "Earth_Node", type: "Terrestrial", radius: "6,371 km", gravity: "9.8 m/s²", facts: "Atrunix HQ. The only known node in the system supporting biological life and organic data processing. Surface composition is 71% H2O.", visual: "radial-gradient(circle at 30% 30%, #4b9fe3, #1e5c8f, #000)" },
+    mars: { name: "Mars_Node", type: "Terrestrial", radius: "3,389 km", gravity: "3.7 m/s²", facts: "High iron oxide surface concentration. Hosts Olympus Mons, the largest geological formation in the planetary network.", visual: "radial-gradient(circle at 30% 30%, #e27b58, #8c3b23, #000)" },
+    jupiter: { name: "Jupiter_Node", type: "Gas Giant", radius: "69,911 km", gravity: "24.7 m/s²", facts: "Primary gravitational anchor. Its Great Red Spot represents a persistent atmospheric storm system larger than the Earth node.", visual: "radial-gradient(circle at 30% 30%, #c88b3a, #7a5223, #000)" },
+    saturn: { name: "Saturn_Node", type: "Gas Giant", radius: "58,232 km", gravity: "10.4 m/s²", facts: "Characterized by an extensive orbital ring network composed of ice particles, rocky debris, and cosmic dust.", visual: "radial-gradient(circle at 30% 30%, #e3d599, #9e9154, #000)" }
 };
 
 const setupSolarSystem = () => {
@@ -68,6 +91,7 @@ const setupSolarSystem = () => {
     const modal = document.getElementById('planet-modal');
     const closeBtn = document.getElementById('close-planet-btn');
     const visual = document.getElementById('detail-planet-visual');
+    let typingInterval;
     
     planets.forEach(p => {
         p.addEventListener('click', () => {
@@ -77,7 +101,17 @@ const setupSolarSystem = () => {
                 document.getElementById('detail-name').textContent = data.name;
                 document.getElementById('detail-type').textContent = data.type;
                 document.getElementById('detail-radius').textContent = data.radius;
-                document.getElementById('detail-facts').textContent = data.facts;
+                document.getElementById('detail-gravity').textContent = data.gravity;
+                
+                const factsEl = document.getElementById('detail-facts');
+                factsEl.textContent = '';
+                clearInterval(typingInterval);
+                let i = 0;
+                typingInterval = setInterval(() => {
+                    factsEl.textContent += data.facts.charAt(i);
+                    i++;
+                    if(i >= data.facts.length) clearInterval(typingInterval);
+                }, 15);
                 
                 visual.innerHTML = '';
                 if(p.getAttribute('data-planet') === 'saturn') {
@@ -85,7 +119,7 @@ const setupSolarSystem = () => {
                     ring.className = 'saturn-rings';
                     ring.style.width = '160px'; ring.style.height = '35px';
                     ring.style.borderWidth = '10px';
-                    ring.style.left = '-30px'; ring.style.top = '32px';
+                    ring.style.left = '-25px'; ring.style.top = '32px';
                     visual.appendChild(ring);
                 }
                 modal.classList.remove('hidden');
@@ -93,7 +127,10 @@ const setupSolarSystem = () => {
         });
     });
 
-    if(closeBtn) closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+    if(closeBtn) closeBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        clearInterval(typingInterval);
+    });
 };
 
 // --- Form & Accessibility Logic ---
@@ -210,16 +247,6 @@ document.querySelector('.side-nav')?.addEventListener('click', (e) => {
     }
 });
 
-let resizeTimeout;
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-        state.winWidth = window.innerWidth;
-        state.winHeight = window.innerHeight;
-        calculateMaxScroll();
-    }, 250);
-});
-
 window.addEventListener('mousemove', (e) => {
     if (PREFERS_REDUCED_MOTION.matches || state.modalOpen) return;
     state.targetX = (e.clientX / state.winWidth) * 2 - 1;
@@ -227,7 +254,6 @@ window.addEventListener('mousemove', (e) => {
     state.targetCursorX = e.clientX;
     state.targetCursorY = e.clientY;
     
-    // Wake up render loop if stopped
     if(!state.isAnimating) {
         state.isAnimating = true;
         window.requestAnimationFrame(renderLoop);
@@ -254,12 +280,12 @@ const setupObserver = () => {
                 });
             }
         });
-    }, { root: null, rootMargin: '0px 0px -50px 0px', threshold: 0.1 }); // Extremely forgiving threshold
+    }, { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
 
     document.querySelectorAll('.fade-in-section').forEach(section => observer.observe(section));
 };
 
-// --- Optimized Render Loop Engine ---
+// --- Render Loop Engine ---
 const renderLoop = () => {
     if (PREFERS_REDUCED_MOTION.matches) { state.isAnimating = false; return; }
 
@@ -288,10 +314,28 @@ const renderLoop = () => {
     state.mouseX += (state.targetX - state.mouseX) * 0.15;
     state.mouseY += (state.targetY - state.mouseY) * 0.15;
     
-    // Update Direct DOM Transform for Cursor Dye Spread (Fixes Lag entirely)
+    // Main Dye Spread Tracker
     state.cursorX += (state.targetCursorX - state.cursorX) * 0.15;
     state.cursorY += (state.targetCursorY - state.cursorY) * 0.15;
-    if(DOM.dyeSpread) {
+    
+    // Smooth trailing particle logic
+    let prevTx = state.cursorX;
+    let prevTy = state.cursorY;
+    state.trailData.forEach((pt, i) => {
+        pt.x += (prevTx - pt.x) * 0.45;
+        pt.y += (prevTy - pt.y) * 0.45;
+        
+        const scale = 1 - (i / TRAIL_PARTICLES) * 0.6;
+        const alpha = 0.25 - (i / TRAIL_PARTICLES) * 0.2;
+        
+        pt.el.style.transform = `translate3d(${pt.x}px, ${pt.y}px, 0) translate(-50%, -50%) scale(${scale})`;
+        pt.el.style.opacity = alpha;
+        
+        prevTx = pt.x;
+        prevTy = pt.y;
+    });
+
+    if (DOM.dyeSpread) {
         DOM.dyeSpread.style.transform = `translate3d(${state.cursorX}px, ${state.cursorY}px, 0) translate(-50%, -50%)`;
     }
     
@@ -327,7 +371,7 @@ const renderLoop = () => {
         DOM.dropletsR[2].style.transform = `translate3d(0px, ${-dirY * spread * 1.5}px, 0) scale(${0.3 + fluidIntensity * 0.7})`;
     }
 
-    if(DOM.hudBar) DOM.hudBar.style.strokeDashoffset = (scrollProgress > 0.99) ? 0 : 100 - (scrollProgress * 100);
+    if(DOM.hudBar) DOM.hudBar.style.strokeDashoffset = 100 - (scrollProgress * 100);
 
     let poly1 = 'polygon(', poly2 = 'polygon(';
     for (let i = 0; i < 8; i++) {
@@ -346,13 +390,10 @@ const renderLoop = () => {
     const b = Math.round(currentShape.c[2] + (nextShape.c[2] - currentShape.c[2]) * localProgress);
     document.documentElement.style.setProperty('--dyn-color', `rgb(${r}, ${g}, ${b})`);
 
-    // Performance Optimization: Stop requesting frames if completely idle
     const deltaScroll = Math.abs(state.targetScroll - state.currentScroll);
     const deltaMouseX = Math.abs(state.targetCursorX - state.cursorX);
     const deltaMouseY = Math.abs(state.targetCursorY - state.cursorY);
     
-    // We keep a continuous loop running only if the window is actively changing, OR if we want the ambient float. 
-    // To save 100% of battery when idle, we pause the animation if everything has settled.
     if (deltaScroll > 0.5 || deltaMouseX > 0.5 || deltaMouseY > 0.5 || fluidIntensity > 0.01) {
         window.requestAnimationFrame(renderLoop);
     } else {
@@ -361,6 +402,16 @@ const renderLoop = () => {
 };
 
 const initApp = () => {
+    // Generate Trail DOM elements dynamically
+    if (DOM.trailContainer) {
+        for (let i = 0; i < TRAIL_PARTICLES; i++) {
+            const p = document.createElement('div');
+            p.className = 'dye-trail-particle';
+            DOM.trailContainer.appendChild(p);
+            state.trailData.push({ el: p, x: state.cursorX, y: state.cursorY });
+        }
+    }
+    
     setupSolarSystem();
     calculateMaxScroll();
     setupObserver();
