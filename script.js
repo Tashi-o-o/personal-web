@@ -63,7 +63,7 @@ const debounce = (func, wait) => {
 };
 
 const calculateMaxScroll = () => {
-    state.maxScroll = Math.max(1, document.body.scrollHeight - state.winHeight);
+    state.maxScroll = Math.max(1, document.documentElement.scrollHeight - state.winHeight);
 };
 
 const resizeObserver = new ResizeObserver(debounce(() => {
@@ -78,12 +78,16 @@ const resizeObserver = new ResizeObserver(debounce(() => {
 
 resizeObserver.observe(document.body);
 
-// --- Solar System Logic ---
+// --- Full Solar System Telemetry Database ---
 const planetDatabase = {
-    earth: { name: "Earth_Node", type: "Terrestrial", radius: "6,371 km", gravity: "9.8 m/s²", facts: "Atrunix HQ. The only known node in the system supporting biological life and organic data processing. Surface composition is 71% H2O.", visual: "radial-gradient(circle at 30% 30%, #4b9fe3, #1e5c8f, #000)" },
-    mars: { name: "Mars_Node", type: "Terrestrial", radius: "3,389 km", gravity: "3.7 m/s²", facts: "High iron oxide surface concentration. Hosts Olympus Mons, the largest geological formation in the planetary network.", visual: "radial-gradient(circle at 30% 30%, #e27b58, #8c3b23, #000)" },
+    mercury: { name: "Mercury_Node", type: "Terrestrial", radius: "2,439 km", gravity: "3.7 m/s²", facts: "Innermost planetary node. Highly cratered surface with zero atmosphere, experiencing extreme thermal swings from -180°C to 430°C.", visual: "radial-gradient(circle at 30% 30%, #a6a6a6, #595959, #000)" },
+    venus: { name: "Venus_Node", type: "Terrestrial", radius: "6,051 km", gravity: "8.8 m/s²", facts: "Enveloped in dense sulfuric acid clouds. Exhibits an extreme runaway greenhouse effect making it the hottest surface in the system.", visual: "radial-gradient(circle at 30% 30%, #e3bb76, #a17838, #000)" },
+    earth: { name: "Earth_Node", type: "Terrestrial", radius: "6,371 km", gravity: "9.8 m/s²", facts: "Atrunix HQ. The only known node supporting biological life and organic data processing. Surface composition is 71% liquid H2O.", visual: "radial-gradient(circle at 30% 30%, #4b9fe3, #1e5c8f, #000)" },
+    mars: { name: "Mars_Node", type: "Terrestrial", radius: "3,389 km", gravity: "3.7 m/s²", facts: "High iron oxide surface concentration. Hosts Olympus Mons, the largest geological volcano formation in the planetary network.", visual: "radial-gradient(circle at 30% 30%, #e27b58, #8c3b23, #000)" },
     jupiter: { name: "Jupiter_Node", type: "Gas Giant", radius: "69,911 km", gravity: "24.7 m/s²", facts: "Primary gravitational anchor. Its Great Red Spot represents a persistent atmospheric storm system larger than the Earth node.", visual: "radial-gradient(circle at 30% 30%, #c88b3a, #7a5223, #000)" },
-    saturn: { name: "Saturn_Node", type: "Gas Giant", radius: "58,232 km", gravity: "10.4 m/s²", facts: "Characterized by an extensive orbital ring network composed of ice particles, rocky debris, and cosmic dust.", visual: "radial-gradient(circle at 30% 30%, #e3d599, #9e9154, #000)" }
+    saturn: { name: "Saturn_Node", type: "Gas Giant", radius: "58,232 km", gravity: "10.4 m/s²", facts: "Characterized by an extensive orbital ring network composed of ice particles, rocky debris, and cosmic dust.", visual: "radial-gradient(circle at 30% 30%, #e3d599, #9e9154, #000)" },
+    uranus: { name: "Uranus_Node", type: "Ice Giant", radius: "25,362 km", gravity: "8.7 m/s²", facts: "Rotates on a radical 97.8-degree axial tilt. Methane-rich atmospheric mantle imparts a distinct cyan coloration.", visual: "radial-gradient(circle at 30% 30%, #68d8d6, #2b8a88, #000)" },
+    neptune: { name: "Neptune_Node", type: "Ice Giant", radius: "24,622 km", gravity: "11.1 m/s²", facts: "Outermost giant node. Experiences extreme supersonic winds reaching up to 2,100 km/h within its deep blue atmosphere.", visual: "radial-gradient(circle at 30% 30%, #4169e1, #192a78, #000)" }
 };
 
 const setupSolarSystem = () => {
@@ -239,26 +243,27 @@ if (DOM.tokenDisplay) {
     });
 }
 
-// --- Interaction Events ---
-document.querySelector('.side-nav')?.addEventListener('click', (e) => {
-    if (e.target.classList.contains('nav-dot')) {
-        e.preventDefault();
-        document.getElementById(e.target.getAttribute('data-target'))?.scrollIntoView({ behavior: 'smooth' });
-    }
-});
-
-window.addEventListener('mousemove', (e) => {
+// --- Smooth Tracking for PC (Mouse) & Mobile (Touch) ---
+const handlePointerMove = (clientX, clientY) => {
     if (PREFERS_REDUCED_MOTION.matches || state.modalOpen) return;
-    state.targetX = (e.clientX / state.winWidth) * 2 - 1;
-    state.targetY = (e.clientY / state.winHeight) * 2 - 1;
-    state.targetCursorX = e.clientX;
-    state.targetCursorY = e.clientY;
+    
+    // Normalized coordinates for 3D parallax elements
+    state.targetX = (clientX / state.winWidth) * 2 - 1;
+    state.targetY = (clientY / state.winHeight) * 2 - 1;
+    
+    // Direct coordinates for the dye tracking
+    state.targetCursorX = clientX;
+    state.targetCursorY = clientY;
     
     if(!state.isAnimating) {
         state.isAnimating = true;
         window.requestAnimationFrame(renderLoop);
     }
-}, { passive: true });
+};
+
+window.addEventListener('mousemove', (e) => handlePointerMove(e.clientX, e.clientY), { passive: true });
+window.addEventListener('touchmove', (e) => handlePointerMove(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+window.addEventListener('touchstart', (e) => handlePointerMove(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
 
 window.addEventListener('scroll', () => {
     state.targetScroll = window.scrollY;
@@ -285,7 +290,7 @@ const setupObserver = () => {
     document.querySelectorAll('.fade-in-section').forEach(section => observer.observe(section));
 };
 
-// --- Render Loop Engine ---
+// --- Optimized Render Loop Engine ---
 const renderLoop = () => {
     if (PREFERS_REDUCED_MOTION.matches) { state.isAnimating = false; return; }
 
@@ -318,7 +323,7 @@ const renderLoop = () => {
     state.cursorX += (state.targetCursorX - state.cursorX) * 0.15;
     state.cursorY += (state.targetCursorY - state.cursorY) * 0.15;
     
-    // Smooth trailing particle logic
+    // Dimmed smooth trailing particle logic
     let prevTx = state.cursorX;
     let prevTy = state.cursorY;
     state.trailData.forEach((pt, i) => {
@@ -326,7 +331,7 @@ const renderLoop = () => {
         pt.y += (prevTy - pt.y) * 0.45;
         
         const scale = 1 - (i / TRAIL_PARTICLES) * 0.6;
-        const alpha = 0.25 - (i / TRAIL_PARTICLES) * 0.2;
+        const alpha = 0.15 - (i / TRAIL_PARTICLES) * 0.15; // Lowered opacity for cleaner UI
         
         pt.el.style.transform = `translate3d(${pt.x}px, ${pt.y}px, 0) translate(-50%, -50%) scale(${scale})`;
         pt.el.style.opacity = alpha;
@@ -413,12 +418,15 @@ const initApp = () => {
     }
     
     setupSolarSystem();
-    calculateMaxScroll();
-    setupObserver();
-    state.targetScroll = window.scrollY;
-    state.currentScroll = window.scrollY;
-    state.isAnimating = true;
-    window.requestAnimationFrame(renderLoop);
+    // Allow DOM to paint before calculating max height
+    setTimeout(() => {
+        calculateMaxScroll();
+        setupObserver();
+        state.targetScroll = window.scrollY;
+        state.currentScroll = window.scrollY;
+        state.isAnimating = true;
+        window.requestAnimationFrame(renderLoop);
+    }, 100);
 };
 
 if (document.readyState !== 'loading') {
