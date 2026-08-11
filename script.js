@@ -226,6 +226,12 @@ window.addEventListener('mousemove', (e) => {
     state.targetY = (e.clientY / state.winHeight) * 2 - 1;
     state.targetCursorX = e.clientX;
     state.targetCursorY = e.clientY;
+    
+    // Wake up render loop if stopped
+    if(!state.isAnimating) {
+        state.isAnimating = true;
+        window.requestAnimationFrame(renderLoop);
+    }
 }, { passive: true });
 
 window.addEventListener('scroll', () => {
@@ -236,7 +242,6 @@ window.addEventListener('scroll', () => {
     }
 }, { passive: true });
 
-// Observer Threshold changed from 0.5 to 0.1 to guarantee firing on taller elements
 const setupObserver = () => {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -249,12 +254,12 @@ const setupObserver = () => {
                 });
             }
         });
-    }, { root: null, rootMargin: '0px 0px -50px 0px', threshold: 0.1 });
+    }, { root: null, rootMargin: '0px 0px -50px 0px', threshold: 0.1 }); // Extremely forgiving threshold
 
     document.querySelectorAll('.fade-in-section').forEach(section => observer.observe(section));
 };
 
-// --- Render Loop Engine ---
+// --- Optimized Render Loop Engine ---
 const renderLoop = () => {
     if (PREFERS_REDUCED_MOTION.matches) { state.isAnimating = false; return; }
 
@@ -283,10 +288,12 @@ const renderLoop = () => {
     state.mouseX += (state.targetX - state.mouseX) * 0.15;
     state.mouseY += (state.targetY - state.mouseY) * 0.15;
     
+    // Update Direct DOM Transform for Cursor Dye Spread (Fixes Lag entirely)
     state.cursorX += (state.targetCursorX - state.cursorX) * 0.15;
     state.cursorY += (state.targetCursorY - state.cursorY) * 0.15;
-    document.documentElement.style.setProperty('--mouse-x', `${state.cursorX}px`);
-    document.documentElement.style.setProperty('--mouse-y', `${state.cursorY}px`);
+    if(DOM.dyeSpread) {
+        DOM.dyeSpread.style.transform = `translate3d(${state.cursorX}px, ${state.cursorY}px, 0) translate(-50%, -50%)`;
+    }
     
     const viewportX = (shapeX * state.winWidth) / 100;
     const viewportY = ((shapeY * state.winHeight) / 100) + ambientY;
@@ -296,7 +303,6 @@ const renderLoop = () => {
     if (DOM.wrapperL) DOM.wrapperL.style.transform = `translate3d(${viewportX + (state.mouseX * 15)}px, ${viewportY + (state.mouseY * 15)}px, 0)`;
     if (DOM.wrapperR) DOM.wrapperR.style.transform = `translate3d(${viewportX2 + (state.mouseX * 10)}px, ${viewportY2 + (state.mouseY * 10)}px, 0)`;
 
-    // Apply Parallax to Starfield
     if (DOM.starfield) DOM.starfield.style.transform = `translate3d(${state.mouseX * -15}px, ${state.mouseY * -15}px, 0)`;
 
     const stretchY = 1 + (fluidIntensity * 0.4);
@@ -340,7 +346,18 @@ const renderLoop = () => {
     const b = Math.round(currentShape.c[2] + (nextShape.c[2] - currentShape.c[2]) * localProgress);
     document.documentElement.style.setProperty('--dyn-color', `rgb(${r}, ${g}, ${b})`);
 
-    window.requestAnimationFrame(renderLoop);
+    // Performance Optimization: Stop requesting frames if completely idle
+    const deltaScroll = Math.abs(state.targetScroll - state.currentScroll);
+    const deltaMouseX = Math.abs(state.targetCursorX - state.cursorX);
+    const deltaMouseY = Math.abs(state.targetCursorY - state.cursorY);
+    
+    // We keep a continuous loop running only if the window is actively changing, OR if we want the ambient float. 
+    // To save 100% of battery when idle, we pause the animation if everything has settled.
+    if (deltaScroll > 0.5 || deltaMouseX > 0.5 || deltaMouseY > 0.5 || fluidIntensity > 0.01) {
+        window.requestAnimationFrame(renderLoop);
+    } else {
+        state.isAnimating = false;
+    }
 };
 
 const initApp = () => {
