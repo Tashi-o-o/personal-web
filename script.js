@@ -16,8 +16,10 @@ const SHAPES = [
     { p: [[40,0], [60,0], [100,40], [100,60], [60,100], [40,100], [0,60], [0,40]], c: [255, 0, 85] }
 ];
 
+// Left Margin constraints
 const X_POS_L = [-42, -40, -42, -38, -42];
 const Y_POS_L = [-30, 0, 30, 0, -30];
+// Right Margin constraints
 const X_POS_R = [42, 40, 42, 38, 42];
 const Y_POS_R = [30, 0, -30, 0, 30];
 
@@ -53,7 +55,8 @@ const DOM = {
     closeModalBtn: document.querySelector('.close-modal'),
     form: document.getElementById('intake-form'),
     feedback: document.getElementById('form-feedback'),
-    tokenDisplay: document.getElementById('tracking-token')
+    tokenDisplay: document.getElementById('tracking-token'),
+    dyeSpread: document.getElementById('dye-spread')
 };
 
 // --- Utility Functions ---
@@ -75,8 +78,10 @@ let firstFocusableElement, lastFocusableElement;
 
 const updateFocusTrap = () => {
     const focusableContent = DOM.modal.querySelectorAll(focusableElements);
-    firstFocusableElement = focusableContent[0];
-    lastFocusableElement = focusableContent[focusableContent.length - 1];
+    if(focusableContent.length > 0) {
+        firstFocusableElement = focusableContent[0];
+        lastFocusableElement = focusableContent[focusableContent.length - 1];
+    }
 };
 
 const toggleModal = (isOpen) => {
@@ -86,7 +91,7 @@ const toggleModal = (isOpen) => {
     
     if (isOpen) {
         DOM.modal.classList.add('active');
-        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        document.body.style.overflow = 'hidden';
         updateFocusTrap();
         setTimeout(() => firstFocusableElement?.focus(), 100);
     } else {
@@ -131,7 +136,6 @@ if (DOM.form) {
         e.preventDefault();
         let isValid = true;
         
-        // Basic Client-Side Validation
         const requiredInputs = DOM.form.querySelectorAll('input[required], textarea[required]');
         requiredInputs.forEach(input => {
             if (!input.value.trim()) {
@@ -151,10 +155,8 @@ if (DOM.form) {
         submitBtn.disabled = true;
 
         try {
-            // Simulate async network request
             await new Promise(resolve => setTimeout(resolve, 1500));
             
-            // Generate secure-looking token
             const cryptoArr = new Uint32Array(1);
             window.crypto.getRandomValues(cryptoArr);
             const token = 'ATRX-' + cryptoArr[0].toString(36).toUpperCase().padStart(6, '0');
@@ -196,7 +198,6 @@ if (DOM.tokenDisplay) {
 
 // --- Graphical Rendering Engine ---
 
-// Event Delegation for Nav Dots
 document.querySelector('.side-nav')?.addEventListener('click', (e) => {
     if (e.target.classList.contains('nav-dot')) {
         e.preventDefault();
@@ -205,21 +206,18 @@ document.querySelector('.side-nav')?.addEventListener('click', (e) => {
     }
 });
 
-// Resizing
 window.addEventListener('resize', debounce(() => {
     state.winWidth = window.innerWidth;
     state.winHeight = window.innerHeight;
     calculateMaxScroll();
 }, 250));
 
-// Mouse Tracking (Throttled via RequestAnimationFrame logic)
 window.addEventListener('mousemove', (e) => {
     if (PREFERS_REDUCED_MOTION.matches || state.modalOpen) return;
     state.targetX = (e.clientX / state.winWidth) * 2 - 1;
     state.targetY = (e.clientY / state.winHeight) * 2 - 1;
 }, { passive: true });
 
-// Scroll Tracking
 window.addEventListener('scroll', () => {
     state.targetScroll = window.scrollY;
     if (!state.isAnimating) {
@@ -228,7 +226,6 @@ window.addEventListener('scroll', () => {
     }
 }, { passive: true });
 
-// Intersection Observer for Sections
 const setupObserver = () => {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -246,14 +243,12 @@ const setupObserver = () => {
     document.querySelectorAll('.fade-in-section').forEach(section => observer.observe(section));
 };
 
-// Main Rendering Loop
 const renderLoop = () => {
     if (PREFERS_REDUCED_MOTION.matches) {
         state.isAnimating = false;
         return; 
     }
 
-    // Kinematic smoothing
     state.currentScroll += (state.targetScroll - state.currentScroll) * 0.18;
     let scrollProgress = Math.max(0, Math.min(1, state.currentScroll / state.maxScroll)) || 0;
 
@@ -273,7 +268,6 @@ const renderLoop = () => {
     const shapeX2 = X_POS_R[currentIndex] + (X_POS_R[nextIndex] - X_POS_R[currentIndex]) * localProgress;
     const shapeY2 = Y_POS_R[currentIndex] + (Y_POS_R[nextIndex] - Y_POS_R[currentIndex]) * localProgress;
 
-    // Ambient floating based on time
     const time = Date.now() * 0.001;
     const ambientY = Math.sin(time) * 10;
     const fluidIntensity = Math.sin(localProgress * Math.PI);
@@ -286,9 +280,15 @@ const renderLoop = () => {
     const viewportX2 = (shapeX2 * state.winWidth) / 100;
     const viewportY2 = ((shapeY2 * state.winHeight) / 100) - ambientY;
 
-    // Transforms
     DOM.wrapperL.style.transform = `translate3d(${viewportX + (state.mouseX * 15)}px, ${viewportY + (state.mouseY * 15)}px, 0)`;
     DOM.wrapperR.style.transform = `translate3d(${viewportX2 + (state.mouseX * 10)}px, ${viewportY2 + (state.mouseY * 10)}px, 0)`;
+
+    // Interactive Cursor Dye Spread Translation
+    const cursorPixelX = ((state.mouseX + 1) / 2) * state.winWidth;
+    const cursorPixelY = ((state.mouseY + 1) / 2) * state.winHeight;
+    if (DOM.dyeSpread) {
+        DOM.dyeSpread.style.transform = `translate3d(${cursorPixelX}px, ${cursorPixelY}px, 0)`;
+    }
 
     const stretchY = 1 + (fluidIntensity * 0.4);
     const squishX = 1 - (fluidIntensity * 0.2);
@@ -297,7 +297,6 @@ const renderLoop = () => {
     DOM.containerL.style.transform = `scale(${squishX}, ${stretchY}) skewY(${skewAmount}deg) translateZ(0)`;
     DOM.containerR.style.transform = `scale(${squishX}, ${stretchY}) skewY(${-skewAmount}deg) translateZ(0)`;
 
-    // Droplets
     const spread = fluidIntensity * 100;
     const dirY = Y_POS_L[nextIndex] > Y_POS_L[currentIndex] ? 1 : -1;
     
@@ -309,10 +308,8 @@ const renderLoop = () => {
     DOM.dropletsR[1].style.transform = `translate3d(${-spread * 0.8}px, ${-dirY * spread * 0.5}px, 0) scale(${0.1 + fluidIntensity * 0.9})`;
     DOM.dropletsR[2].style.transform = `translate3d(0px, ${-dirY * spread * 1.5}px, 0) scale(${0.3 + fluidIntensity * 0.7})`;
 
-    // HUD Update
     DOM.hudBar.style.strokeDashoffset = (scrollProgress > 0.99) ? 0 : 100 - (scrollProgress * 100);
 
-    // Polygons
     let poly1 = 'polygon(', poly2 = 'polygon(';
     for (let i = 0; i < 8; i++) {
         const x = currentShape.p[i][0] + (nextShape.p[i][0] - currentShape.p[i][0]) * localProgress;
@@ -326,22 +323,18 @@ const renderLoop = () => {
     DOM.shapeL.style.clipPath = poly1 + ')';
     DOM.shapeR.style.clipPath = poly2 + ')';
 
-    // Color Logic via CSS Var
     const r = Math.round(currentShape.c[0] + (nextShape.c[0] - currentShape.c[0]) * localProgress);
     const g = Math.round(currentShape.c[1] + (nextShape.c[1] - currentShape.c[1]) * localProgress);
     const b = Math.round(currentShape.c[2] + (nextShape.c[2] - currentShape.c[2]) * localProgress);
     document.documentElement.style.setProperty('--dyn-color', `rgb(${r}, ${g}, ${b})`);
 
-    // Loop continuation constraint
     if (Math.abs(state.targetScroll - state.currentScroll) > 0.5 || Math.abs(state.targetX - state.mouseX) > 0.01 || fluidIntensity > 0.01) {
         window.requestAnimationFrame(renderLoop);
     } else {
-        // Keep loop alive purely for ambient continuous motion if active
         window.requestAnimationFrame(renderLoop); 
     }
 };
 
-// Initialize
 const init = () => {
     calculateMaxScroll();
     setupObserver();
