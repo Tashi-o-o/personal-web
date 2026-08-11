@@ -28,30 +28,25 @@
     </noscript>
 </head>
 <body>
-    <!-- Hardware-Accelerated SVG Cellular Membrane Filter -->
-    <svg style="position: absolute; width: 0; height: 0;" aria-hidden="true">
+    <!-- Advanced 3D Fluid & Outline SVG Shader -->
+    <svg style="position: absolute; width: 0; height: 0; pointer-events: none;" aria-hidden="true">
         <defs>
-            <filter id="sick-goo">
+            <filter id="sick-goo" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+                <!-- 1. Soften the shapes -->
                 <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur" />
-                
-                <!-- The Outer Membrane Outline (White) -->
-                <feColorMatrix in="blur" mode="matrix" values="
-                    0 0 0 0 1  
-                    0 0 0 0 1  
-                    0 0 0 0 1  
-                    0 0 0 22 -9" result="membrane" />
-                
-                <!-- The Inner Fluid Core (Preserves Dynamic Color) -->
-                <feColorMatrix in="blur" mode="matrix" values="
-                    1 0 0 0 0  
-                    0 1 0 0 0  
-                    0 0 1 0 0  
-                    0 0 0 45 -22" result="core" />
-                
-                <!-- Composite layer stacking -->
+                <!-- 2. Clamp the alpha to create the melted threshold -->
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 25 -12" result="goo" />
+                <!-- 3. Extract the edge to create the outline -->
+                <feMorphology in="goo" operator="dilate" radius="3" result="dilated" />
+                <feComposite in="dilated" in2="goo" operator="out" result="outline_raw" />
+                <!-- 4. Color the outline pure white -->
+                <feColorMatrix in="outline_raw" mode="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0" result="outline" />
+                <!-- 5. Map the original 3D sphere gradients back onto the melted goo shape -->
+                <feComposite in="SourceGraphic" in2="goo" operator="atop" result="melted_3d" />
+                <!-- 6. Stack the glowing outline behind the 3D fluid -->
                 <feMerge>
-                    <feMergeNode in="membrane" />
-                    <feMergeNode in="core" />
+                    <feMergeNode in="outline" />
+                    <feMergeNode in="melted_3d" />
                 </feMerge>
             </filter>
         </defs>
@@ -179,7 +174,7 @@
                         </div>
                     </div>
 
-                    <!-- 2. Interactive Gooey Lava Lamp -->
+                    <!-- 2. Interactive Gooey Lava Lamp (3D Spheres with Sick Outline) -->
                     <div class="demo-window">
                         <div class="demo-header">
                             <div class="demo-dots"><span></span><span></span><span></span></div>
@@ -187,7 +182,8 @@
                         </div>
                         <div class="demo-viewport lava-viewport" id="lava-viewport">
                             <div class="lava-text tech-font">ENGAGE FLUID DISRUPTION</div>
-                            <div class="lava-fluid-layer">
+                            <!-- Inline style guarantees the SVG filter resolves correctly on all browsers -->
+                            <div class="lava-fluid-layer" style="filter: url('#sick-goo');">
                                 <div class="lava-blob blob-1"></div>
                                 <div class="lava-blob blob-2"></div>
                                 <div class="lava-blob blob-3"></div>
