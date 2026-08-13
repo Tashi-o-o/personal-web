@@ -40,17 +40,17 @@ body, html { margin: 0; padding: 0; font-family: 'Outfit', system-ui, sans-serif
 /* Tracking GUI */
 .hud-progress-frame { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 1; pointer-events: none; }
 .hud-track { fill: none; stroke: rgba(255, 255, 255, 0.04); stroke-width: 2px; }
-.hud-bar { fill: none; stroke: var(--dyn-color); stroke-width: 3px; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; will-change: stroke-dashoffset; transition: stroke-dashoffset 0.1s linear;}
+/* Added gentle bloom to progress bar */
+.hud-bar { fill: none; stroke: var(--dyn-color); stroke-width: 3px; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; filter: drop-shadow(0 0 10px var(--dyn-color)); will-change: stroke-dashoffset; transition: stroke-dashoffset 0.1s linear;}
 
 /* Structure Overlays and Bloom Magic */
 /* Z-Index raised to 15 (above content z-index 10) and mix-blend-mode screen makes it physically overlap tiles without hiding text */
 .atrunix-morph-container { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 15; mix-blend-mode: screen; contain: strict; pointer-events: none; }
 .floating-wrapper { position: relative; width: clamp(40px, 5vw, 70px); height: clamp(40px, 5vw, 70px); will-change: transform; }
 
-/* Apply perfectly tracing hardware-accelerated bloom via filter drop-shadow */
-.liquid-container { position: absolute; inset: 0; will-change: transform, filter; filter: drop-shadow(0 0 12px var(--dyn-color)) drop-shadow(0 0 25px var(--dyn-color)); transform: translateZ(0); }
+/* Lowered edge light bloom down to a single optimized 12px drop-shadow */
+.liquid-container { position: absolute; inset: 0; will-change: transform, filter; filter: drop-shadow(0 0 12px var(--dyn-color)); transform: translateZ(0); }
 .shape { position: absolute; inset: 0; background-color: var(--dyn-color); will-change: clip-path; clip-path: polygon(50% 0%, 50% 0%, 100% 100%, 100% 100%, 50% 100%, 0% 100%, 0% 100%, 50% 0%); z-index: 2; }
-/* Internal soft ambient glow to assist overlapping blend modes */
 .shape-glow { position: absolute; inset: -50%; background: radial-gradient(circle at center, var(--dyn-color) 0%, transparent 60%); opacity: 0.25; z-index: 1; transform: translateZ(0); }
 
 .droplet { position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; margin-block-start: -6px; margin-inline-start: -6px; border-radius: 50%; background-color: var(--dyn-color); will-change: transform; z-index: 2; }
