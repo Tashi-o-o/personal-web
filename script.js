@@ -4,7 +4,6 @@ window.addEventListener('error', (event) => {
     console.error("Atrunix Error Handler:", event.message, "at", event.filename, ":", event.lineno);
 });
 
-// Removed the PREFERS_REDUCED_MOTION block on pointer tracking so the cursor always interacts with the site.
 const PREFERS_REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 const SHAPES = [
@@ -19,7 +18,6 @@ const X_POS_L = [-42, -40, -42, -38, -42];
 const Y_POS_L = [-30, 0, 30, 0, -30];
 const X_POS_R = [42, 40, 42, 38, 42];
 const Y_POS_R = [30, 0, -30, 0, 30];
-const TRAIL_PARTICLES = 6;
 
 const state = {
     targetScroll: 0, currentScroll: 0,
@@ -27,10 +25,7 @@ const state = {
     winWidth: window.innerWidth, winHeight: window.innerHeight,
     mouseX: 0, mouseY: 0,
     targetX: 0, targetY: 0,
-    cursorX: window.innerWidth / 2, cursorY: window.innerHeight / 2,
-    targetCursorX: window.innerWidth / 2, targetCursorY: window.innerHeight / 2,
-    maxScroll: 1, modalOpen: false,
-    trailData: []
+    maxScroll: 1, modalOpen: false
 };
 
 const DOM = {
@@ -50,8 +45,6 @@ const DOM = {
     form: document.getElementById('intake-form'),
     feedback: document.getElementById('form-feedback'),
     tokenDisplay: document.getElementById('tracking-token'),
-    dyeSpread: document.getElementById('dye-spread'),
-    trailContainer: document.getElementById('dye-trail-container'),
     starfield: document.getElementById('starfield')
 };
 
@@ -135,23 +128,49 @@ const setupSolarSystem = () => {
     });
 };
 
-// --- Component 2: Lava Lamp Fluid Dynamics ---
-const setupLavaLamp = () => {
-    const lavaBox = document.getElementById('lava-viewport');
-    const lavaCursor = document.getElementById('lava-cursor');
-    if (!lavaBox || !lavaCursor) return;
+// --- Component 2: High-Performance Terminal Simulator ---
+const setupTerminal = () => {
+    const btn = document.getElementById('term-run-btn');
+    const output = document.getElementById('term-output');
+    if(!btn || !output) return;
 
-    const moveLavaCursor = (clientX, clientY) => {
-        const rect = lavaBox.getBoundingClientRect();
-        const x = clientX - rect.left;
-        const y = clientY - rect.top;
-        if(x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
-            lavaCursor.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
-        }
-    };
+    const scriptLines = [
+        { text: "> Authenticating local access...", delay: 400 },
+        { text: "[OK] Credentials verified.", delay: 300, class: "term-success" },
+        { text: "> Fetching build dependencies...", delay: 600 },
+        { text: "[WARN] 2 deprecation warnings ignored.", delay: 200, class: "term-warn" },
+        { text: "> Compiling JavaScript bundles (0.8s)...", delay: 800 },
+        { text: "> Injecting CSS variables...", delay: 400 },
+        { text: "[OK] Deployment routine finished.", delay: 500, class: "term-success" }
+    ];
 
-    lavaBox.addEventListener('mousemove', (e) => moveLavaCursor(e.clientX, e.clientY));
-    lavaBox.addEventListener('touchmove', (e) => moveLavaCursor(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
+    btn.addEventListener('click', () => {
+        btn.disabled = true;
+        output.innerHTML = '';
+        
+        let cumulativeDelay = 0;
+        
+        scriptLines.forEach((line, index) => {
+            cumulativeDelay += line.delay;
+            setTimeout(() => {
+                const span = document.createElement('span');
+                span.className = `term-line ${line.class || ''}`;
+                span.textContent = line.text;
+                output.appendChild(span);
+                output.scrollTop = output.scrollHeight;
+                
+                if(index === scriptLines.length - 1) {
+                    setTimeout(() => {
+                        const prompt = document.createElement('span');
+                        prompt.innerHTML = '<br><span class="term-prompt">user@atrunix:~$</span> Ready.';
+                        output.appendChild(prompt);
+                        output.scrollTop = output.scrollHeight;
+                        btn.disabled = false;
+                    }, 800);
+                }
+            }, cumulativeDelay);
+        });
+    });
 };
 
 // --- Component 3: 3D Holographic Card ---
@@ -159,10 +178,9 @@ const setupHoloCard = () => {
     const cardBox = document.getElementById('holo-viewport');
     const card = document.getElementById('holo-card');
     const glare = document.getElementById('holo-glare');
-    if (!cardBox || !card || !glare) return;
+    if (!cardBox || !card || !glare || PREFERS_REDUCED_MOTION.matches) return;
 
     const updateCardTilt = (clientX, clientY) => {
-        if(PREFERS_REDUCED_MOTION.matches) return;
         const rect = cardBox.getBoundingClientRect();
         const x = clientX - rect.left;
         const y = clientY - rect.top;
@@ -312,13 +330,10 @@ document.querySelector('.side-nav')?.addEventListener('click', (e) => {
 });
 
 const handlePointerMove = (clientX, clientY) => {
-    if (state.modalOpen) return; // Removed reduced-motion block to guarantee pointer interaction
+    if (state.modalOpen) return;
     
     state.targetX = (clientX / state.winWidth) * 2 - 1;
     state.targetY = (clientY / state.winHeight) * 2 - 1;
-    
-    state.targetCursorX = clientX;
-    state.targetCursorY = clientY;
     
     if(!state.isAnimating) {
         state.isAnimating = true;
@@ -387,29 +402,6 @@ const renderLoop = () => {
     state.mouseX += (state.targetX - state.mouseX) * 0.15;
     state.mouseY += (state.targetY - state.mouseY) * 0.15;
     
-    state.cursorX += (state.targetCursorX - state.cursorX) * 0.15;
-    state.cursorY += (state.targetCursorY - state.cursorY) * 0.15;
-    
-    let prevTx = state.cursorX;
-    let prevTy = state.cursorY;
-    state.trailData.forEach((pt, i) => {
-        pt.x += (prevTx - pt.x) * 0.45;
-        pt.y += (prevTy - pt.y) * 0.45;
-        
-        const scale = 1 - (i / TRAIL_PARTICLES) * 0.6;
-        const alpha = 0.15 - (i / TRAIL_PARTICLES) * 0.15;
-        
-        pt.el.style.transform = `translate3d(${pt.x}px, ${pt.y}px, 0) translate(-50%, -50%) scale(${scale})`;
-        pt.el.style.opacity = alpha;
-        
-        prevTx = pt.x;
-        prevTy = pt.y;
-    });
-
-    if (DOM.dyeSpread) {
-        DOM.dyeSpread.style.transform = `translate3d(${state.cursorX}px, ${state.cursorY}px, 0) translate(-50%, -50%)`;
-    }
-    
     const viewportX = (shapeX * state.winWidth) / 100;
     const viewportY = ((shapeY * state.winHeight) / 100) + ambientY;
     const viewportX2 = (shapeX2 * state.winWidth) / 100;
@@ -462,10 +454,8 @@ const renderLoop = () => {
     document.documentElement.style.setProperty('--dyn-color', `rgb(${r}, ${g}, ${b})`);
 
     const deltaScroll = Math.abs(state.targetScroll - state.currentScroll);
-    const deltaMouseX = Math.abs(state.targetCursorX - state.cursorX);
-    const deltaMouseY = Math.abs(state.targetCursorY - state.cursorY);
     
-    if (deltaScroll > 0.5 || deltaMouseX > 0.5 || deltaMouseY > 0.5 || fluidIntensity > 0.01) {
+    if (deltaScroll > 0.5 || fluidIntensity > 0.01) {
         window.requestAnimationFrame(renderLoop);
     } else {
         state.isAnimating = false;
@@ -473,17 +463,8 @@ const renderLoop = () => {
 };
 
 const initApp = () => {
-    if (DOM.trailContainer) {
-        for (let i = 0; i < TRAIL_PARTICLES; i++) {
-            const p = document.createElement('div');
-            p.className = 'dye-trail-particle';
-            DOM.trailContainer.appendChild(p);
-            state.trailData.push({ el: p, x: state.cursorX, y: state.cursorY });
-        }
-    }
-    
     setupSolarSystem();
-    setupLavaLamp();
+    setupTerminal();
     setupHoloCard();
     
     setTimeout(() => {
