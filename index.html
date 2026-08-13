@@ -21,46 +21,19 @@
     
     <noscript>
         <style>
-            .atrunix-morph-container, .hud-progress-frame, .interactive-dye-spread, .deep-space-bg, #dye-trail-container { display: none; }
+            .atrunix-morph-container, .hud-progress-frame, .deep-space-bg { display: none; }
             .content { background-color: #030305; }
             .fade-in-section { opacity: 1; transform: none; }
         </style>
     </noscript>
 </head>
 <body>
-    <!-- Advanced 3D Fluid & Outline SVG Shader -->
-    <svg style="position: absolute; width: 0; height: 0; pointer-events: none;" aria-hidden="true">
-        <defs>
-            <filter id="sick-goo" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
-                <!-- 1. Soften the shapes -->
-                <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur" />
-                <!-- 2. Clamp the alpha to create the melted threshold -->
-                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 25 -12" result="goo" />
-                <!-- 3. Extract the edge to create the outline -->
-                <feMorphology in="goo" operator="dilate" radius="3" result="dilated" />
-                <feComposite in="dilated" in2="goo" operator="out" result="outline_raw" />
-                <!-- 4. Color the outline pure white -->
-                <feColorMatrix in="outline_raw" mode="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0" result="outline" />
-                <!-- 5. Map the original 3D sphere gradients back onto the melted goo shape -->
-                <feComposite in="SourceGraphic" in2="goo" operator="atop" result="melted_3d" />
-                <!-- 6. Stack the glowing outline behind the 3D fluid -->
-                <feMerge>
-                    <feMergeNode in="outline" />
-                    <feMergeNode in="melted_3d" />
-                </feMerge>
-            </filter>
-        </defs>
-    </svg>
-
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
     <div class="noise-overlay" aria-hidden="true"></div>
     <div class="deep-space-bg" aria-hidden="true"></div>
     <div class="css-starfield" aria-hidden="true" id="starfield"></div>
     <div class="tech-grid" aria-hidden="true"></div>
-    
-    <div id="dye-trail-container" aria-hidden="true"></div>
-    <div class="interactive-dye-spread" id="dye-spread" aria-hidden="true"></div>
 
     <svg class="hud-progress-frame" preserveAspectRatio="none" aria-hidden="true" focusable="false">
         <rect class="hud-track" x="1.5%" y="1.5%" width="97%" height="97%" rx="15" />
@@ -121,7 +94,7 @@
             <article class="text-block wide-block fade-in-section">
                 <span class="subheading">Component Showcase</span>
                 <h2>Interactive Architecture</h2>
-                <p>Scroll down to explore distinct samples of custom DOM manipulation, fluid CSS physics, and advanced 3D transforms engineered for modern interfaces.</p>
+                <p>Scroll down to explore distinct samples of custom DOM manipulation, asynchronous script execution, and hardware-accelerated transforms engineered for maximum performance.</p>
                 
                 <div class="portfolio-grid">
                     
@@ -174,21 +147,18 @@
                         </div>
                     </div>
 
-                    <!-- 2. Interactive Gooey Lava Lamp (3D Spheres with Sick Outline) -->
+                    <!-- 2. Lightweight Terminal Deployment Engine -->
                     <div class="demo-window">
                         <div class="demo-header">
                             <div class="demo-dots"><span></span><span></span><span></span></div>
-                            <div class="demo-url">fluid-dynamics.atrunix.internal</div>
+                            <div class="demo-url">cli-deploy.atrunix.internal</div>
                         </div>
-                        <div class="demo-viewport lava-viewport" id="lava-viewport">
-                            <div class="lava-text tech-font">ENGAGE FLUID DISRUPTION</div>
-                            <!-- Inline style guarantees the SVG filter resolves correctly on all browsers -->
-                            <div class="lava-fluid-layer" style="filter: url('#sick-goo');">
-                                <div class="lava-blob blob-1"></div>
-                                <div class="lava-blob blob-2"></div>
-                                <div class="lava-blob blob-3"></div>
-                                <div class="lava-blob blob-4"></div>
-                                <div class="lava-cursor" id="lava-cursor"></div>
+                        <div class="demo-viewport term-viewport">
+                            <div class="term-interface">
+                                <div class="term-output tech-font" id="term-output">
+                                    <span class="term-prompt">user@atrunix:~$</span> Waiting for command...
+                                </div>
+                                <button class="term-btn tech-font" id="term-run-btn">./execute_deployment.sh</button>
                             </div>
                         </div>
                     </div>
