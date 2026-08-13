@@ -1,317 +1,461 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+'use strict';
+
+window.addEventListener('error', (event) => {
+    console.error("Atrunix Error Handler:", event.message, "at", event.filename, ":", event.lineno);
+});
+
+const PREFERS_REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+const SHAPES = [
+    { p: [[10,0], [90,10], [100,50], [80,100], [20,90], [0,60], [5,30], [5,10]], c: [0, 229, 255] },
+    { p: [[20,0], [80,0], [100,50], [100,50], [80,100], [20,100], [40,50], [40,50]], c: [181, 0, 255] },
+    { p: [[50,0], [75,25], [100,50], [75,75], [50,100], [25,75], [0,50], [25,25]], c: [255, 122, 0] },
+    { p: [[25,0], [100,0], [100,0], [75,100], [75,100], [0,100], [0,100], [25,0]], c: [0, 255, 87] },
+    { p: [[40,0], [60,0], [100,40], [100,60], [60,100], [40,100], [0,60], [0,40]], c: [255, 0, 85] }
+];
+
+const X_POS_L = [-42, -40, -42, -38, -42];
+const Y_POS_L = [-30, 0, 30, 0, -30];
+const X_POS_R = [42, 40, 42, 38, 42];
+const Y_POS_R = [30, 0, -30, 0, 30];
+
+const state = {
+    targetScroll: 0, currentScroll: 0,
+    isAnimating: false,
+    winWidth: window.innerWidth, winHeight: window.innerHeight,
+    mouseX: 0, mouseY: 0,
+    targetX: 0, targetY: 0,
+    maxScroll: 1, modalOpen: false
+};
+
+const DOM = {
+    shapeL: document.getElementById('geometry-morph'),
+    shapeR: document.getElementById('geometry-morph-2'),
+    hudBar: document.getElementById('progress-bar'),
+    hudBarGlow: document.getElementById('progress-glow'),
+    wrapperL: document.getElementById('parallax-wrapper'),
+    wrapperR: document.getElementById('parallax-wrapper-2'),
+    containerL: document.querySelector('.liquid-container'),
+    containerR: document.querySelector('.secondary-container .liquid-container'),
+    navDots: document.querySelectorAll('.nav-dot'),
+    modal: document.getElementById('intake-modal'),
+    openModalBtn: document.getElementById('open-intake'),
+    closeModalBtn: document.querySelector('.close-modal'),
+    form: document.getElementById('intake-form'),
+    feedback: document.getElementById('form-feedback'),
+    tokenDisplay: document.getElementById('tracking-token')
+};
+
+const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+};
+
+const calculateMaxScroll = () => {
+    state.maxScroll = Math.max(1, document.documentElement.scrollHeight - state.winHeight);
+};
+
+const resizeObserver = new ResizeObserver(debounce(() => {
+    state.winWidth = window.innerWidth;
+    state.winHeight = window.innerHeight;
+    calculateMaxScroll();
+    if(!state.isAnimating) {
+        state.isAnimating = true;
+        window.requestAnimationFrame(renderLoop);
+    }
+}, 100));
+
+resizeObserver.observe(document.body);
+
+// --- Component 1: Solar System Logic ---
+const planetDatabase = {
+    mercury: { name: "Mercury_Node", type: "Terrestrial", radius: "2,439 km", gravity: "3.7 m/s²", facts: "Innermost planetary node. Highly cratered surface with zero atmosphere, experiencing extreme thermal swings from -180°C to 430°C.", visual: "radial-gradient(circle at 30% 30%, #a6a6a6, #595959, #000)" },
+    venus: { name: "Venus_Node", type: "Terrestrial", radius: "6,051 km", gravity: "8.8 m/s²", facts: "Enveloped in dense sulfuric acid clouds. Exhibits an extreme runaway greenhouse effect making it the hottest surface in the system.", visual: "radial-gradient(circle at 30% 30%, #e3bb76, #a17838, #000)" },
+    earth: { name: "Earth_Node", type: "Terrestrial", radius: "6,371 km", gravity: "9.8 m/s²", facts: "Atrunix HQ. The only known node supporting biological life and organic data processing. Surface composition is 71% liquid H2O.", visual: "radial-gradient(circle at 30% 30%, #4b9fe3, #1e5c8f, #000)" },
+    mars: { name: "Mars_Node", type: "Terrestrial", radius: "3,389 km", gravity: "3.7 m/s²", facts: "High iron oxide surface concentration. Hosts Olympus Mons, the largest geological volcano formation in the planetary network.", visual: "radial-gradient(circle at 30% 30%, #e27b58, #8c3b23, #000)" },
+    jupiter: { name: "Jupiter_Node", type: "Gas Giant", radius: "69,911 km", gravity: "24.7 m/s²", facts: "Primary gravitational anchor. Its Great Red Spot represents a persistent atmospheric storm system larger than the Earth node.", visual: "radial-gradient(circle at 30% 30%, #c88b3a, #7a5223, #000)" },
+    saturn: { name: "Saturn_Node", type: "Gas Giant", radius: "58,232 km", gravity: "10.4 m/s²", facts: "Characterized by an extensive orbital ring network composed of ice particles, rocky debris, and cosmic dust.", visual: "radial-gradient(circle at 30% 30%, #e3d599, #9e9154, #000)" },
+    uranus: { name: "Uranus_Node", type: "Ice Giant", radius: "25,362 km", gravity: "8.7 m/s²", facts: "Rotates on a radical 97.8-degree axial tilt. Methane-rich atmospheric mantle imparts a distinct cyan coloration.", visual: "radial-gradient(circle at 30% 30%, #68d8d6, #2b8a88, #000)" },
+    neptune: { name: "Neptune_Node", type: "Ice Giant", radius: "24,622 km", gravity: "11.1 m/s²", facts: "Outermost giant node. Experiences extreme supersonic winds reaching up to 2,100 km/h within its deep blue atmosphere.", visual: "radial-gradient(circle at 30% 30%, #4169e1, #192a78, #000)" }
+};
+
+const setupSolarSystem = () => {
+    const planets = document.querySelectorAll('.celestial-body[data-planet]');
+    const modal = document.getElementById('planet-modal');
+    const closeBtn = document.getElementById('close-planet-btn');
+    const visual = document.getElementById('detail-planet-visual');
+    let typingInterval;
     
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self' https://script.google.com;">
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    
-    <title>Atrunix | Web Architecture & Development</title>
-    <meta name="title" content="Atrunix | Web Architecture & Development">
-    <meta name="description" content="High-performance web development, custom digital infrastructure, and scalable frontend architectures for modern businesses.">
-    <meta name="theme-color" content="#030305">
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    
-    <link rel="stylesheet" href="style.css">
-    
-    <noscript>
-        <style>
-            .atrunix-morph-container, .hud-progress-frame, .deep-space-bg { display: none; }
-            .content { background-color: #030305; }
-            .fade-in-section { opacity: 1; transform: none; }
-        </style>
-    </noscript>
-</head>
-<body>
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-
-    <!-- Lightweight Background Layers -->
-    <div class="noise-overlay" aria-hidden="true"></div>
-    <div class="deep-space-bg" aria-hidden="true"></div>
-    <div class="ambient-orb orb-1" aria-hidden="true"></div>
-    <div class="ambient-orb orb-2" aria-hidden="true"></div>
-    <div class="dust-particles" aria-hidden="true"></div>
-    <div class="css-starfield" aria-hidden="true" id="starfield"></div>
-    <div class="tech-grid" aria-hidden="true"></div>
-    
-    <!-- New: Hardware-Accelerated Data Streams -->
-    <div class="data-stream stream-1" aria-hidden="true"></div>
-    <div class="data-stream stream-2" aria-hidden="true"></div>
-    <div class="data-stream stream-3" aria-hidden="true"></div>
-    <div class="data-stream stream-4" aria-hidden="true"></div>
-
-    <!-- Dual-Layer Fake Bloom (Ultra-Fast) overlapping content -->
-    <svg class="hud-progress-frame" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-        <rect class="hud-track" x="1.5%" y="1.5%" width="97%" height="97%" rx="15" />
-        <rect class="hud-bar-glow" id="progress-glow" x="1.5%" y="1.5%" width="97%" height="97%" rx="15" pathLength="100" />
-        <rect class="hud-bar" id="progress-bar" x="1.5%" y="1.5%" width="97%" height="97%" rx="15" pathLength="100" />
-    </svg>
-
-    <!-- Overlapping Hardware-Accelerated Morph Lights -->
-    <div class="atrunix-morph-container" aria-hidden="true">
-        <div class="floating-wrapper" id="parallax-wrapper">
-            <div class="liquid-container">
-                <div class="shape-glow"></div>
-                <div class="droplet drop-1"></div>
-                <div class="droplet drop-2"></div>
-                <div class="droplet drop-3"></div>
-                <div id="geometry-morph" class="shape"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="atrunix-morph-container secondary-container" aria-hidden="true">
-        <div class="floating-wrapper" id="parallax-wrapper-2">
-            <div class="liquid-container">
-                <div class="shape-glow"></div>
-                <div class="droplet drop-1"></div>
-                <div class="droplet drop-2"></div>
-                <div class="droplet drop-3"></div>
-                <div id="geometry-morph-2" class="shape"></div>
-            </div>
-        </div>
-    </div>
-
-    <nav class="side-nav" aria-label="Page Sections">
-        <a href="#home" class="nav-dot active" aria-label="Navigate to Home section" data-target="home"></a>
-        <a href="#foundation" class="nav-dot" aria-label="Navigate to Architecture section" data-target="foundation"></a>
-        <a href="#portfolio" class="nav-dot" aria-label="Navigate to Portfolio section" data-target="portfolio"></a>
-        <a href="#capabilities" class="nav-dot" aria-label="Navigate to Services section" data-target="capabilities"></a>
-        <a href="#pricing" class="nav-dot" aria-label="Navigate to Pricing section" data-target="pricing"></a>
-        <a href="#contact" class="nav-dot" aria-label="Navigate to Contact section" data-target="contact"></a>
-    </nav>
-
-    <main class="content" id="main-content">
-        <section class="scroll-zone" id="home">
-            <article class="text-block fade-in-section">
-                <span class="subheading">Atrunix Studio</span>
-                <h1>Engineered Web Architecture</h1>
-                <p>We build high-performance, custom-coded websites designed to attract clients and convert traffic. Elevate your brand with bespoke digital infrastructure.</p>
-            </article>
-        </section>
-        
-        <section class="scroll-zone" id="foundation">
-            <article class="text-block fade-in-section">
-                <span class="subheading">The Problem</span>
-                <h2>Beyond Basic Templates</h2>
-                <p>Standard drag-and-drop builders are slow, unoriginal, and fail to capture your unique brand identity. Modern businesses require technical precision, optimized load times, and custom UI/UX design to stand out.</p>
-            </article>
-        </section>
-
-        <section class="scroll-zone" id="portfolio">
-            <article class="text-block wide-block fade-in-section">
-                <span class="subheading">Component Showcase</span>
-                <h2>Interactive Architecture</h2>
-                <p>Scroll down to explore distinct samples of custom DOM manipulation, asynchronous script execution, and hardware-accelerated transforms engineered for maximum performance.</p>
+    planets.forEach(p => {
+        p.addEventListener('click', () => {
+            const data = planetDatabase[p.getAttribute('data-planet')];
+            if(data) {
+                visual.style.background = data.visual;
+                document.getElementById('detail-name').textContent = data.name;
+                document.getElementById('detail-type').textContent = data.type;
+                document.getElementById('detail-radius').textContent = data.radius;
+                document.getElementById('detail-gravity').textContent = data.gravity;
                 
-                <div class="portfolio-grid">
-                    
-                    <!-- 1. Solar System Data Visualization -->
-                    <div class="demo-window">
-                        <div class="demo-header">
-                            <div class="demo-dots"><span></span><span></span><span></span></div>
-                            <div class="demo-url">sys-query.atrunix.internal</div>
-                        </div>
-                        <div class="demo-viewport" id="solar-system-viewport">
-                            <div class="solar-system-map" id="solar-map">
-                                <div class="celestial-body sun" title="The Sun"></div>
-                                <div class="orbit orbit-mercury"><div class="celestial-body mercury" data-planet="mercury" title="Mercury"></div></div>
-                                <div class="orbit orbit-venus"><div class="celestial-body venus" data-planet="venus" title="Venus"></div></div>
-                                <div class="orbit orbit-earth">
-                                    <div class="celestial-body earth" data-planet="earth" title="Earth">
-                                        <div class="orbit-moon"><div class="luna"></div></div>
-                                    </div>
-                                </div>
-                                <div class="orbit orbit-mars"><div class="celestial-body mars" data-planet="mars" title="Mars"></div></div>
-                                <div class="orbit orbit-jupiter"><div class="celestial-body jupiter" data-planet="jupiter" title="Jupiter"></div></div>
-                                <div class="orbit orbit-saturn">
-                                    <div class="celestial-body saturn" data-planet="saturn" title="Saturn"><div class="saturn-rings"></div></div>
-                                </div>
-                                <div class="orbit orbit-uranus"><div class="celestial-body uranus" data-planet="uranus" title="Uranus"></div></div>
-                                <div class="orbit orbit-neptune"><div class="celestial-body neptune" data-planet="neptune" title="Neptune"></div></div>
-                            </div>
-                            <div class="planet-detail-overlay hidden" id="planet-modal">
-                                <div class="hud-scanline"></div>
-                                <button class="back-btn" id="close-planet-btn">[ TERMINATE CONNECTION ]</button>
-                                <div class="planet-detail-content">
-                                    <div class="planet-display-stage">
-                                        <div class="planet-large" id="detail-planet-visual"></div>
-                                        <div class="hud-target-ring"></div>
-                                    </div>
-                                    <div class="planet-data">
-                                        <h3 id="detail-name">SYS_NODE</h3>
-                                        <div class="data-grid">
-                                            <div class="data-point"><span class="data-label">Class</span><span class="data-value tech-font" id="detail-type">---</span></div>
-                                            <div class="data-point"><span class="data-label">Radius</span><span class="data-value tech-font" id="detail-radius">---</span></div>
-                                            <div class="data-point"><span class="data-label">Gravity</span><span class="data-value tech-font" id="detail-gravity">---</span></div>
-                                        </div>
-                                        <div class="fact-box">
-                                            <span class="data-label">Telemetry Report //</span>
-                                            <p class="planet-facts tech-font" id="detail-facts">Awaiting datastream...</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 2. Lightweight Terminal Deployment Engine -->
-                    <div class="demo-window">
-                        <div class="demo-header">
-                            <div class="demo-dots"><span></span><span></span><span></span></div>
-                            <div class="demo-url">cli-deploy.atrunix.internal</div>
-                        </div>
-                        <div class="demo-viewport term-viewport">
-                            <div class="term-interface">
-                                <div class="term-output tech-font" id="term-output">
-                                    <span class="term-prompt">user@atrunix:~$</span> Waiting for command...
-                                </div>
-                                <button class="term-btn tech-font" id="term-run-btn">./execute_deployment.sh</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 3. 3D Holographic Parallax Card -->
-                    <div class="demo-window">
-                        <div class="demo-header">
-                            <div class="demo-dots"><span></span><span></span><span></span></div>
-                            <div class="demo-url">holo-matrix.atrunix.internal</div>
-                        </div>
-                        <div class="demo-viewport holo-viewport" id="holo-viewport">
-                            <div class="holo-card" id="holo-card">
-                                <div class="holo-glare" id="holo-glare"></div>
-                                <div class="holo-content">
-                                    <div class="holo-icon">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                                    </div>
-                                    <h3 class="tech-font">Atrunix Security</h3>
-                                    <p>Hover or touch to engage 3D parallax transformation and dynamic light reflection matrix.</p>
-                                    <div class="holo-chip tech-font">AUTH: VALID</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </article>
-        </section>
-        
-        <section class="scroll-zone" id="capabilities">
-            <article class="text-block fade-in-section">
-                <span class="subheading">Our Capabilities</span>
-                <h2>Development Services</h2>
-                <p>From highly interactive frontend architectures and bespoke portfolio sites to complex database integrations and web applications, we develop tailored solutions that align perfectly with your business goals.</p>
-            </article>
-        </section>
-
-        <section class="scroll-zone" id="pricing">
-            <article class="text-block wide-block fade-in-section">
-                <span class="subheading">Architecture Tiers</span>
-                <h2>Deployment Scopes</h2>
+                const factsEl = document.getElementById('detail-facts');
+                factsEl.textContent = '';
+                clearInterval(typingInterval);
+                let i = 0;
+                typingInterval = setInterval(() => {
+                    factsEl.textContent += data.facts.charAt(i);
+                    i++;
+                    if(i >= data.facts.length) clearInterval(typingInterval);
+                }, 15);
                 
-                <div class="pricing-grid">
-                    <div class="tier-card">
-                        <h3>Express Presence</h3>
-                        <div class="price tech-font">₹3,500 – ₹5,000</div>
-                        <p class="target-client"><strong>Target:</strong> Solo tutors, home bakers, technicians, freelancers.</p>
-                        <ul class="deliverables">
-                            <li>1 scrollable page (Hero, Services, About, Maps).</li>
-                            <li>Floating "Book on WhatsApp" button.</li>
-                            <li>Mobile-responsive loading layout.</li>
-                        </ul>
-                    </div>
+                visual.innerHTML = '';
+                if(p.getAttribute('data-planet') === 'saturn') {
+                    const ring = document.createElement('div');
+                    ring.className = 'saturn-rings-detail';
+                    visual.appendChild(ring);
+                }
+                modal.classList.remove('hidden');
+            }
+        });
+    });
 
-                    <div class="tier-card">
-                        <h3>Core Booking Site</h3>
-                        <div class="price tech-font">₹7,500 – ₹9,999</div>
-                        <p class="target-client"><strong>Target:</strong> Local doctors, clinics, salons, trainers, consultants.</p>
-                        <ul class="deliverables">
-                            <li>3 dedicated pages (Home, Services & Pricing, Contact).</li>
-                            <li>Interactive Appointment Calendar.</li>
-                            <li>Direct tap-to-call + WhatsApp messaging.</li>
-                            <li>Basic local SEO tags for Maps/Search indexing.</li>
-                        </ul>
-                    </div>
+    if(closeBtn) closeBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        clearInterval(typingInterval);
+    });
+};
 
-                    <div class="tier-card">
-                        <h3>Full Business Setup</h3>
-                        <div class="price tech-font">₹12,000 – ₹16,000</div>
-                        <p class="target-client"><strong>Target:</strong> Specialty clinics, coaching centers, law practices, premium salons.</p>
-                        <ul class="deliverables">
-                            <li>5 structured pages (including Gallery/Testimonials).</li>
-                            <li>Online Advance Payment Collection (UPI/Gateway).</li>
-                            <li>Automated booking confirmation emails.</li>
-                            <li>Google Search Console submission.</li>
-                        </ul>
-                    </div>
-                </div>
-            </article>
-        </section>
+// --- Component 2: High-Performance Terminal Simulator ---
+const setupTerminal = () => {
+    const btn = document.getElementById('term-run-btn');
+    const output = document.getElementById('term-output');
+    if(!btn || !output) return;
+
+    const scriptLines = [
+        { text: "> Authenticating local access...", delay: 400 },
+        { text: "[OK] Credentials verified.", delay: 300, class: "term-success" },
+        { text: "> Fetching build dependencies...", delay: 600 },
+        { text: "[WARN] 2 deprecation warnings ignored.", delay: 200, class: "term-warn" },
+        { text: "> Compiling JavaScript bundles (0.8s)...", delay: 800 },
+        { text: "> Injecting CSS variables...", delay: 400 },
+        { text: "[OK] Deployment routine finished.", delay: 500, class: "term-success" }
+    ];
+
+    btn.addEventListener('click', () => {
+        btn.disabled = true;
+        output.innerHTML = '';
         
-        <section class="scroll-zone" id="contact">
-            <article class="text-block fade-in-section">
-                <span class="subheading">Onboarding</span>
-                <h2>Initiate Project</h2>
-                <p>Establish direct communication to map your project requirements, discuss design scoping, and architect your new digital foundation.</p>
+        let cumulativeDelay = 0;
+        
+        scriptLines.forEach((line, index) => {
+            cumulativeDelay += line.delay;
+            setTimeout(() => {
+                const span = document.createElement('span');
+                span.className = `term-line ${line.class || ''}`;
+                span.textContent = line.text;
+                output.appendChild(span);
+                output.scrollTop = output.scrollHeight;
                 
-                <div class="button-container">
-                    <button id="open-intake" class="cta-button primary-btn" aria-haspopup="dialog" aria-expanded="false">
-                        <span class="btn-text">Start Web Project</span>
-                    </button>
-                    <a href="https://wa.me/916350062238?text=Hi,%20I%20am%20interested%20in%20building%20a%20website" class="cta-button outline-btn" target="_blank" rel="noopener noreferrer" aria-label="Contact via WhatsApp">
-                        <span class="btn-text">WhatsApp Direct</span>
-                    </a>
-                </div>
-            </article>
-        </section>
-    </main>
+                if(index === scriptLines.length - 1) {
+                    setTimeout(() => {
+                        const prompt = document.createElement('span');
+                        prompt.innerHTML = '<br><span class="term-prompt">user@atrunix:~$</span> Ready.';
+                        output.appendChild(prompt);
+                        output.scrollTop = output.scrollHeight;
+                        btn.disabled = false;
+                    }, 800);
+                }
+            }, cumulativeDelay);
+        });
+    });
+};
 
-    <div class="modal-overlay" id="intake-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
-        <div class="text-block modal-content">
-            <button class="close-modal" aria-label="Close modal window">&times;</button>
-            <h2 id="modal-title">Project Discovery Log</h2>
-            <p>Submit your requirements to initiate the architecture scoping phase.</p>
+// --- Component 3: 3D Holographic Card ---
+const setupHoloCard = () => {
+    const cardBox = document.getElementById('holo-viewport');
+    const card = document.getElementById('holo-card');
+    const glare = document.getElementById('holo-glare');
+    if (!cardBox || !card || !glare || PREFERS_REDUCED_MOTION.matches) return;
+
+    const updateCardTilt = (clientX, clientY) => {
+        const rect = cardBox.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const rotateX = ((y - centerY) / centerY) * -15; 
+        const rotateY = ((x - centerX) / centerX) * 15;
+        
+        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        glare.style.transform = `translate(${x - (rect.width*1.5)}px, ${y - (rect.height*1.5)}px)`;
+        glare.style.opacity = 1;
+    };
+
+    const resetCardTilt = () => {
+        card.style.transform = `rotateX(0deg) rotateY(0deg)`;
+        glare.style.opacity = 0;
+    };
+
+    cardBox.addEventListener('mousemove', (e) => updateCardTilt(e.clientX, e.clientY));
+    cardBox.addEventListener('mouseleave', resetCardTilt);
+    
+    cardBox.addEventListener('touchmove', (e) => {
+        const touch = e.touches[0];
+        const rect = cardBox.getBoundingClientRect();
+        if(touch.clientX >= rect.left && touch.clientX <= rect.right && touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+            updateCardTilt(touch.clientX, touch.clientY);
+        } else {
+            resetCardTilt();
+        }
+    }, {passive: true});
+    cardBox.addEventListener('touchend', resetCardTilt);
+};
+
+// --- Form & Accessibility Logic ---
+const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+let firstFocusableElement, lastFocusableElement;
+
+const updateFocusTrap = () => {
+    const focusableContent = DOM.modal.querySelectorAll(focusableElements);
+    if(focusableContent.length > 0) {
+        firstFocusableElement = focusableContent[0];
+        lastFocusableElement = focusableContent[focusableContent.length - 1];
+    }
+};
+
+const toggleModal = (isOpen) => {
+    state.modalOpen = isOpen;
+    if(DOM.modal) DOM.modal.setAttribute('aria-hidden', !isOpen);
+    if(DOM.openModalBtn) DOM.openModalBtn.setAttribute('aria-expanded', isOpen);
+    
+    if (isOpen) {
+        DOM.modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        updateFocusTrap();
+        setTimeout(() => firstFocusableElement?.focus(), 100);
+    } else {
+        DOM.modal.classList.remove('active');
+        document.body.style.overflow = '';
+        setTimeout(() => {
+            DOM.form.style.display = 'block';
+            DOM.feedback.classList.add('hidden');
+            DOM.form.reset();
+            DOM.form.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+            DOM.openModalBtn.focus();
+        }, 400);
+    }
+};
+
+if (DOM.openModalBtn && DOM.closeModalBtn) {
+    DOM.openModalBtn.addEventListener('click', () => toggleModal(true));
+    DOM.closeModalBtn.addEventListener('click', () => toggleModal(false));
+    DOM.modal.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') toggleModal(false);
+        if (e.key === 'Tab') {
+            if (e.shiftKey && document.activeElement === firstFocusableElement) {
+                lastFocusableElement.focus(); e.preventDefault();
+            } else if (!e.shiftKey && document.activeElement === lastFocusableElement) {
+                firstFocusableElement.focus(); e.preventDefault();
+            }
+        }
+    });
+}
+
+if (DOM.form) {
+    DOM.form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        let isValid = true;
+        DOM.form.querySelectorAll('input[required], textarea[required]').forEach(input => {
+            if (!input.value.trim()) {
+                input.parentElement.classList.add('invalid');
+                document.getElementById(`error-${input.id.split('-')[0]}`).textContent = 'This field is required.';
+                isValid = false;
+            } else {
+                input.parentElement.classList.remove('invalid');
+            }
+        });
+
+        if (!isValid) return;
+        const submitBtn = DOM.form.querySelector('button[type="submit"]');
+        submitBtn.classList.add('skeleton-loader');
+        submitBtn.innerHTML = '';
+        submitBtn.disabled = true;
+
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            const cryptoArr = new Uint32Array(1);
+            window.crypto.getRandomValues(cryptoArr);
             
-            <form id="intake-form" novalidate>
-                <div class="input-group">
-                    <label for="client-name">Client / Company Name <span aria-hidden="true">*</span></label>
-                    <input type="text" id="client-name" name="clientName" required autocomplete="organization">
-                    <span class="error-message" id="error-name" aria-live="polite"></span>
-                </div>
-                <div class="input-group">
-                    <label for="project-type">Type of Website <span aria-hidden="true">*</span></label>
-                    <input type="text" id="project-type" name="projectType" placeholder="e.g., Corporate Site, Portfolio, SaaS App" required autocomplete="off">
-                    <span class="error-message" id="error-type" aria-live="polite"></span>
-                </div>
-                <div class="input-group">
-                    <label for="project-scope">Project Scope & Features <span aria-hidden="true">*</span></label>
-                    <textarea id="project-scope" name="projectScope" rows="3" required aria-describedby="scope-hint"></textarea>
-                    <span class="input-hint" id="scope-hint">Describe your goals, desired features, and target audience.</span>
-                    <span class="error-message" id="error-scope" aria-live="polite"></span>
-                </div>
-                <div class="input-group">
-                    <label for="budget">Estimated Budget (Optional)</label>
-                    <input type="text" id="budget" name="budget" placeholder="e.g., ₹50,000 - ₹1,50,000">
-                </div>
-                <button type="submit" class="cta-button primary-btn full-width">
-                    <span class="btn-text">Submit Project Brief</span>
-                </button>
-            </form>
+            DOM.form.style.display = 'none';
+            DOM.tokenDisplay.textContent = 'ATRX-' + cryptoArr[0].toString(36).toUpperCase().padStart(6, '0');
+            DOM.feedback.classList.remove('hidden');
+            updateFocusTrap();
+            DOM.tokenDisplay.focus();
+        } catch (error) {
+            console.error('Submission failed:', error);
+            alert('A network error occurred. Please try again.');
+        } finally {
+            submitBtn.classList.remove('skeleton-loader');
+            submitBtn.innerHTML = '<span class="btn-text">Submit Project Brief</span>';
+            submitBtn.disabled = false;
+        }
+    });
+}
 
-            <div id="form-feedback" class="hidden feedback-container" aria-live="polite">
-                <span class="subheading" style="color: var(--dyn-color);">Brief Received</span>
-                <h3>Project Token</h3>
-                <button class="token-display" id="tracking-token" aria-label="Click to copy tracking token" title="Copy to clipboard"></button>
-                <p>Your discovery log is synced. Retain this token for our upcoming consultation. <span class="copy-hint">Click token to copy.</span></p>
-            </div>
-        </div>
-    </div>
+if (DOM.tokenDisplay) {
+    DOM.tokenDisplay.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(DOM.tokenDisplay.textContent);
+            DOM.tokenDisplay.classList.add('copied');
+            const hint = document.querySelector('.copy-hint');
+            if(hint) hint.textContent = 'Copied to clipboard!';
+            setTimeout(() => {
+                DOM.tokenDisplay.classList.remove('copied');
+                if(hint) hint.textContent = 'Click token to copy.';
+            }, 2000);
+        } catch (err) { console.error('Failed to copy!', err); }
+    });
+}
 
-    <script src="script.js" defer></script>
-</body>
-</html>
+// --- Global Interaction Events ---
+document.querySelector('.side-nav')?.addEventListener('click', (e) => {
+    if (e.target.classList.contains('nav-dot')) {
+        e.preventDefault();
+        document.getElementById(e.target.getAttribute('data-target'))?.scrollIntoView({ behavior: 'smooth' });
+    }
+});
+
+const handlePointerMove = (clientX, clientY) => {
+    if (state.modalOpen) return;
+    
+    state.targetX = (clientX / state.winWidth) * 2 - 1;
+    state.targetY = (clientY / state.winHeight) * 2 - 1;
+    
+    if(!state.isAnimating) {
+        state.isAnimating = true;
+        window.requestAnimationFrame(renderLoop);
+    }
+};
+
+window.addEventListener('mousemove', (e) => handlePointerMove(e.clientX, e.clientY), { passive: true });
+window.addEventListener('touchmove', (e) => handlePointerMove(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+window.addEventListener('touchstart', (e) => handlePointerMove(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+
+window.addEventListener('scroll', () => {
+    state.targetScroll = window.scrollY;
+    if (!state.isAnimating) {
+        state.isAnimating = true;
+        window.requestAnimationFrame(renderLoop);
+    }
+}, { passive: true });
+
+const setupObserver = () => {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                const id = entry.target.parentElement.id;
+                DOM.navDots.forEach(dot => {
+                    dot.classList.toggle('active', dot.getAttribute('data-target') === id);
+                    dot.setAttribute('aria-current', dot.getAttribute('data-target') === id ? 'true' : 'false');
+                });
+            }
+        });
+    }, { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in-section').forEach(section => observer.observe(section));
+};
+
+// --- Optimized Render Loop Engine ---
+const renderLoop = () => {
+    if (PREFERS_REDUCED_MOTION.matches && document.documentElement.scrollTop === state.targetScroll) { 
+        state.isAnimating = false; 
+        return; 
+    }
+
+    state.currentScroll += (state.targetScroll - state.currentScroll) * 0.18;
+    let scrollProgress = Math.max(0, Math.min(1, state.currentScroll / state.maxScroll)) || 0;
+
+    const numShapes = SHAPES.length;
+    const scaledProgress = scrollProgress * (numShapes - 1);
+    const currentIndex = Math.floor(scaledProgress);
+    const nextIndex = Math.min(currentIndex + 1, numShapes - 1);
+    const localProgress = scaledProgress - currentIndex; 
+
+    const currentShape = SHAPES[currentIndex];
+    const nextShape = SHAPES[nextIndex];
+    const nextShape2 = SHAPES[(nextIndex + 1) % numShapes];
+
+    const shapeX = X_POS_L[currentIndex] + (X_POS_L[nextIndex] - X_POS_L[currentIndex]) * localProgress;
+    const shapeY = Y_POS_L[currentIndex] + (Y_POS_L[nextIndex] - Y_POS_L[currentIndex]) * localProgress;
+    const shapeX2 = X_POS_R[currentIndex] + (X_POS_R[nextIndex] - X_POS_R[currentIndex]) * localProgress;
+    const shapeY2 = Y_POS_R[currentIndex] + (Y_POS_R[nextIndex] - Y_POS_R[currentIndex]) * localProgress;
+
+    const time = Date.now() * 0.001;
+    const ambientY = Math.sin(time) * 10;
+    const fluidIntensity = Math.sin(localProgress * Math.PI);
+
+    state.mouseX += (state.targetX - state.mouseX) * 0.15;
+    state.mouseY += (state.targetY - state.mouseY) * 0.15;
+    
+    const viewportX = (shapeX * state.winWidth) / 100;
+    const viewportY = ((shapeY * state.winHeight) / 100) + ambientY;
+    const viewportX2 = (shapeX2 * state.winWidth) / 100;
+    const viewportY2 = ((shapeY2 * state.winHeight) / 100) - ambientY;
+
+    if (DOM.wrapperL) DOM.wrapperL.style.transform = `translate3d(${viewportX + (state.mouseX * 15)}px, ${viewportY + (state.mouseY * 15)}px, 0)`;
+    if (DOM.wrapperR) DOM.wrapperR.style.transform = `translate3d(${viewportX2 + (state.mouseX * 10)}px, ${viewportY2 + (state.mouseY * 10)}px, 0)`;
+
+    // Calculate Hardware-Accelerated Progress Bar Bloom Updates
+    const dashOffset = 100 - (scrollProgress * 100);
+    if(DOM.hudBar) DOM.hudBar.style.strokeDashoffset = dashOffset;
+    if(DOM.hudBarGlow) DOM.hudBarGlow.style.strokeDashoffset = dashOffset;
+
+    let poly1 = 'polygon(', poly2 = 'polygon(';
+    for (let i = 0; i < 8; i++) {
+        const x = currentShape.p[i][0] + (nextShape.p[i][0] - currentShape.p[i][0]) * localProgress;
+        const y = currentShape.p[i][1] + (nextShape.p[i][1] - currentShape.p[i][1]) * localProgress;
+        const x2 = nextShape.p[i][0] + (nextShape2.p[i][0] - nextShape.p[i][0]) * localProgress;
+        const y2 = nextShape.p[i][1] + (nextShape2.p[i][1] - nextShape.p[i][1]) * localProgress;
+        poly1 += `${x}% ${y}%${i < 7 ? ', ' : ''}`;
+        poly2 += `${x2}% ${y2}%${i < 7 ? ', ' : ''}`;
+    }
+    if(DOM.shapeL) DOM.shapeL.style.clipPath = poly1 + ')';
+    if(DOM.shapeR) DOM.shapeR.style.clipPath = poly2 + ')';
+
+    const r = Math.round(currentShape.c[0] + (nextShape.c[0] - currentShape.c[0]) * localProgress);
+    const g = Math.round(currentShape.c[1] + (nextShape.c[1] - currentShape.c[1]) * localProgress);
+    const b = Math.round(currentShape.c[2] + (nextShape.c[2] - currentShape.c[2]) * localProgress);
+    document.documentElement.style.setProperty('--dyn-color', `rgb(${r}, ${g}, ${b})`);
+
+    const deltaScroll = Math.abs(state.targetScroll - state.currentScroll);
+    
+    if (deltaScroll > 0.5 || fluidIntensity > 0.01) {
+        window.requestAnimationFrame(renderLoop);
+    } else {
+        state.isAnimating = false;
+    }
+};
+
+const initApp = () => {
+    setupSolarSystem();
+    setupTerminal();
+    setupHoloCard();
+    
+    setTimeout(() => {
+        calculateMaxScroll();
+        setupObserver();
+        state.targetScroll = window.scrollY;
+        state.currentScroll = window.scrollY;
+        state.isAnimating = true;
+        window.requestAnimationFrame(renderLoop);
+    }, 100);
+};
+
+if (document.readyState !== 'loading') {
+    initApp();
+} else {
+    document.addEventListener('DOMContentLoaded', initApp);
+}
