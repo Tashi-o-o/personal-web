@@ -126,26 +126,7 @@ const setupSolarSystem = () => {
     });
 };
 
-// --- Component 2: Lightweight Lava Lamp Logic ---
-const setupLavaLamp = () => {
-    const lavaBox = document.getElementById('lava-viewport');
-    const lavaCursor = document.getElementById('lava-cursor');
-    if (!lavaBox || !lavaCursor) return;
-
-    const moveLavaCursor = (clientX, clientY) => {
-        const rect = lavaBox.getBoundingClientRect();
-        const x = clientX - rect.left;
-        const y = clientY - rect.top;
-        if(x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
-            lavaCursor.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%)`;
-        }
-    };
-
-    lavaBox.addEventListener('mousemove', (e) => moveLavaCursor(e.clientX, e.clientY));
-    lavaBox.addEventListener('touchmove', (e) => moveLavaCursor(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
-};
-
-// --- Component 3: Terminal Simulator ---
+// --- Component 2: High-Performance Terminal Simulator ---
 const setupTerminal = () => {
     const btn = document.getElementById('term-run-btn');
     const output = document.getElementById('term-output');
@@ -188,6 +169,48 @@ const setupTerminal = () => {
             }, cumulativeDelay);
         });
     });
+};
+
+// --- Component 3: 3D Holographic Card ---
+const setupHoloCard = () => {
+    const cardBox = document.getElementById('holo-viewport');
+    const card = document.getElementById('holo-card');
+    const glare = document.getElementById('holo-glare');
+    if (!cardBox || !card || !glare || PREFERS_REDUCED_MOTION.matches) return;
+
+    const updateCardTilt = (clientX, clientY) => {
+        const rect = cardBox.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const rotateX = ((y - centerY) / centerY) * -15; 
+        const rotateY = ((x - centerX) / centerX) * 15;
+        
+        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        glare.style.transform = `translate(${x - (rect.width*1.5)}px, ${y - (rect.height*1.5)}px)`;
+        glare.style.opacity = 1;
+    };
+
+    const resetCardTilt = () => {
+        card.style.transform = `rotateX(0deg) rotateY(0deg)`;
+        glare.style.opacity = 0;
+    };
+
+    cardBox.addEventListener('mousemove', (e) => updateCardTilt(e.clientX, e.clientY));
+    cardBox.addEventListener('mouseleave', resetCardTilt);
+    
+    cardBox.addEventListener('touchmove', (e) => {
+        const touch = e.touches[0];
+        const rect = cardBox.getBoundingClientRect();
+        if(touch.clientX >= rect.left && touch.clientX <= rect.right && touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+            updateCardTilt(touch.clientX, touch.clientY);
+        } else {
+            resetCardTilt();
+        }
+    }, {passive: true});
+    cardBox.addEventListener('touchend', resetCardTilt);
 };
 
 // --- Form & Accessibility Logic ---
@@ -418,8 +441,8 @@ const renderLoop = () => {
 
 const initApp = () => {
     setupSolarSystem();
-    setupLavaLamp();
     setupTerminal();
+    setupHoloCard();
     
     setTimeout(() => {
         calculateMaxScroll();
