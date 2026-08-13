@@ -37,8 +37,6 @@ const DOM = {
     containerL: document.querySelector('.liquid-container'),
     containerR: document.querySelector('.secondary-container .liquid-container'),
     navDots: document.querySelectorAll('.nav-dot'),
-    dropletsL: document.querySelectorAll('#parallax-wrapper .droplet'),
-    dropletsR: document.querySelectorAll('#parallax-wrapper-2 .droplet'),
     modal: document.getElementById('intake-modal'),
     openModalBtn: document.getElementById('open-intake'),
     closeModalBtn: document.querySelector('.close-modal'),
@@ -418,21 +416,6 @@ const renderLoop = () => {
     
     if (DOM.containerL) DOM.containerL.style.transform = `scale(${squishX}, ${stretchY}) skewY(${skewAmount}deg) translateZ(0)`;
     if (DOM.containerR) DOM.containerR.style.transform = `scale(${squishX}, ${stretchY}) skewY(${-skewAmount}deg) translateZ(0)`;
-
-    const spread = fluidIntensity * 100;
-    const dirY = Y_POS_L[nextIndex] > Y_POS_L[currentIndex] ? 1 : -1;
-    
-    if (DOM.dropletsL.length > 0) {
-        DOM.dropletsL[0].style.transform = `translate3d(${-spread * 0.5}px, ${dirY * -spread}px, 0) scale(${0.2 + fluidIntensity * 0.8})`;
-        DOM.dropletsL[1].style.transform = `translate3d(${spread * 0.8}px, ${dirY * spread * 0.5}px, 0) scale(${0.1 + fluidIntensity * 0.9})`;
-        DOM.dropletsL[2].style.transform = `translate3d(0px, ${dirY * spread * 1.5}px, 0) scale(${0.3 + fluidIntensity * 0.7})`;
-    }
-    
-    if (DOM.dropletsR.length > 0) {
-        DOM.dropletsR[0].style.transform = `translate3d(${spread * 0.5}px, ${-dirY * -spread}px, 0) scale(${0.2 + fluidIntensity * 0.8})`;
-        DOM.dropletsR[1].style.transform = `translate3d(${-spread * 0.8}px, ${-dirY * spread * 0.5}px, 0) scale(${0.1 + fluidIntensity * 0.9})`;
-        DOM.dropletsR[2].style.transform = `translate3d(0px, ${-dirY * spread * 1.5}px, 0) scale(${0.3 + fluidIntensity * 0.7})`;
-    }
 
     if(DOM.hudBar) DOM.hudBar.style.strokeDashoffset = 100 - (scrollProgress * 100);
 
