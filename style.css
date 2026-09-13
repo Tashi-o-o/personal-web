@@ -88,26 +88,39 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    
+    /* Windows 8 Interactive Feel */
+    transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.15s ease;
+    cursor: default;
 }
 
-/* --- Scroll In/Out Animations --- */
-.reveal {
+/* The iconic Windows 8 "Push" effect on click */
+.apple-glass:active {
+    transform: scale(0.97) !important;
+}
+
+/* --- Pure CSS Entrance Animations (Foolproof) --- */
+.tile {
     opacity: 0;
-    transform: translateY(60px) scale(0.95);
-    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
-    will-change: opacity, transform;
+    animation: tile-entrance 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
-.reveal.in-view {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+@keyframes tile-entrance {
+    0% { opacity: 0; transform: translateY(40px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Interactive Push Effect */
-.apple-glass.in-view:active {
-    transform: translateY(0) scale(0.97);
-    box-shadow: inset 0 0 0 1px var(--glass-border), inset 0 2px 0 0 var(--glass-highlight);
-}
+/* Staggered loading for the grid */
+.tile:nth-child(1) { animation-delay: 0.05s; }
+.tile:nth-child(2) { animation-delay: 0.10s; }
+.tile:nth-child(3) { animation-delay: 0.15s; }
+.tile:nth-child(4) { animation-delay: 0.20s; }
+.tile:nth-child(5) { animation-delay: 0.25s; }
+.tile:nth-child(6) { animation-delay: 0.30s; }
+.tile:nth-child(7) { animation-delay: 0.35s; }
+.tile:nth-child(8) { animation-delay: 0.40s; }
+.tile:nth-child(9) { animation-delay: 0.45s; }
+.tile:nth-child(10) { animation-delay: 0.50s; }
 
 /* --- Typography & Internal Tile Layouts --- */
 h1, h2, h3 { margin-top: 0; color: var(--text-main); font-weight: 700; letter-spacing: -0.02em; }
@@ -163,7 +176,7 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cur
 /* CTA Tile */
 .cta-tile p { margin-bottom: 2rem; max-width: 600px;}
 .button-row { display: flex; gap: 1rem; }
-.btn { padding: 14px 28px; border-radius: 12px; font-weight: 600; font-size: 1rem; font-family: inherit; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;}
+.btn { padding: 14px 28px; border-radius: 12px; font-weight: 600; font-size: 0.95rem; font-family: inherit; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;}
 .btn-primary { background: var(--text-main); color: #fff; box-shadow: 0 4px 12px rgba(44, 36, 27, 0.2); }
 .btn-primary:hover { background: #000; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(44, 36, 27, 0.3); }
 .btn-secondary { background: rgba(255,255,255,0.8); color: var(--text-main); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
@@ -207,207 +220,4 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cur
     .apple-glass { padding: 1.5rem; border-radius: 20px;}
     .button-row { flex-direction: column; width: 100%; }
     .btn { width: 100%; }
-}/* Color Variables - Warm, Elegant, Light Brown/Coffee Palette */
-:root {
-    --bg-base: #f4efe6;
-    --text-main: #2c241b;
-    --text-muted: #7a6352;
-    --accent-brand: #a6603a;
-    --accent-light: #e6d5c3;
-    
-    /* Apple Premium Glassmorphism Properties */
-    --glass-bg: rgba(255, 255, 255, 0.55);
-    --glass-border: rgba(255, 255, 255, 0.8);
-    --glass-highlight: rgba(255, 255, 255, 0.9);
-    --glass-shadow: 0 10px 40px rgba(100, 70, 50, 0.08);
-    
-    /* Grid Spacing */
-    --grid-gap: 16px;
-    --tile-base-size: 220px;
-}
-
-* { box-sizing: border-box; }
-
-html { font-size: 16px; }
-
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background-color: var(--bg-base);
-    color: var(--text-main);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow-x: hidden;
-}
-
-/* --- Potato-Friendly Organic Background --- */
-/* Completely static gradients. Zero JS, zero CSS animations. High visual impact, zero rendering cost. */
-.organic-bg {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    overflow: hidden;
-    background: var(--bg-base);
-}
-
-.bg-shape {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(120px);
-    opacity: 0.7;
-    transform: translateZ(0); /* Hardware acceleration */
-}
-
-.shape-sand {
-    width: 60vw; height: 60vw;
-    background: #fdfbf7;
-    top: -10%; left: -10%;
-}
-
-.shape-mocha {
-    width: 50vw; height: 50vw;
-    background: #e6d5c3;
-    bottom: -20%; right: -10%;
-}
-
-.shape-latte {
-    width: 40vw; height: 40vw;
-    background: #f0e4d4;
-    top: 30%; left: 40%;
-}
-
-/* --- Windows 8 / Metro UI Architecture --- */
-.metro-dashboard {
-    display: grid;
-    grid-template-columns: repeat(4, var(--tile-base-size));
-    grid-auto-rows: var(--tile-base-size);
-    gap: var(--grid-gap);
-    padding: 2rem;
-    max-width: 100vw;
-}
-
-/* Metro Spans */
-.tile-large { grid-column: span 2; grid-row: span 2; }
-.tile-wide { grid-column: span 2; grid-row: span 1; }
-.tile-tall { grid-column: span 1; grid-row: span 2; }
-
-/* --- Apple Glass Component --- */
-.apple-glass {
-    background: var(--glass-bg);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border-radius: 24px;
-    box-shadow: 
-        var(--glass-shadow), 
-        inset 0 0 0 1px var(--glass-border), /* Inner crisp border */
-        inset 0 2px 0 0 var(--glass-highlight); /* Top highlight */
-    padding: 2rem;
-    position: relative;
-    overflow: hidden;
-    
-    /* Windows 8 Interactive Feel */
-    transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.15s ease;
-    cursor: default;
-}
-
-/* The iconic Windows 8 "Push" effect on click */
-.apple-glass:active {
-    transform: scale(0.97);
-}
-
-/* --- Typography & Internal Tile Layouts --- */
-h1, h2, h3 { margin-top: 0; color: var(--text-main); font-weight: 700; letter-spacing: -0.02em; }
-h1 { font-size: 2.5rem; line-height: 1.1; margin-bottom: 1rem; }
-h2 { font-size: 1.8rem; margin-bottom: 0.5rem; }
-h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
-p { color: var(--text-muted); font-size: 1rem; line-height: 1.5; margin-bottom: 0; }
-
-.badge { display: inline-block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; color: var(--accent-brand); margin-bottom: 1rem; padding: 6px 12px; background: rgba(166, 96, 58, 0.1); border-radius: 8px; border: 1px solid rgba(166, 96, 58, 0.2);}
-.solid-badge { background: var(--accent-brand); color: #fff; border: none; }
-.small-text { font-size: 0.9rem; }
-
-.flex-center { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.text-center { text-align: center; }
-.icon-large { font-size: 2.5rem; margin-bottom: 1rem; }
-
-/* Hero Tile */
-.hero-tile { display: flex; flex-direction: column; justify-content: space-between; }
-.location-tag { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-muted); font-weight: 500; margin-top: auto;}
-
-/* Showcase Tiles */
-.interactive-ui { background: linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.3)); }
-.calendar-mini { background: #fff; padding: 1rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); width: 100%; border: 1px solid rgba(0,0,0,0.05);}
-.cal-days { display: flex; justify-content: space-between; margin-bottom: 0.75rem; }
-.day { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--bg-base); border-radius: 8px; font-weight: 600; font-size: 0.9rem; color: var(--text-muted);}
-.day.active { background: var(--accent-brand); color: #fff; box-shadow: 0 4px 10px rgba(166, 96, 58, 0.3);}
-.day.booked { opacity: 0.3; text-decoration: line-through; }
-.cal-status { font-size: 0.75rem; font-weight: 600; color: var(--accent-brand); text-align: center; text-transform: uppercase; letter-spacing: 1px;}
-
-/* Pricing Tiles */
-.pricing-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
-.price { font-size: 1.1rem; font-weight: 700; color: var(--accent-brand); }
-.block-price { display: block; font-size: 1.5rem; margin-bottom: 1rem; }
-.target { font-size: 0.85rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.08); }
-.deliverables { list-style: none; padding: 0; margin: 0; font-size: 0.9rem; color: var(--text-main); }
-.deliverables li { position: relative; padding-left: 1.25rem; margin-bottom: 0.5rem; }
-.deliverables li::before { content: '•'; position: absolute; left: 0; color: var(--accent-brand); font-size: 1.2rem; line-height: 1;}
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
-.stacked li { margin-bottom: 0.75rem; }
-
-/* CTA Tile */
-.cta-tile p { margin-bottom: 1.5rem; }
-.button-row { display: flex; gap: 1rem; }
-.btn { padding: 12px 24px; border-radius: 12px; font-weight: 600; font-size: 0.95rem; font-family: inherit; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;}
-.btn-primary { background: var(--text-main); color: #fff; box-shadow: 0 4px 12px rgba(44, 36, 27, 0.2); }
-.btn-primary:hover { background: #000; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(44, 36, 27, 0.3); }
-.btn-secondary { background: rgba(255,255,255,0.8); color: var(--text-main); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
-.btn-secondary:hover { background: #fff; transform: translateY(-2px); }
-
-/* --- Apple Glass Modal --- */
-.modal-overlay { position: fixed; inset: 0; background: rgba(244, 239, 230, 0.4); backdrop-filter: blur(8px); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
-.modal-overlay.active { opacity: 1; visibility: visible; }
-.modal-content { max-width: 450px; width: 90%; transform: translateY(20px) scale(0.95); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-.modal-overlay.active .modal-content { transform: translateY(0) scale(1); }
-.close-modal { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.05); border: none; font-size: 1.5rem; color: var(--text-main); cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s;}
-.close-modal:hover { background: rgba(0,0,0,0.1); }
-.modal-sub { margin-bottom: 1.5rem; font-size: 0.9rem;}
-
-.input-group { margin-bottom: 1.25rem; text-align: left; }
-.input-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-muted);}
-.input-group input, .input-group textarea { width: 100%; background: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.1); padding: 12px; border-radius: 12px; font-family: inherit; font-size: 1rem; color: var(--text-main); transition: border-color 0.2s, background 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);}
-.input-group input:focus, .input-group textarea:focus { outline: none; border-color: var(--accent-brand); background: #fff;}
-.full-width { width: 100%; margin-top: 0.5rem;}
-
-.hidden { display: none !important; }
-.feedback-container { text-align: center; padding: 1rem 0; }
-.token-display { font-family: 'JetBrains Mono', monospace; font-size: 1.75rem; font-weight: 700; color: var(--text-main); background: #fff; border: 1px solid rgba(0,0,0,0.1); padding: 1rem; border-radius: 12px; width: 100%; margin: 1rem 0; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: transform 0.1s;}
-.token-display:active { transform: scale(0.98); }
-
-/* --- Mobile Responsiveness (Stacking the Metro Grid) --- */
-@media (max-width: 1024px) {
-    .metro-dashboard { grid-template-columns: repeat(3, var(--tile-base-size)); }
-}
-
-@media (max-width: 800px) {
-    body { display: block; padding: 2rem 0;}
-    .metro-dashboard { 
-        grid-template-columns: 1fr; 
-        grid-auto-rows: auto; 
-        padding: 1rem; 
-        max-width: 500px;
-        margin: 0 auto;
-    }
-    
-    .tile-large, .tile-wide, .tile-tall {
-        grid-column: span 1;
-        grid-row: auto;
-    }
-    
-    .apple-glass { padding: 1.5rem; border-radius: 20px;}
-    .two-col { grid-template-columns: 1fr; }
-    .button-row { flex-direction: column; }
-    h1 { font-size: 2rem; }
 }
