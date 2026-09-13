@@ -1,461 +1,254 @@
-'use strict';
-
-window.addEventListener('error', (event) => {
-    console.error("Atrunix Error Handler:", event.message, "at", event.filename, ":", event.lineno);
-});
-
-const PREFERS_REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-const SHAPES = [
-    { p: [[10,0], [90,10], [100,50], [80,100], [20,90], [0,60], [5,30], [5,10]], c: [0, 229, 255] },
-    { p: [[20,0], [80,0], [100,50], [100,50], [80,100], [20,100], [40,50], [40,50]], c: [181, 0, 255] },
-    { p: [[50,0], [75,25], [100,50], [75,75], [50,100], [25,75], [0,50], [25,25]], c: [255, 122, 0] },
-    { p: [[25,0], [100,0], [100,0], [75,100], [75,100], [0,100], [0,100], [25,0]], c: [0, 255, 87] },
-    { p: [[40,0], [60,0], [100,40], [100,60], [60,100], [40,100], [0,60], [0,40]], c: [255, 0, 85] }
-];
-
-const X_POS_L = [-42, -40, -42, -38, -42];
-const Y_POS_L = [-30, 0, 30, 0, -30];
-const X_POS_R = [42, 40, 42, 38, 42];
-const Y_POS_R = [30, 0, -30, 0, 30];
-
-const state = {
-    targetScroll: 0, currentScroll: 0,
-    isAnimating: false,
-    winWidth: window.innerWidth, winHeight: window.innerHeight,
-    mouseX: 0, mouseY: 0,
-    targetX: 0, targetY: 0,
-    maxScroll: 1, modalOpen: false
-};
-
-const DOM = {
-    shapeL: document.getElementById('geometry-morph'),
-    shapeR: document.getElementById('geometry-morph-2'),
-    hudBar: document.getElementById('progress-bar'),
-    hudBarGlow: document.getElementById('progress-glow'),
-    wrapperL: document.getElementById('parallax-wrapper'),
-    wrapperR: document.getElementById('parallax-wrapper-2'),
-    containerL: document.querySelector('.liquid-container'),
-    containerR: document.querySelector('.secondary-container .liquid-container'),
-    navDots: document.querySelectorAll('.nav-dot'),
-    modal: document.getElementById('intake-modal'),
-    openModalBtn: document.getElementById('open-intake'),
-    closeModalBtn: document.querySelector('.close-modal'),
-    form: document.getElementById('intake-form'),
-    feedback: document.getElementById('form-feedback'),
-    tokenDisplay: document.getElementById('tracking-token')
-};
-
-const debounce = (func, wait) => {
-    let timeout;
-    return (...args) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-};
-
-const calculateMaxScroll = () => {
-    state.maxScroll = Math.max(1, document.documentElement.scrollHeight - state.winHeight);
-};
-
-const resizeObserver = new ResizeObserver(debounce(() => {
-    state.winWidth = window.innerWidth;
-    state.winHeight = window.innerHeight;
-    calculateMaxScroll();
-    if(!state.isAnimating) {
-        state.isAnimating = true;
-        window.requestAnimationFrame(renderLoop);
-    }
-}, 100));
-
-resizeObserver.observe(document.body);
-
-// --- Component 1: Solar System Logic ---
-const planetDatabase = {
-    mercury: { name: "Mercury_Node", type: "Terrestrial", radius: "2,439 km", gravity: "3.7 m/s²", facts: "Innermost planetary node. Highly cratered surface with zero atmosphere, experiencing extreme thermal swings from -180°C to 430°C.", visual: "radial-gradient(circle at 30% 30%, #a6a6a6, #595959, #000)" },
-    venus: { name: "Venus_Node", type: "Terrestrial", radius: "6,051 km", gravity: "8.8 m/s²", facts: "Enveloped in dense sulfuric acid clouds. Exhibits an extreme runaway greenhouse effect making it the hottest surface in the system.", visual: "radial-gradient(circle at 30% 30%, #e3bb76, #a17838, #000)" },
-    earth: { name: "Earth_Node", type: "Terrestrial", radius: "6,371 km", gravity: "9.8 m/s²", facts: "Atrunix HQ. The only known node supporting biological life and organic data processing. Surface composition is 71% liquid H2O.", visual: "radial-gradient(circle at 30% 30%, #4b9fe3, #1e5c8f, #000)" },
-    mars: { name: "Mars_Node", type: "Terrestrial", radius: "3,389 km", gravity: "3.7 m/s²", facts: "High iron oxide surface concentration. Hosts Olympus Mons, the largest geological volcano formation in the planetary network.", visual: "radial-gradient(circle at 30% 30%, #e27b58, #8c3b23, #000)" },
-    jupiter: { name: "Jupiter_Node", type: "Gas Giant", radius: "69,911 km", gravity: "24.7 m/s²", facts: "Primary gravitational anchor. Its Great Red Spot represents a persistent atmospheric storm system larger than the Earth node.", visual: "radial-gradient(circle at 30% 30%, #c88b3a, #7a5223, #000)" },
-    saturn: { name: "Saturn_Node", type: "Gas Giant", radius: "58,232 km", gravity: "10.4 m/s²", facts: "Characterized by an extensive orbital ring network composed of ice particles, rocky debris, and cosmic dust.", visual: "radial-gradient(circle at 30% 30%, #e3d599, #9e9154, #000)" },
-    uranus: { name: "Uranus_Node", type: "Ice Giant", radius: "25,362 km", gravity: "8.7 m/s²", facts: "Rotates on a radical 97.8-degree axial tilt. Methane-rich atmospheric mantle imparts a distinct cyan coloration.", visual: "radial-gradient(circle at 30% 30%, #68d8d6, #2b8a88, #000)" },
-    neptune: { name: "Neptune_Node", type: "Ice Giant", radius: "24,622 km", gravity: "11.1 m/s²", facts: "Outermost giant node. Experiences extreme supersonic winds reaching up to 2,100 km/h within its deep blue atmosphere.", visual: "radial-gradient(circle at 30% 30%, #4169e1, #192a78, #000)" }
-};
-
-const setupSolarSystem = () => {
-    const planets = document.querySelectorAll('.celestial-body[data-planet]');
-    const modal = document.getElementById('planet-modal');
-    const closeBtn = document.getElementById('close-planet-btn');
-    const visual = document.getElementById('detail-planet-visual');
-    let typingInterval;
+/* Color Variables - Warm, Earthy, Glassmorphic Theme */
+:root {
+    --bg-base: #f7f4ee;
+    --text-main: #3e2723;
+    --text-muted: #795548;
+    --accent-light: #d7ccc8;
+    --accent-brand: #8b5a2b;
+    --accent-glow: rgba(215, 204, 200, 0.6);
     
-    planets.forEach(p => {
-        p.addEventListener('click', () => {
-            const data = planetDatabase[p.getAttribute('data-planet')];
-            if(data) {
-                visual.style.background = data.visual;
-                document.getElementById('detail-name').textContent = data.name;
-                document.getElementById('detail-type').textContent = data.type;
-                document.getElementById('detail-radius').textContent = data.radius;
-                document.getElementById('detail-gravity').textContent = data.gravity;
-                
-                const factsEl = document.getElementById('detail-facts');
-                factsEl.textContent = '';
-                clearInterval(typingInterval);
-                let i = 0;
-                typingInterval = setInterval(() => {
-                    factsEl.textContent += data.facts.charAt(i);
-                    i++;
-                    if(i >= data.facts.length) clearInterval(typingInterval);
-                }, 15);
-                
-                visual.innerHTML = '';
-                if(p.getAttribute('data-planet') === 'saturn') {
-                    const ring = document.createElement('div');
-                    ring.className = 'saturn-rings-detail';
-                    visual.appendChild(ring);
-                }
-                modal.classList.remove('hidden');
-            }
-        });
-    });
-
-    if(closeBtn) closeBtn.addEventListener('click', () => {
-        modal.classList.add('hidden');
-        clearInterval(typingInterval);
-    });
-};
-
-// --- Component 2: High-Performance Terminal Simulator ---
-const setupTerminal = () => {
-    const btn = document.getElementById('term-run-btn');
-    const output = document.getElementById('term-output');
-    if(!btn || !output) return;
-
-    const scriptLines = [
-        { text: "> Authenticating local access...", delay: 400 },
-        { text: "[OK] Credentials verified.", delay: 300, class: "term-success" },
-        { text: "> Fetching build dependencies...", delay: 600 },
-        { text: "[WARN] 2 deprecation warnings ignored.", delay: 200, class: "term-warn" },
-        { text: "> Compiling JavaScript bundles (0.8s)...", delay: 800 },
-        { text: "> Injecting CSS variables...", delay: 400 },
-        { text: "[OK] Deployment routine finished.", delay: 500, class: "term-success" }
-    ];
-
-    btn.addEventListener('click', () => {
-        btn.disabled = true;
-        output.innerHTML = '';
-        
-        let cumulativeDelay = 0;
-        
-        scriptLines.forEach((line, index) => {
-            cumulativeDelay += line.delay;
-            setTimeout(() => {
-                const span = document.createElement('span');
-                span.className = `term-line ${line.class || ''}`;
-                span.textContent = line.text;
-                output.appendChild(span);
-                output.scrollTop = output.scrollHeight;
-                
-                if(index === scriptLines.length - 1) {
-                    setTimeout(() => {
-                        const prompt = document.createElement('span');
-                        prompt.innerHTML = '<br><span class="term-prompt">user@atrunix:~$</span> Ready.';
-                        output.appendChild(prompt);
-                        output.scrollTop = output.scrollHeight;
-                        btn.disabled = false;
-                    }, 800);
-                }
-            }, cumulativeDelay);
-        });
-    });
-};
-
-// --- Component 3: 3D Holographic Card ---
-const setupHoloCard = () => {
-    const cardBox = document.getElementById('holo-viewport');
-    const card = document.getElementById('holo-card');
-    const glare = document.getElementById('holo-glare');
-    if (!cardBox || !card || !glare || PREFERS_REDUCED_MOTION.matches) return;
-
-    const updateCardTilt = (clientX, clientY) => {
-        const rect = cardBox.getBoundingClientRect();
-        const x = clientX - rect.left;
-        const y = clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        
-        const rotateX = ((y - centerY) / centerY) * -15; 
-        const rotateY = ((x - centerX) / centerX) * 15;
-        
-        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-        glare.style.transform = `translate(${x - (rect.width*1.5)}px, ${y - (rect.height*1.5)}px)`;
-        glare.style.opacity = 1;
-    };
-
-    const resetCardTilt = () => {
-        card.style.transform = `rotateX(0deg) rotateY(0deg)`;
-        glare.style.opacity = 0;
-    };
-
-    cardBox.addEventListener('mousemove', (e) => updateCardTilt(e.clientX, e.clientY));
-    cardBox.addEventListener('mouseleave', resetCardTilt);
-    
-    cardBox.addEventListener('touchmove', (e) => {
-        const touch = e.touches[0];
-        const rect = cardBox.getBoundingClientRect();
-        if(touch.clientX >= rect.left && touch.clientX <= rect.right && touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
-            updateCardTilt(touch.clientX, touch.clientY);
-        } else {
-            resetCardTilt();
-        }
-    }, {passive: true});
-    cardBox.addEventListener('touchend', resetCardTilt);
-};
-
-// --- Form & Accessibility Logic ---
-const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-let firstFocusableElement, lastFocusableElement;
-
-const updateFocusTrap = () => {
-    const focusableContent = DOM.modal.querySelectorAll(focusableElements);
-    if(focusableContent.length > 0) {
-        firstFocusableElement = focusableContent[0];
-        lastFocusableElement = focusableContent[focusableContent.length - 1];
-    }
-};
-
-const toggleModal = (isOpen) => {
-    state.modalOpen = isOpen;
-    if(DOM.modal) DOM.modal.setAttribute('aria-hidden', !isOpen);
-    if(DOM.openModalBtn) DOM.openModalBtn.setAttribute('aria-expanded', isOpen);
-    
-    if (isOpen) {
-        DOM.modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-        updateFocusTrap();
-        setTimeout(() => firstFocusableElement?.focus(), 100);
-    } else {
-        DOM.modal.classList.remove('active');
-        document.body.style.overflow = '';
-        setTimeout(() => {
-            DOM.form.style.display = 'block';
-            DOM.feedback.classList.add('hidden');
-            DOM.form.reset();
-            DOM.form.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
-            DOM.openModalBtn.focus();
-        }, 400);
-    }
-};
-
-if (DOM.openModalBtn && DOM.closeModalBtn) {
-    DOM.openModalBtn.addEventListener('click', () => toggleModal(true));
-    DOM.closeModalBtn.addEventListener('click', () => toggleModal(false));
-    DOM.modal.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') toggleModal(false);
-        if (e.key === 'Tab') {
-            if (e.shiftKey && document.activeElement === firstFocusableElement) {
-                lastFocusableElement.focus(); e.preventDefault();
-            } else if (!e.shiftKey && document.activeElement === lastFocusableElement) {
-                firstFocusableElement.focus(); e.preventDefault();
-            }
-        }
-    });
+    /* Premium Glassmorphism Properties */
+    --glass-bg: rgba(255, 255, 255, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.8);
+    --glass-shadow: 0 12px 32px rgba(93, 64, 55, 0.08);
 }
 
-if (DOM.form) {
-    DOM.form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        let isValid = true;
-        DOM.form.querySelectorAll('input[required], textarea[required]').forEach(input => {
-            if (!input.value.trim()) {
-                input.parentElement.classList.add('invalid');
-                document.getElementById(`error-${input.id.split('-')[0]}`).textContent = 'This field is required.';
-                isValid = false;
-            } else {
-                input.parentElement.classList.remove('invalid');
-            }
-        });
+* { box-sizing: border-box; }
 
-        if (!isValid) return;
-        const submitBtn = DOM.form.querySelector('button[type="submit"]');
-        submitBtn.classList.add('skeleton-loader');
-        submitBtn.innerHTML = '';
-        submitBtn.disabled = true;
-
-        try {
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            const cryptoArr = new Uint32Array(1);
-            window.crypto.getRandomValues(cryptoArr);
-            
-            DOM.form.style.display = 'none';
-            DOM.tokenDisplay.textContent = 'ATRX-' + cryptoArr[0].toString(36).toUpperCase().padStart(6, '0');
-            DOM.feedback.classList.remove('hidden');
-            updateFocusTrap();
-            DOM.tokenDisplay.focus();
-        } catch (error) {
-            console.error('Submission failed:', error);
-            alert('A network error occurred. Please try again.');
-        } finally {
-            submitBtn.classList.remove('skeleton-loader');
-            submitBtn.innerHTML = '<span class="btn-text">Submit Project Brief</span>';
-            submitBtn.disabled = false;
-        }
-    });
+html { 
+    scroll-behavior: smooth; 
+    font-size: 16px; 
 }
 
-if (DOM.tokenDisplay) {
-    DOM.tokenDisplay.addEventListener('click', async () => {
-        try {
-            await navigator.clipboard.writeText(DOM.tokenDisplay.textContent);
-            DOM.tokenDisplay.classList.add('copied');
-            const hint = document.querySelector('.copy-hint');
-            if(hint) hint.textContent = 'Copied to clipboard!';
-            setTimeout(() => {
-                DOM.tokenDisplay.classList.remove('copied');
-                if(hint) hint.textContent = 'Click token to copy.';
-            }, 2000);
-        } catch (err) { console.error('Failed to copy!', err); }
-    });
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Outfit', system-ui, sans-serif;
+    background-color: var(--bg-base);
+    color: var(--text-main);
+    overflow-x: hidden;
+    line-height: 1.6;
 }
 
-// --- Global Interaction Events ---
-document.querySelector('.side-nav')?.addEventListener('click', (e) => {
-    if (e.target.classList.contains('nav-dot')) {
-        e.preventDefault();
-        document.getElementById(e.target.getAttribute('data-target'))?.scrollIntoView({ behavior: 'smooth' });
-    }
-});
+/* --- Optimized Organic Background --- */
+.bg-mesh {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    background: #fdfbf7;
+}
 
-const handlePointerMove = (clientX, clientY) => {
-    if (state.modalOpen) return;
+.ambient-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.6;
+    will-change: transform;
+    animation: drift 20s infinite alternate ease-in-out;
+}
+
+.blob-warm {
+    width: 60vw; height: 60vw;
+    background: #f3e5f5;
+    top: -10%; left: -10%;
+    animation-delay: 0s;
+}
+
+.blob-sand {
+    width: 50vw; height: 50vw;
+    background: #ffecb3;
+    bottom: -10%; right: -5%;
+    animation-delay: -5s;
+}
+
+.blob-coffee {
+    width: 40vw; height: 40vw;
+    background: #d7ccc8;
+    top: 40%; left: 30%;
+    animation-delay: -10s;
+}
+
+@keyframes drift {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(10vw, 5vh) scale(1.1); }
+}
+
+/* --- Floating Navigation --- */
+.glass-nav {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+    max-width: 800px;
+    padding: 12px 24px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 50px;
+    box-shadow: var(--glass-shadow);
+    z-index: 1000;
+}
+
+.nav-logo { font-weight: 700; font-size: 1.2rem; color: var(--accent-brand); letter-spacing: 1px;}
+.nav-links { display: flex; gap: 20px; align-items: center; }
+.nav-links a { text-decoration: none; color: var(--text-muted); font-size: 0.95rem; font-weight: 500; transition: color 0.3s; }
+.nav-links a:hover { color: var(--accent-brand); }
+.nav-btn { background: var(--text-main); color: #fff !important; padding: 6px 16px; border-radius: 30px; font-weight: 600; }
+
+/* --- Global Glass Tile (The Core Aesthetic) --- */
+.glass-tile {
+    background: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.3) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-top: 1px solid rgba(255,255,255,1);
+    border-left: 1px solid rgba(255,255,255,1);
+    border-radius: 24px;
+    box-shadow: var(--glass-shadow);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* --- Layout: Bento Box Grid --- */
+.content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 120px 20px 60px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+}
+
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.span-2 { grid-column: span 2; }
+
+/* Typography inside tiles */
+.eyebrow { display: inline-block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 700; color: var(--accent-brand); margin-bottom: 1rem; padding: 4px 10px; background: rgba(139, 90, 43, 0.1); border-radius: 6px; }
+h1, h2, h3 { margin-top: 0; color: var(--text-main); font-weight: 700; letter-spacing: -0.02em; }
+h1 { font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1; margin-bottom: 1rem; }
+h2 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 1rem; }
+h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+p { color: var(--text-muted); font-size: 1.05rem; line-height: 1.6; margin-bottom: 0; }
+
+/* Specific Grid Adjustments */
+.hero-grid { grid-template-columns: 2fr 1fr; }
+.feature-tile { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; text-align: left; }
+.icon-wrap { font-size: 2rem; margin-bottom: 1rem; background: #fff; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+/* --- Interactive Hover Cards (JS tracks mouse position) --- */
+.interactive-card {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+    cursor: pointer;
+}
+.interactive-card:hover {
+    transform: translateY(-5px);
+    border-color: #fff;
+}
+.card-glare {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: radial-gradient(circle 300px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.8), transparent 80%);
+    pointer-events: none;
+    z-index: 1;
+}
+.interactive-card:hover .card-glare { opacity: 1; }
+.card-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column;}
+
+/* --- Component Showcase UI Demos --- */
+.ui-demo-box { margin-top: 1.5rem; padding: 1.5rem; background: rgba(255,255,255,0.4); border-radius: 16px; border: 1px solid rgba(255,255,255,0.5); flex-grow: 1; display: flex; flex-direction: column; justify-content: center;}
+
+/* Demo 1: Calendar */
+.calendar-ui { text-align: center; }
+.cal-header { font-weight: 600; margin-bottom: 1rem; font-size: 0.9rem;}
+.cal-days { display: flex; justify-content: space-between; margin-bottom: 1rem; }
+.day { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: #fff; border-radius: 10px; font-weight: 500; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05);}
+.day.active { background: var(--text-main); color: #fff; }
+.day.booked { opacity: 0.4; text-decoration: line-through; background: transparent; box-shadow: none; border: 1px solid rgba(0,0,0,0.1);}
+.ui-btn { width: 100%; padding: 10px; background: var(--text-main); color: #fff; border: none; border-radius: 8px; font-family: inherit; font-weight: 600; cursor: pointer;}
+
+/* Demo 2: Slider */
+.slider-ui { text-align: center; }
+.val-display { font-size: 2rem; font-weight: 700; color: var(--accent-brand); margin-bottom: 1rem; }
+.slider-ui label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;}
+input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: #fff; border: 2px solid var(--text-main); cursor: pointer; margin-top: -8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: rgba(0,0,0,0.1); border-radius: 2px; }
+
+/* Demo 3: Empty State Skeleton */
+.empty-state { gap: 10px; }
+.skeleton-line { height: 12px; background: rgba(0,0,0,0.05); border-radius: 6px; width: 100%; }
+.skeleton-line.short { width: 60%; }
+.skeleton-box { height: 80px; background: rgba(0,0,0,0.05); border-radius: 12px; width: 100%; margin-top: 10px;}
+
+/* --- Pricing Tiers --- */
+.pricing-grid { align-items: stretch; }
+.pricing-card { display: flex; flex-direction: column; }
+.pricing-card.featured { border: 2px solid var(--accent-brand); transform: scale(1.02); }
+.pricing-card.featured:hover { transform: scale(1.02) translateY(-5px); }
+.featured-badge { position: absolute; top: 0; right: 0; background: var(--accent-brand); color: #fff; font-size: 0.75rem; font-weight: 700; padding: 6px 12px; border-bottom-left-radius: 16px; text-transform: uppercase; letter-spacing: 1px;}
+.price { font-size: 1.5rem; font-weight: 700; color: var(--accent-brand); margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.1); }
+.target { font-size: 0.9rem; margin-bottom: 1rem; }
+.deliverables { list-style: none; padding: 0; margin: 0; font-size: 0.9rem; }
+.deliverables li { position: relative; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+.deliverables li::before { content: '✓'; position: absolute; left: 0; color: var(--accent-brand); font-weight: bold;}
+
+/* --- Buttons & Forms --- */
+.contact-tile { text-align: center; }
+.button-group { display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap;}
+.primary-btn, .secondary-btn { padding: 14px 28px; border-radius: 12px; font-weight: 600; font-size: 1rem; font-family: inherit; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none;}
+.primary-btn { background: var(--text-main); color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+.primary-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+.secondary-btn { background: rgba(255,255,255,0.6); color: var(--text-main); border: 1px solid var(--glass-border); }
+.secondary-btn:hover { background: #fff; transform: translateY(-2px); }
+
+/* --- Modal --- */
+.modal-overlay { position: fixed; inset: 0; background: rgba(247, 244, 238, 0.6); backdrop-filter: blur(10px); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+.modal-overlay.active { opacity: 1; visibility: visible; }
+.modal-content { max-width: 500px; width: 90%; position: relative; transform: translateY(20px); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.modal-overlay.active .modal-content { transform: translateY(0); }
+.close-modal { position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 2rem; color: var(--text-muted); cursor: pointer; line-height: 1;}
+
+.input-group { margin-bottom: 1.5rem; text-align: left; }
+.input-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; }
+.input-group input, .input-group textarea { width: 100%; background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.1); padding: 12px; border-radius: 8px; font-family: inherit; font-size: 1rem; color: var(--text-main); transition: border-color 0.2s, background 0.2s;}
+.input-group input:focus, .input-group textarea:focus { outline: none; border-color: var(--accent-brand); background: #fff;}
+.full-width { width: 100%; }
+.hidden { display: none !important; }
+.feedback-container { text-align: center; padding: 2rem 0; }
+.token-display { font-family: monospace; font-size: 1.5rem; font-weight: 700; color: var(--accent-brand); background: rgba(255,255,255,0.8); border: 1px dashed var(--accent-brand); padding: 1rem; border-radius: 8px; width: 100%; margin: 1rem 0; cursor: pointer;}
+.token-display:hover { background: #fff; }
+
+/* Fade-in Animation Observer */
+.fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .span-2 { grid-column: span 1; }
+    .span-2-mobile { grid-column: span 1; }
     
-    state.targetX = (clientX / state.winWidth) * 2 - 1;
-    state.targetY = (clientY / state.winHeight) * 2 - 1;
+    .glass-nav { flex-direction: column; gap: 10px; border-radius: 16px; padding: 15px; }
+    .nav-links { flex-wrap: wrap; justify-content: center; gap: 10px; }
     
-    if(!state.isAnimating) {
-        state.isAnimating = true;
-        window.requestAnimationFrame(renderLoop);
-    }
-};
-
-window.addEventListener('mousemove', (e) => handlePointerMove(e.clientX, e.clientY), { passive: true });
-window.addEventListener('touchmove', (e) => handlePointerMove(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
-window.addEventListener('touchstart', (e) => handlePointerMove(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
-
-window.addEventListener('scroll', () => {
-    state.targetScroll = window.scrollY;
-    if (!state.isAnimating) {
-        state.isAnimating = true;
-        window.requestAnimationFrame(renderLoop);
-    }
-}, { passive: true });
-
-const setupObserver = () => {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('is-visible');
-                const id = entry.target.parentElement.id;
-                DOM.navDots.forEach(dot => {
-                    dot.classList.toggle('active', dot.getAttribute('data-target') === id);
-                    dot.setAttribute('aria-current', dot.getAttribute('data-target') === id ? 'true' : 'false');
-                });
-            }
-        });
-    }, { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
-
-    document.querySelectorAll('.fade-in-section').forEach(section => observer.observe(section));
-};
-
-// --- Optimized Render Loop Engine ---
-const renderLoop = () => {
-    if (PREFERS_REDUCED_MOTION.matches && document.documentElement.scrollTop === state.targetScroll) { 
-        state.isAnimating = false; 
-        return; 
-    }
-
-    state.currentScroll += (state.targetScroll - state.currentScroll) * 0.18;
-    let scrollProgress = Math.max(0, Math.min(1, state.currentScroll / state.maxScroll)) || 0;
-
-    const numShapes = SHAPES.length;
-    const scaledProgress = scrollProgress * (numShapes - 1);
-    const currentIndex = Math.floor(scaledProgress);
-    const nextIndex = Math.min(currentIndex + 1, numShapes - 1);
-    const localProgress = scaledProgress - currentIndex; 
-
-    const currentShape = SHAPES[currentIndex];
-    const nextShape = SHAPES[nextIndex];
-    const nextShape2 = SHAPES[(nextIndex + 1) % numShapes];
-
-    const shapeX = X_POS_L[currentIndex] + (X_POS_L[nextIndex] - X_POS_L[currentIndex]) * localProgress;
-    const shapeY = Y_POS_L[currentIndex] + (Y_POS_L[nextIndex] - Y_POS_L[currentIndex]) * localProgress;
-    const shapeX2 = X_POS_R[currentIndex] + (X_POS_R[nextIndex] - X_POS_R[currentIndex]) * localProgress;
-    const shapeY2 = Y_POS_R[currentIndex] + (Y_POS_R[nextIndex] - Y_POS_R[currentIndex]) * localProgress;
-
-    const time = Date.now() * 0.001;
-    const ambientY = Math.sin(time) * 10;
-    const fluidIntensity = Math.sin(localProgress * Math.PI);
-
-    state.mouseX += (state.targetX - state.mouseX) * 0.15;
-    state.mouseY += (state.targetY - state.mouseY) * 0.15;
+    .content-wrapper { padding-top: 140px; }
+    .glass-tile { padding: 1.5rem; }
     
-    const viewportX = (shapeX * state.winWidth) / 100;
-    const viewportY = ((shapeY * state.winHeight) / 100) + ambientY;
-    const viewportX2 = (shapeX2 * state.winWidth) / 100;
-    const viewportY2 = ((shapeY2 * state.winHeight) / 100) - ambientY;
-
-    if (DOM.wrapperL) DOM.wrapperL.style.transform = `translate3d(${viewportX + (state.mouseX * 15)}px, ${viewportY + (state.mouseY * 15)}px, 0)`;
-    if (DOM.wrapperR) DOM.wrapperR.style.transform = `translate3d(${viewportX2 + (state.mouseX * 10)}px, ${viewportY2 + (state.mouseY * 10)}px, 0)`;
-
-    // Calculate Hardware-Accelerated Progress Bar Bloom Updates
-    const dashOffset = 100 - (scrollProgress * 100);
-    if(DOM.hudBar) DOM.hudBar.style.strokeDashoffset = dashOffset;
-    if(DOM.hudBarGlow) DOM.hudBarGlow.style.strokeDashoffset = dashOffset;
-
-    let poly1 = 'polygon(', poly2 = 'polygon(';
-    for (let i = 0; i < 8; i++) {
-        const x = currentShape.p[i][0] + (nextShape.p[i][0] - currentShape.p[i][0]) * localProgress;
-        const y = currentShape.p[i][1] + (nextShape.p[i][1] - currentShape.p[i][1]) * localProgress;
-        const x2 = nextShape.p[i][0] + (nextShape2.p[i][0] - nextShape.p[i][0]) * localProgress;
-        const y2 = nextShape.p[i][1] + (nextShape2.p[i][1] - nextShape.p[i][1]) * localProgress;
-        poly1 += `${x}% ${y}%${i < 7 ? ', ' : ''}`;
-        poly2 += `${x2}% ${y2}%${i < 7 ? ', ' : ''}`;
-    }
-    if(DOM.shapeL) DOM.shapeL.style.clipPath = poly1 + ')';
-    if(DOM.shapeR) DOM.shapeR.style.clipPath = poly2 + ')';
-
-    const r = Math.round(currentShape.c[0] + (nextShape.c[0] - currentShape.c[0]) * localProgress);
-    const g = Math.round(currentShape.c[1] + (nextShape.c[1] - currentShape.c[1]) * localProgress);
-    const b = Math.round(currentShape.c[2] + (nextShape.c[2] - currentShape.c[2]) * localProgress);
-    document.documentElement.style.setProperty('--dyn-color', `rgb(${r}, ${g}, ${b})`);
-
-    const deltaScroll = Math.abs(state.targetScroll - state.currentScroll);
-    
-    if (deltaScroll > 0.5 || fluidIntensity > 0.01) {
-        window.requestAnimationFrame(renderLoop);
-    } else {
-        state.isAnimating = false;
-    }
-};
-
-const initApp = () => {
-    setupSolarSystem();
-    setupTerminal();
-    setupHoloCard();
-    
-    setTimeout(() => {
-        calculateMaxScroll();
-        setupObserver();
-        state.targetScroll = window.scrollY;
-        state.currentScroll = window.scrollY;
-        state.isAnimating = true;
-        window.requestAnimationFrame(renderLoop);
-    }, 100);
-};
-
-if (document.readyState !== 'loading') {
-    initApp();
-} else {
-    document.addEventListener('DOMContentLoaded', initApp);
+    .pricing-card.featured { transform: none; border: 1px solid var(--glass-border); }
+    .pricing-card.featured:hover { transform: translateY(-5px); }
+    .featured-badge { border-bottom-left-radius: 12px; font-size: 0.65rem;}
 }
