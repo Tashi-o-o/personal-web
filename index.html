@@ -5,203 +5,127 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
-    <meta name="title" content="Atrunix Studio | Premium Web Architecture">
-    <meta name="description" content="Atrunix provides high-performance web development, automated booking systems, and custom digital infrastructure for businesses, clinics, and salons in Jaipur. Projects start at ₹3,500.">
-    <meta name="theme-color" content="#fdfbf7">
-    
-    <title>Atrunix Studio | Custom Web Development</title>
+    <title>Atrunix Studio | Custom Web Architecture</title>
+    <meta name="description" content="High-performance web development and custom digital infrastructure for businesses in Jaipur.">
+    <meta name="theme-color" content="#f4efe6">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Soft, Warm, Organic Background -->
-    <div class="bg-mesh" aria-hidden="true">
-        <div class="ambient-blob blob-warm"></div>
-        <div class="ambient-blob blob-sand"></div>
-        <div class="ambient-blob blob-coffee"></div>
+    <!-- Ultra-Lightweight Static Warm Background -->
+    <div class="organic-bg" aria-hidden="true">
+        <div class="bg-shape shape-sand"></div>
+        <div class="bg-shape shape-mocha"></div>
+        <div class="bg-shape shape-latte"></div>
     </div>
 
-    <!-- Sleek Floating Navigation -->
-    <header class="glass-nav">
-        <div class="nav-logo">Atrunix</div>
-        <nav class="nav-links">
-            <a href="#architecture">Architecture</a>
-            <a href="#showcase">Showcase</a>
-            <a href="#pricing">Tiers</a>
-            <a href="#contact" class="nav-btn">Start Project</a>
-        </nav>
-    </header>
-
-    <main class="content-wrapper">
+    <!-- Windows 8 / Metro UI Grid Dashboard -->
+    <main class="metro-dashboard">
         
-        <!-- Hero Section (Bento Grid) -->
-        <section class="bento-section fade-in" id="architecture">
-            <div class="bento-grid hero-grid">
-                <div class="glass-tile hero-main span-2">
-                    <span class="eyebrow">Atrunix Studio</span>
-                    <h1>Elegant Web Architecture</h1>
-                    <p>We build high-performance, custom-coded websites designed to attract clients and convert traffic. Elevate your local business with bespoke digital infrastructure tailored for speed and SEO.</p>
-                </div>
-                
-                <div class="glass-tile feature-tile">
-                    <div class="icon-wrap">⚡</div>
-                    <h3>Performance</h3>
-                    <p>Optimized code for maximum speed on all devices.</p>
-                </div>
-
-                <div class="glass-tile feature-tile">
-                    <div class="icon-wrap">🔍</div>
-                    <h3>Local SEO</h3>
-                    <p>Structured to dominate regional search results.</p>
-                </div>
+        <!-- Tile 1: Hero (Large 2x2) -->
+        <div class="tile tile-large apple-glass hero-tile">
+            <span class="badge">Atrunix Studio</span>
+            <h1>Engineered Web Architecture</h1>
+            <p>We build high-performance, custom-coded websites designed to attract clients and convert traffic. Elevate your local business with bespoke digital infrastructure tailored for speed and SEO.</p>
+            <div class="location-tag">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                Jaipur, Rajasthan
             </div>
-        </section>
+        </div>
 
-        <!-- Component Showcase Section -->
-        <section class="bento-section fade-in" id="showcase">
-            <div class="section-header glass-tile title-tile">
-                <h2>Interactive UI Showcase</h2>
-                <p>Hover over the glass tiles to reveal interactive light refractions. We build seamless components tailored for modern user experiences.</p>
+        <!-- Tile 2: Showcase Calendar (1x1) -->
+        <div class="tile apple-glass interactive-ui flex-center">
+            <h3>Smart Booking UI</h3>
+            <div class="calendar-mini">
+                <div class="cal-days">
+                    <span class="day">12</span>
+                    <span class="day active">13</span>
+                    <span class="day booked">14</span>
+                </div>
+                <div class="cal-status">Slot Selected</div>
             </div>
+        </div>
 
-            <div class="bento-grid showcase-grid">
-                
-                <!-- Demo 1: Booking UI -->
-                <div class="glass-tile interactive-card">
-                    <div class="card-glare"></div>
-                    <div class="card-content">
-                        <span class="eyebrow">Appointment Systems</span>
-                        <h3>Smart Booking</h3>
-                        <div class="ui-demo-box">
-                            <div class="calendar-ui">
-                                <div class="cal-header">Select Date</div>
-                                <div class="cal-days">
-                                    <span class="day active">12</span>
-                                    <span class="day">13</span>
-                                    <span class="day">14</span>
-                                    <span class="day booked">15</span>
-                                </div>
-                                <button class="ui-btn">Confirm Slot</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- Tile 3: Feature (1x1) -->
+        <div class="tile apple-glass flex-center text-center">
+            <div class="icon-large">⚡</div>
+            <h3>Potato Friendly</h3>
+            <p class="small-text">Zero JS render loops. 100% CSS performance.</p>
+        </div>
 
-                <!-- Demo 2: Valuation UI -->
-                <div class="glass-tile interactive-card">
-                    <div class="card-glare"></div>
-                    <div class="card-content">
-                        <span class="eyebrow">Data Calculation</span>
-                        <h3>Valuation Engine</h3>
-                        <div class="ui-demo-box">
-                            <div class="slider-ui">
-                                <div class="val-display">₹ <span id="val-price">12,500</span></div>
-                                <label for="val-range">Adjust Scope</label>
-                                <input type="range" id="val-range" min="1" max="100" value="50">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Demo 3: Product UI -->
-                <div class="glass-tile interactive-card span-2-mobile">
-                    <div class="card-glare"></div>
-                    <div class="card-content">
-                        <span class="eyebrow">E-Commerce Ready</span>
-                        <h3>Premium Displays</h3>
-                        <p class="sub-text">Clean, conversion-optimized interfaces for high-ticket services and products.</p>
-                        <div class="ui-demo-box empty-state">
-                            <div class="skeleton-line"></div>
-                            <div class="skeleton-line short"></div>
-                            <div class="skeleton-box"></div>
-                        </div>
-                    </div>
-                </div>
-
+        <!-- Tile 4: Pricing 1 (Wide 2x1) -->
+        <div class="tile tile-wide apple-glass pricing-tile">
+            <div class="pricing-header">
+                <h3>Express Presence</h3>
+                <span class="price">₹3,500 – ₹5,000</span>
             </div>
-        </section>
+            <p class="target"><strong>For:</strong> Tutors, home bakers, technicians.</p>
+            <ul class="deliverables">
+                <li>1 scrollable page layout</li>
+                <li>"Book on WhatsApp" integration</li>
+                <li>Mobile-responsive loading</li>
+            </ul>
+        </div>
 
-        <!-- Pricing Section -->
-        <section class="bento-section fade-in" id="pricing">
-            <div class="section-header glass-tile title-tile">
-                <h2>Deployment Scopes</h2>
-                <p>Transparent pricing tailored for local professionals, clinics, and businesses.</p>
+        <!-- Tile 5: Pricing 2 (Tall 1x2) -->
+        <div class="tile tile-tall apple-glass pricing-tile featured-tile">
+            <span class="badge solid-badge">Core Setup</span>
+            <h3>Booking Site</h3>
+            <span class="price block-price">₹7,500 – ₹9,999</span>
+            <p class="target"><strong>For:</strong> Doctors, clinics, salons.</p>
+            <ul class="deliverables stacked">
+                <li>3 dedicated pages</li>
+                <li>Interactive Calendar</li>
+                <li>Direct tap-to-call</li>
+                <li>Local SEO tags</li>
+            </ul>
+        </div>
+
+        <!-- Tile 6: Contact CTA (Wide 2x1) -->
+        <div class="tile tile-wide apple-glass cta-tile flex-center">
+            <h2>Ready to Upgrade?</h2>
+            <p>Establish direct communication to map your project requirements.</p>
+            <div class="button-row">
+                <button id="open-intake" class="btn btn-primary">Start Project</button>
+                <a href="https://wa.me/916350062238" class="btn btn-secondary" target="_blank" rel="noopener">WhatsApp Us</a>
             </div>
+        </div>
 
-            <div class="bento-grid pricing-grid">
-                <div class="glass-tile pricing-card interactive-card">
-                    <div class="card-glare"></div>
-                    <div class="card-content">
-                        <h3>Express Presence</h3>
-                        <div class="price">₹3,500 – ₹5,000</div>
-                        <p class="target"><strong>Target:</strong> Tutors, home bakers, technicians.</p>
-                        <ul class="deliverables">
-                            <li>1 scrollable page layout</li>
-                            <li>"Book on WhatsApp" integration</li>
-                            <li>Mobile-responsive loading</li>
-                        </ul>
-                    </div>
-                </div>
+        <!-- Tile 7: Feature (1x1) -->
+        <div class="tile apple-glass flex-center text-center">
+            <div class="icon-large">🔍</div>
+            <h3>Local SEO</h3>
+            <p class="small-text">Structured to dominate search results.</p>
+        </div>
 
-                <div class="glass-tile pricing-card interactive-card featured">
-                    <div class="card-glare"></div>
-                    <div class="card-content">
-                        <div class="featured-badge">Most Popular</div>
-                        <h3>Core Booking Site</h3>
-                        <div class="price">₹7,500 – ₹9,999</div>
-                        <p class="target"><strong>Target:</strong> Doctors, clinics, salons, trainers.</p>
-                        <ul class="deliverables">
-                            <li>3 dedicated structural pages</li>
-                            <li>Interactive Appointment Calendar</li>
-                            <li>Tap-to-call & WhatsApp messaging</li>
-                            <li>Optimized local SEO tags</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="glass-tile pricing-card interactive-card">
-                    <div class="card-glare"></div>
-                    <div class="card-content">
-                        <h3>Full Business Setup</h3>
-                        <div class="price">₹12,000 – ₹16,000</div>
-                        <p class="target"><strong>Target:</strong> Specialty clinics, law practices.</p>
-                        <ul class="deliverables">
-                            <li>5 structured professional pages</li>
-                            <li>Online Advance Payment (UPI)</li>
-                            <li>Automated confirmation workflows</li>
-                            <li>Search Console submission</li>
-                        </ul>
-                    </div>
-                </div>
+        <!-- Tile 8: Pricing 3 (Wide 2x1) -->
+        <div class="tile tile-wide apple-glass pricing-tile">
+            <div class="pricing-header">
+                <h3>Full Business</h3>
+                <span class="price">₹12,000 – ₹16,000</span>
             </div>
-        </section>
-
-        <!-- Contact Section -->
-        <section class="bento-section fade-in" id="contact">
-            <div class="glass-tile contact-tile">
-                <span class="eyebrow">Onboarding</span>
-                <h2>Initiate Project in Jaipur</h2>
-                <p>Establish direct communication to map your project requirements and architect your new digital foundation.</p>
-                <div class="button-group">
-                    <button id="open-intake" class="primary-btn">Start Web Project</button>
-                    <a href="https://wa.me/916350062238" class="secondary-btn" target="_blank" rel="noopener">WhatsApp Direct</a>
-                </div>
-            </div>
-        </section>
+            <p class="target"><strong>For:</strong> Specialty clinics, law practices.</p>
+            <ul class="deliverables two-col">
+                <li>5 structured pages</li>
+                <li>Online UPI Payments</li>
+                <li>Automated confirmations</li>
+                <li>Search Console sync</li>
+            </ul>
+        </div>
 
     </main>
 
-    <!-- Glass Modal -->
+    <!-- Apple Glass Modal -->
     <div class="modal-overlay" id="intake-modal" aria-hidden="true">
-        <div class="glass-tile modal-content">
+        <div class="modal-content apple-glass">
             <button class="close-modal" aria-label="Close modal">&times;</button>
             <h2 id="modal-title">Project Discovery Log</h2>
-            <p>Submit your requirements to initiate the architecture scoping phase.</p>
+            <p class="modal-sub">Submit your requirements to initiate the architecture scoping phase.</p>
             
             <form id="intake-form" novalidate>
                 <div class="input-group">
@@ -216,14 +140,14 @@
                     <label for="project-scope">Project Scope *</label>
                     <textarea id="project-scope" rows="3" required></textarea>
                 </div>
-                <button type="submit" class="primary-btn full-width">Submit Project Brief</button>
+                <button type="submit" class="btn btn-primary full-width">Submit Project Brief</button>
             </form>
 
             <div id="form-feedback" class="hidden feedback-container">
-                <span class="eyebrow">Brief Received</span>
+                <span class="badge solid-badge">Brief Received</span>
                 <h3>Project Token</h3>
                 <button class="token-display" id="tracking-token" title="Copy to clipboard"></button>
-                <p>Retain this token for our consultation. Click to copy.</p>
+                <p class="modal-sub">Retain this token for our consultation. Click to copy.</p>
             </div>
         </div>
     </div>
