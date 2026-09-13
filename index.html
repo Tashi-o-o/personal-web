@@ -27,8 +27,8 @@
     <!-- Windows 8 / Metro UI Grid Dashboard -->
     <main class="metro-dashboard">
         
-        <!-- Tile 1: Hero (Large 2x2) -->
-        <div class="tile tile-large apple-glass hero-tile">
+        <!-- Row 1 & 2: Core Introduction & Mini Features -->
+        <div class="tile span-2x2 apple-glass reveal hero-tile">
             <span class="badge">Atrunix Studio</span>
             <h1>Engineered Web Architecture</h1>
             <p>We build high-performance, custom-coded websites designed to attract clients and convert traffic. Elevate your local business with bespoke digital infrastructure tailored for speed and SEO.</p>
@@ -38,9 +38,14 @@
             </div>
         </div>
 
-        <!-- Tile 2: Showcase Calendar (1x1) -->
-        <div class="tile apple-glass interactive-ui flex-center">
-            <h3>Smart Booking UI</h3>
+        <div class="tile span-1x1 apple-glass reveal flex-center text-center metric-tile">
+            <div class="metric-value">99<span class="metric-symbol">/100</span></div>
+            <h3>Lighthouse Score</h3>
+            <p class="small-text">Perfect performance audits.</p>
+        </div>
+
+        <div class="tile span-1x1 apple-glass reveal interactive-ui flex-center">
+            <h3>Smart Booking</h3>
             <div class="calendar-mini">
                 <div class="cal-days">
                     <span class="day">12</span>
@@ -51,71 +56,89 @@
             </div>
         </div>
 
-        <!-- Tile 3: Feature (1x1) -->
-        <div class="tile apple-glass flex-center text-center">
-            <div class="icon-large">⚡</div>
-            <h3>Potato Friendly</h3>
-            <p class="small-text">Zero JS render loops. 100% CSS performance.</p>
-        </div>
-
-        <!-- Tile 4: Pricing 1 (Wide 2x1) -->
-        <div class="tile tile-wide apple-glass pricing-tile">
-            <div class="pricing-header">
-                <h3>Express Presence</h3>
-                <span class="price">₹3,500 – ₹5,000</span>
-            </div>
-            <p class="target"><strong>For:</strong> Tutors, home bakers, technicians.</p>
-            <ul class="deliverables">
-                <li>1 scrollable page layout</li>
-                <li>"Book on WhatsApp" integration</li>
-                <li>Mobile-responsive loading</li>
-            </ul>
-        </div>
-
-        <!-- Tile 5: Pricing 2 (Tall 1x2) -->
-        <div class="tile tile-tall apple-glass pricing-tile featured-tile">
-            <span class="badge solid-badge">Core Setup</span>
-            <h3>Booking Site</h3>
-            <span class="price block-price">₹7,500 – ₹9,999</span>
-            <p class="target"><strong>For:</strong> Doctors, clinics, salons.</p>
-            <ul class="deliverables stacked">
-                <li>3 dedicated pages</li>
-                <li>Interactive Calendar</li>
-                <li>Direct tap-to-call</li>
-                <li>Local SEO tags</li>
-            </ul>
-        </div>
-
-        <!-- Tile 6: Contact CTA (Wide 2x1) -->
-        <div class="tile tile-wide apple-glass cta-tile flex-center">
-            <h2>Ready to Upgrade?</h2>
-            <p>Establish direct communication to map your project requirements.</p>
-            <div class="button-row">
-                <button id="open-intake" class="btn btn-primary">Start Project</button>
-                <a href="https://wa.me/916350062238" class="btn btn-secondary" target="_blank" rel="noopener">WhatsApp Us</a>
-            </div>
-        </div>
-
-        <!-- Tile 7: Feature (1x1) -->
-        <div class="tile apple-glass flex-center text-center">
+        <div class="tile span-1x1 apple-glass reveal flex-center text-center">
             <div class="icon-large">🔍</div>
             <h3>Local SEO</h3>
             <p class="small-text">Structured to dominate search results.</p>
         </div>
 
-        <!-- Tile 8: Pricing 3 (Wide 2x1) -->
-        <div class="tile tile-wide apple-glass pricing-tile">
+        <div class="tile span-1x1 apple-glass reveal flex-center text-center">
+            <div class="icon-large">⚡</div>
+            <h3>Ultra-Fast</h3>
+            <p class="small-text">Zero bloat. Instant render times.</p>
+        </div>
+
+        <!-- Row 3: Extended Capabilities -->
+        <div class="tile span-2x1 apple-glass reveal valuation-tile">
+            <div class="val-header">
+                <h3>Dynamic Valuation UI</h3>
+                <span class="badge solid-badge">Component</span>
+            </div>
+            <div class="slider-ui">
+                <div class="val-display">₹ <span id="val-price">12,500</span></div>
+                <input type="range" id="val-range" min="1" max="100" value="50" aria-label="Adjust valuation scope">
+            </div>
+        </div>
+
+        <div class="tile span-2x1 apple-glass reveal text-center flex-center tech-tile">
+            <h3>Modern Tech Stack</h3>
+            <p>Built with native web APIs, semantic HTML5, and advanced CSS Grid for maximum hardware compatibility and fluid responsiveness.</p>
+        </div>
+
+        <!-- Row 4 & 5: Pricing Matrix -->
+        <div class="tile span-1x2 apple-glass reveal pricing-tile">
             <div class="pricing-header">
-                <h3>Full Business</h3>
-                <span class="price">₹12,000 – ₹16,000</span>
+                <h3>Express</h3>
+                <span class="price">₹3,500</span>
+            </div>
+            <p class="target"><strong>For:</strong> Solo tutors, home bakers, freelancers.</p>
+            <ul class="deliverables stacked">
+                <li>1 scrollable page</li>
+                <li>WhatsApp integration</li>
+                <li>Mobile-responsive</li>
+                <li>Maps integration</li>
+            </ul>
+        </div>
+
+        <div class="tile span-2x2 apple-glass reveal pricing-tile featured-tile">
+            <div class="featured-header">
+                <span class="badge solid-badge">Core Setup</span>
+                <h3>Booking Site</h3>
+                <span class="price block-price">₹7,500 – ₹9,999</span>
+            </div>
+            <p class="target"><strong>For:</strong> Local doctors, clinics, salons, trainers.</p>
+            <ul class="deliverables two-col">
+                <li>3 dedicated pages</li>
+                <li>Interactive Calendar</li>
+                <li>Direct tap-to-call</li>
+                <li>Local SEO tags</li>
+                <li>Fast-loading layout</li>
+                <li>Service catalog</li>
+            </ul>
+        </div>
+
+        <div class="tile span-1x2 apple-glass reveal pricing-tile">
+            <div class="pricing-header">
+                <h3>Business</h3>
+                <span class="price">₹12,000+</span>
             </div>
             <p class="target"><strong>For:</strong> Specialty clinics, law practices.</p>
-            <ul class="deliverables two-col">
+            <ul class="deliverables stacked">
                 <li>5 structured pages</li>
                 <li>Online UPI Payments</li>
-                <li>Automated confirmations</li>
+                <li>Automated workflows</li>
                 <li>Search Console sync</li>
             </ul>
+        </div>
+
+        <!-- Row 6: Call to Action -->
+        <div class="tile span-4x1 apple-glass reveal cta-tile flex-center">
+            <h2>Ready to Upgrade Your Digital Infrastructure?</h2>
+            <p>Establish direct communication to map your project requirements and architect your new foundation.</p>
+            <div class="button-row">
+                <button id="open-intake" class="btn btn-primary">Start Project Scope</button>
+                <a href="https://wa.me/916350062238" class="btn btn-secondary" target="_blank" rel="noopener">WhatsApp Direct</a>
+            </div>
         </div>
 
     </main>
